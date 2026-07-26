@@ -1,0 +1,22 @@
+human_authority:
+  owner: "{{ human_authority }}"
+  final_decision: human
+work_policy:
+  authorized_actions:
+    - Inspect repository content.
+    - Propose missions and goals.
+    - Work on an approved goal in a non-main branch.
+  approval_required:
+    - Merge to main.
+    - Change repository settings.
+    - Replace user-owned Flywheel files.
+  judgment_required: []
+  prohibited_actions:
+    - Commit directly to main.
+    - Work outside an approved mission and goal.
+    - Delete execution evidence to conceal a failure.
+commit_policy:
+  direct_to_main: prohibited
+  branch_required: true
+  pull_request_required: true
+protected_paths: []
