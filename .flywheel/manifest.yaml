@@ -3,23 +3,27 @@ product_version: 0.3.0
 template_set_version: 0.1.0
 schema_set_version: 0.1.0
 initialized_at: 2026-07-25T23:00:00-05:00
-last_product_operation: initialize
+last_product_operation: structure-control-plane
 files:
   - path: .flywheel/manifest.yaml
     ownership: product-managed
     required: true
-  - path: .flywheel/project-context.yaml
-    ownership: user-owned
-    required: true
-  - path: .flywheel/governance.yaml
-    ownership: seeded-user-owned
-    required: true
-  - path: .flywheel/operator.md
-    ownership: seeded-user-owned
-    required: true
-  - path: .flywheel/sop.md
-    ownership: seeded-user-owned
-    required: true
   - path: .flywheel/state.yaml
     ownership: product-managed
     required: true
+  - path: .flywheel/operating-model/config/project-context.yaml
+    ownership: user-owned
+    required: true
+  - path: .flywheel/operating-model/config/governance.yaml
+    ownership: seeded-user-owned
+    required: true
+  - path: .flywheel/operating-model/guidance/operator.md
+    ownership: seeded-user-owned
+    required: true
+  - path: .flywheel/operating-model/guidance/sop.md
+    ownership: seeded-user-owned
+    required: true
+operational_roots:
+  missions: .flywheel/operations/missions
+  records: .flywheel/operations/records
+  knowledge: .flywheel/operations/knowledge
