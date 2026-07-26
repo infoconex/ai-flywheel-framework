@@ -1,0 +1,7 @@
+status: initializing
+active_mission: null
+active_goal: null
+active_execution: null
+readiness: initializing
+onboarding_state: not_started
+conflicts: []
