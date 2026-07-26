@@ -1,0 +1,25 @@
+product_id: ai-flywheel
+product_version: "{{ product_version }}"
+template_set_version: "{{ template_set_version }}"
+schema_set_version: "{{ schema_set_version }}"
+initialized_at: "{{ initialized_at }}"
+last_product_operation: initialize
+files:
+  - path: .flywheel/manifest.yaml
+    ownership: product-managed
+    required: true
+  - path: .flywheel/state.yaml
+    ownership: product-managed
+    required: true
+  - path: .flywheel/operating-model/config/project-context.yaml
+    ownership: user-owned
+    required: true
+  - path: .flywheel/operating-model/config/governance.yaml
+    ownership: seeded-user-owned
+    required: true
+  - path: .flywheel/operating-model/guidance/operator.md
+    ownership: seeded-user-owned
+    required: true
+  - path: .flywheel/operating-model/guidance/sop.md
+    ownership: seeded-user-owned
+    required: true
