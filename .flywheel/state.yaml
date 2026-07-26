@@ -1,7 +1,11 @@
 status: active
 active_mission: initialize-framework-repository
 active_goal: establish-flywheel-foundation
-active_execution: null
+active_execution: structure-operational-data
+paths:
+  mission: .flywheel/operations/missions/initialize-framework-repository/mission.yaml
+  goal: .flywheel/operations/missions/initialize-framework-repository/goals/establish-flywheel-foundation/goal.yaml
+  execution: .flywheel/operations/missions/initialize-framework-repository/goals/establish-flywheel-foundation/executions/001-structure-operational-data/execution.yaml
 readiness: initializing
 onboarding_state: in_progress
 conflicts: []
