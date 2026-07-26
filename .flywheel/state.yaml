@@ -1,0 +1,7 @@
+status: active
+active_mission: initialize-framework-repository
+active_goal: establish-flywheel-foundation
+active_execution: null
+readiness: initializing
+onboarding_state: in_progress
+conflicts: []
