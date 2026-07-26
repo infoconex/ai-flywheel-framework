@@ -1,0 +1,43 @@
+id: structure-operational-data
+mission_id: initialize-framework-repository
+goal_id: establish-flywheel-foundation
+sequence: 1
+status: completed
+outcome: goal_continues
+started_at: 2026-07-25T23:00:00-05:00
+completed_at: 2026-07-25T23:45:00-05:00
+lifecycle:
+  execute:
+    summary: Reorganized the repository control plane and added the corresponding distributable project template structure.
+  observe:
+    observations:
+      - Operating model files and operational data were mixed at the .flywheel root.
+      - Executions need goal ownership rather than a repository-wide execution folder.
+  evaluate:
+    result: adaptation_required
+    summary: The flat structure did not clearly separate rules from generated work history.
+  classify:
+    records:
+      - type: design-decision
+        summary: Group changing work data under operations and nest executions beneath goals.
+  adapt:
+    changed_paths:
+      - .flywheel/operating-model/
+      - .flywheel/operations/
+      - templates/project/.flywheel/
+      - .flywheel/manifest.yaml
+      - .flywheel/state.yaml
+  validate:
+    result: passed_with_pending_review
+    checks:
+      - Project-specific and distributable layouts use the same hierarchy.
+      - Mission, goal, and execution references resolve by path and ID.
+      - Framework assets remain separate from repository-specific operational history.
+  persist:
+    records:
+      - This execution preserves the design decision and implementation evidence.
+  reuse:
+    candidates:
+      - Use the project template hierarchy for future CLI initialization work.
+unresolved:
+  - Formal schemas and deterministic validators still need to be implemented in later goals.
