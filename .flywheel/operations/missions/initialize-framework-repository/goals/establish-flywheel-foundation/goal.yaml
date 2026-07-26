@@ -1,0 +1,14 @@
+id: establish-flywheel-foundation
+mission_id: initialize-framework-repository
+objective: Initialize repository governance and define the framework extraction boundary.
+status: in_progress
+success_criteria:
+  - Required root .flywheel files exist.
+  - Governance prohibits direct commits to main and work outside goals.
+  - Root governance files are clearly separated from distributable assets.
+  - The framework template reflects the approved operating and operational data hierarchy.
+constraints:
+  - No merge without explicit human approval.
+validation_expectations:
+  - Review all initialized files for cross-file consistency.
+  - Compare branch changes against main.
