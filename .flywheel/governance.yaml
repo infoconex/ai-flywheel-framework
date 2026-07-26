@@ -1,0 +1,33 @@
+human_authority:
+  owner: Infoconex
+  final_decision: human
+work_policy:
+  authorized_actions:
+    - Inspect repository content.
+    - Propose missions and goals.
+    - Work on an approved goal in a non-main branch.
+    - Create pull requests for human review.
+  approval_required:
+    - Merge to main.
+    - Change repository settings.
+    - Publish a release.
+    - Replace user-owned Flywheel files.
+    - Enable hosted execution or GitHub Actions.
+  judgment_required:
+    - Change framework ownership boundaries.
+    - Introduce breaking template or schema changes.
+  prohibited_actions:
+    - Commit directly to main.
+    - Work outside an approved mission and goal.
+    - Delete execution evidence to conceal a failure.
+    - Automatically overwrite seeded-user-owned files.
+commit_policy:
+  direct_to_main: prohibited
+  branch_required: true
+  pull_request_required: true
+hosted_service_policy:
+  github_actions: approval_required
+protected_paths:
+  - .flywheel/governance.yaml
+  - templates/
+  - schemas/
