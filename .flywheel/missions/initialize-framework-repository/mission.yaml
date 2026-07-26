@@ -1,0 +1,12 @@
+id: initialize-framework-repository
+objective: Establish the AI Flywheel Framework repository as the governed source of official distributable framework assets.
+status: active
+human_authority: Infoconex
+success_criteria:
+  - The repository has a valid root Flywheel control plane.
+  - Framework distribution boundaries are documented.
+  - Candidate assets from the sample repository are classified for migration.
+  - Changes are presented through a pull request and not merged without approval.
+constraints:
+  - Do not commit directly to main.
+  - Do not treat the root .flywheel directory as distributable framework source.
