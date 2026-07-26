@@ -1,0 +1,15 @@
+identity:
+  name: "{{ project_name }}"
+  purpose: "{{ project_purpose }}"
+  status: proposed
+repository:
+  type: "{{ repository_type }}"
+architecture:
+  summary: "{{ architecture_summary }}"
+  boundaries: []
+validation:
+  commands: []
+constraints: []
+protected_paths: []
+risks: []
+documentation_sources: []
