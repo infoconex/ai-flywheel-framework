@@ -3,7 +3,7 @@ phase: onboarding
 readiness: not-ready-for-missions
 status: ready
 active_mission: establish-ai-flywheel-operations
-active_goal: 001-conduct-onboarding-interview
+active_goal: 001-discover-repository-and-gather-context
 active_execution: null
 lifecycle_stage: null
 implementation_available: false
