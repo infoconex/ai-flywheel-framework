@@ -1,44 +1,114 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 $id: record.schema.yaml
 type: object
-required: [schema_version, id, kind, mission_id, goal_id, created_at, summary]
+additionalProperties: false
+required: [schema_version, id, kind, mission_id, goal_id, execution_id, created_at, created_by, summary, status, source_refs, artifact_refs]
 properties:
   schema_version: {type: integer, const: 1}
   id: {type: string, minLength: 1}
-  kind: {type: string, enum: [evidence, decision, finding, approval, knowledge]}
+  kind: {type: string, enum: [evidence, decision, finding, approval]}
   mission_id: {type: string, minLength: 1}
   goal_id: {type: string, minLength: 1}
-  execution_id: {type: [string, 'null']}
-  created_at: {type: string, minLength: 1}
-  created_by: {type: [string, 'null']}
+  execution_id: {type: [string, 'null'], minLength: 1}
+  created_at: {type: string, format: date-time}
+  created_by: {type: string, minLength: 1}
   summary: {type: string, minLength: 1}
-  status: {type: [string, 'null']}
+  status: {type: string, enum: [open, accepted, superseded, closed, rejected]}
   classification: {type: [string, 'null']}
   criterion_ids:
     type: array
+    uniqueItems: true
     items: {type: string, pattern: '^AC-[0-9]{3,}$'}
-  source_refs: {type: array, items: {type: string}}
-  artifact_refs: {type: array, items: {type: string}}
+  source_refs:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  artifact_refs:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  evidence:
+    type: [object, 'null']
+    additionalProperties: false
+    required: [evidence_type, supported_claim, source_or_method, actual_result, observed_at, storage_location]
+    properties:
+      evidence_type: {type: string, minLength: 1}
+      supported_claim: {type: string, minLength: 1}
+      source_or_method: {type: string, minLength: 1}
+      actual_result: {type: string, minLength: 1}
+      observed_at: {type: string, format: date-time}
+      storage_location: {type: string, minLength: 1}
+  decision:
+    type: [object, 'null']
+    additionalProperties: false
+    required: [decision, rationale, authority, decided_at, alternatives_considered]
+    properties:
+      decision: {type: string, minLength: 1}
+      rationale: {type: string, minLength: 1}
+      authority: {type: string, minLength: 1}
+      decided_at: {type: string, format: date-time}
+      alternatives_considered:
+        type: array
+        items: {type: string, minLength: 1}
+  finding:
+    type: [object, 'null']
+    additionalProperties: false
+    required: [finding_type, description, impact, discovered_at, disposition]
+    properties:
+      finding_type: {type: string, minLength: 1}
+      description: {type: string, minLength: 1}
+      impact: {type: string, minLength: 1}
+      discovered_at: {type: string, format: date-time}
+      disposition: {type: string, enum: [open, accepted, resolved, deferred, rejected]}
   approval:
     type: [object, 'null']
+    additionalProperties: false
+    required: [authority, authorization_basis, decision, scope, decided_at, evidence_ref]
     properties:
-      authority: {type: string}
+      authority: {type: string, minLength: 1}
+      authorization_basis: {type: string, minLength: 1}
       decision: {type: string, enum: [approved, rejected, deferred]}
-      scope: {type: string}
-  context:
-    type: [object, 'null']
-  validation:
-    type: [object, 'null']
+      scope: {type: string, minLength: 1}
+      decided_at: {type: string, format: date-time}
+      evidence_ref: {type: string, minLength: 1}
 allOf:
   - if:
       properties: {kind: {const: evidence}}
+      required: [kind]
     then:
-      required: [criterion_ids, artifact_refs]
+      required: [evidence]
+      properties:
+        evidence: {type: object}
+        decision: {type: 'null'}
+        finding: {type: 'null'}
+        approval: {type: 'null'}
+  - if:
+      properties: {kind: {const: decision}}
+      required: [kind]
+    then:
+      required: [decision]
+      properties:
+        evidence: {type: 'null'}
+        decision: {type: object}
+        finding: {type: 'null'}
+        approval: {type: 'null'}
+  - if:
+      properties: {kind: {const: finding}}
+      required: [kind]
+    then:
+      required: [finding]
+      properties:
+        evidence: {type: 'null'}
+        decision: {type: 'null'}
+        finding: {type: object}
+        approval: {type: 'null'}
   - if:
       properties: {kind: {const: approval}}
+      required: [kind]
     then:
       required: [approval]
-  - if:
-      properties: {kind: {const: knowledge}}
-    then:
-      required: [context, validation]
+      properties:
+        evidence: {type: 'null'}
+        decision: {type: 'null'}
+        finding: {type: 'null'}
+        approval: {type: object}
