@@ -1,15 +1,44 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 $id: execution.schema.yaml
 type: object
-required: [schema_version, id, mission_id, goal_id, status, intended_outcome, acceptance_criteria, lifecycle, approval_refs, evidence_refs, validation_results, completion]
+additionalProperties: false
+required:
+  - schema_version
+  - id
+  - mission_id
+  - goal_id
+  - status
+  - intended_outcome
+  - acceptance_criteria
+  - started_at
+  - completed_at
+  - lifecycle
+  - actions
+  - observations
+  - classifications
+  - adaptations
+  - blockers
+  - approval_refs
+  - evidence_refs
+  - decision_refs
+  - finding_refs
+  - validation_results
+  - outcome
+  - completion
 properties:
   schema_version: {type: integer, const: 1}
   id: {type: string, minLength: 1}
   mission_id: {type: string, minLength: 1}
   goal_id: {type: string, minLength: 1}
   status: {type: string, enum: [in-progress, succeeded, partially-succeeded, failed, blocked, abandoned, interrupted]}
-  intended_outcome: {type: [string, 'null']}
-  acceptance_criteria: {type: array, items: {type: string}}
+  intended_outcome: {type: string, minLength: 1}
+  acceptance_criteria:
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items: {type: string, pattern: '^AC-[0-9]{3,}$'}
+  started_at: {type: string, format: date-time}
+  completed_at: {type: [string, 'null'], format: date-time}
   lifecycle:
     type: object
     additionalProperties: false
@@ -23,18 +52,76 @@ properties:
       validate: {$ref: '#/$defs/stage'}
       persist: {$ref: '#/$defs/stage'}
       reuse: {$ref: '#/$defs/stage'}
-  approval_refs: {type: array, items: {type: string}}
-  evidence_refs: {type: array, items: {type: string}}
-  classification_refs: {type: array, items: {type: string}}
-  decision_refs: {type: array, items: {type: string}}
-  finding_refs: {type: array, items: {type: string}}
-  validation_results: {type: array}
+  actions:
+    type: array
+    items: {type: string, minLength: 1}
+  observations:
+    type: array
+    items: {type: string, minLength: 1}
+  classifications:
+    type: array
+    items: {type: string, minLength: 1}
+  adaptations:
+    type: array
+    items: {type: string, minLength: 1}
+  blockers:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  approval_refs:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  evidence_refs:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  decision_refs:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  finding_refs:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  validation_results:
+    type: array
+    items: {$ref: '#/$defs/validation_result'}
+  outcome: {type: [string, 'null']}
   completion:
     type: object
+    additionalProperties: false
     required: [disposition, rationale]
     properties:
-      disposition: {type: [string, 'null']}
+      disposition: {type: [string, 'null'], enum: [goal-completed, goal-continues, goal-blocked, goal-failed, goal-cancelled, null]}
       rationale: {type: [string, 'null']}
+allOf:
+  - if:
+      properties: {status: {const: in-progress}}
+      required: [status]
+    then:
+      properties:
+        completed_at: {type: 'null'}
+        completion:
+          properties:
+            disposition: {type: 'null'}
+            rationale: {type: 'null'}
+  - if:
+      properties: {status: {enum: [succeeded, partially-succeeded, failed, blocked, abandoned, interrupted]}}
+      required: [status]
+    then:
+      properties:
+        completed_at: {type: string, format: date-time}
+        outcome: {type: string, minLength: 1}
+        completion:
+          properties:
+            disposition: {type: string}
+            rationale: {type: string, minLength: 1}
+  - if:
+      properties: {status: {const: blocked}}
+      required: [status]
+    then:
+      properties: {blockers: {minItems: 1}}
 $defs:
   stage:
     type: object
@@ -42,13 +129,59 @@ $defs:
     required: [status, started_at, completed_at, summary, refs, reason]
     properties:
       status: {type: string, enum: [pending, in-progress, completed, not-applicable]}
-      started_at: {type: [string, 'null']}
-      completed_at: {type: [string, 'null']}
+      started_at: {type: [string, 'null'], format: date-time}
+      completed_at: {type: [string, 'null'], format: date-time}
       summary: {type: [string, 'null']}
-      refs: {type: array, items: {type: string}}
+      refs:
+        type: array
+        uniqueItems: true
+        items: {type: string, minLength: 1}
       reason: {type: [string, 'null']}
     allOf:
       - if:
-          properties: {status: {const: not-applicable}}
+          properties: {status: {const: pending}}
+          required: [status]
         then:
-          properties: {reason: {type: string, minLength: 1}}
+          properties:
+            started_at: {type: 'null'}
+            completed_at: {type: 'null'}
+            summary: {type: 'null'}
+      - if:
+          properties: {status: {const: in-progress}}
+          required: [status]
+        then:
+          properties:
+            started_at: {type: string, format: date-time}
+            completed_at: {type: 'null'}
+      - if:
+          properties: {status: {const: completed}}
+          required: [status]
+        then:
+          properties:
+            started_at: {type: string, format: date-time}
+            completed_at: {type: string, format: date-time}
+            summary: {type: string, minLength: 1}
+      - if:
+          properties: {status: {const: not-applicable}}
+          required: [status]
+        then:
+          properties:
+            started_at: {type: 'null'}
+            completed_at: {type: 'null'}
+            reason: {type: string, minLength: 1}
+  validation_result:
+    type: object
+    additionalProperties: false
+    required: [rule_id, domain, status, severity, message, artifact_path, evidence_refs, recovery_action]
+    properties:
+      rule_id: {type: string, pattern: '^[A-Z]+-[A-Z0-9-]+$'}
+      domain: {type: string, enum: [operating, repository, implementation]}
+      status: {type: string, enum: [passed, failed, pending, not-applicable]}
+      severity: {type: string, enum: [info, warning, error, blocker]}
+      message: {type: string, minLength: 1}
+      artifact_path: {type: [string, 'null']}
+      evidence_refs:
+        type: array
+        uniqueItems: true
+        items: {type: string, minLength: 1}
+      recovery_action: {type: [string, 'null']}
