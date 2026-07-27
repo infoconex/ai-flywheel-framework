@@ -1,0 +1,20 @@
+schema_version: 1
+id: 002-inspect-and-reconcile-repository
+title: Inspect and Reconcile Repository
+status: blocked
+blocked_by:
+  - 001-conduct-onboarding-interview
+objective: Inspect the repository and reconcile observed facts with onboarding answers.
+procedure:
+  - Inventory languages, runtimes, build systems, tests, automation, and repository conventions.
+  - Compare observations with human-provided answers.
+  - Surface conflicts, omissions, and unsupported assumptions.
+  - Resolve conflicts with the human or record them as explicit deferred decisions.
+acceptance_criteria:
+  - Repository observations are persisted.
+  - Conflicts are resolved or explicitly deferred.
+  - The operating model accurately reflects confirmed repository reality.
+evidence_required:
+  - Repository inventory
+  - Reconciliation decisions
+  - Updated project-context.yaml
