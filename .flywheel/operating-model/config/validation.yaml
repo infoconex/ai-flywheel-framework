@@ -5,10 +5,16 @@ artifact_validation:
   require_reference_validation: true
   require_unique_active_mission: true
   require_unique_active_goal: true
+  require_zero_or_one_active_execution: true
   require_state_execution_consistency: true
   require_goal_filename_matches_id: true
   require_acceptance_criterion_ids: true
   require_evidence_criterion_mapping: true
+  require_operator_invariants: true
+  require_startup_contract: true
+  require_execution_transition_rules: true
+  require_readiness_transition_rules: true
+  require_provenance_for_material_values: true
   schemas:
     manifest: .flywheel/operating-model/schemas/manifest.schema.yaml
     state: .flywheel/operating-model/schemas/state.schema.yaml
@@ -33,8 +39,15 @@ onboarding:
 readiness:
   required_state: ready-for-missions
   require_artifact_validation: true
+  require_certification: true
   require_cold_start_test: true
+  require_first_execution_test: true
+  require_resume_test: true
+  require_recovery_tests: true
+  require_approval_boundary_test: true
+  require_self_hosting: true
   require_proving_mission: true
+  require_human_approval: true
   required_capabilities:
     - mission-management
     - goal-management
@@ -49,10 +62,19 @@ cold_start_test:
   expected:
     - discovers AGENTS.md and manifest entrypoint
     - reads all required files
-    - reports phase readiness active work blockers approvals validation and next action
-    - creates or resumes the correct execution before material work
+    - emits the fixed opening report headings in required order
+    - distinguishes operating validation from repository validation
+    - creates or resumes the correct execution before goal-directed work
+    - treats absence of prior executions as expected for a first execution
     - does not invent files or perform application work during onboarding
     - records all lifecycle stages
+validator_output:
+  require_rule_id: true
+  require_artifact_path: true
+  require_severity: true
+  require_message: true
+  require_recovery_action: true
+  prohibit_silent_normalization: true
 provenance:
   allowed:
     - discovered
