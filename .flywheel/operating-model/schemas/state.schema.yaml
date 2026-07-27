@@ -1,0 +1,26 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: state.schema.yaml
+type: object
+additionalProperties: false
+required: [schema_version, phase, readiness, status, active_mission, active_goal, active_execution, lifecycle_stage, implementation_available, application_missions_allowed, last_updated_by]
+properties:
+  schema_version: {type: integer, const: 1}
+  phase: {type: string, enum: [onboarding, operating, upgrading, suspended]}
+  readiness: {type: string, enum: [not-ready-for-missions, ready-for-missions, degraded]}
+  status: {type: string, enum: [ready, active, blocked, suspended]}
+  active_mission: {type: [string, 'null']}
+  active_goal: {type: [string, 'null']}
+  active_execution: {type: [string, 'null']}
+  lifecycle_stage: {type: [string, 'null'], enum: [execute, observe, evaluate, classify, adapt, validate, persist, reuse, null]}
+  implementation_available: {type: boolean}
+  application_missions_allowed: {type: boolean}
+  last_updated_by: {type: string}
+allOf:
+  - if:
+      properties: {active_execution: {type: string}}
+    then:
+      properties: {status: {const: active}, lifecycle_stage: {type: string}}
+  - if:
+      properties: {readiness: {const: ready-for-missions}}
+    then:
+      properties: {application_missions_allowed: {const: true}}
