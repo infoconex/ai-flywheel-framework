@@ -1,0 +1,54 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: execution.schema.yaml
+type: object
+required: [schema_version, id, mission_id, goal_id, status, intended_outcome, acceptance_criteria, lifecycle, approval_refs, evidence_refs, validation_results, completion]
+properties:
+  schema_version: {type: integer, const: 1}
+  id: {type: string, minLength: 1}
+  mission_id: {type: string, minLength: 1}
+  goal_id: {type: string, minLength: 1}
+  status: {type: string, enum: [in-progress, succeeded, partially-succeeded, failed, blocked, abandoned, interrupted]}
+  intended_outcome: {type: [string, 'null']}
+  acceptance_criteria: {type: array, items: {type: string}}
+  lifecycle:
+    type: object
+    additionalProperties: false
+    required: [execute, observe, evaluate, classify, adapt, validate, persist, reuse]
+    properties:
+      execute: {$ref: '#/$defs/stage'}
+      observe: {$ref: '#/$defs/stage'}
+      evaluate: {$ref: '#/$defs/stage'}
+      classify: {$ref: '#/$defs/stage'}
+      adapt: {$ref: '#/$defs/stage'}
+      validate: {$ref: '#/$defs/stage'}
+      persist: {$ref: '#/$defs/stage'}
+      reuse: {$ref: '#/$defs/stage'}
+  approval_refs: {type: array, items: {type: string}}
+  evidence_refs: {type: array, items: {type: string}}
+  classification_refs: {type: array, items: {type: string}}
+  decision_refs: {type: array, items: {type: string}}
+  finding_refs: {type: array, items: {type: string}}
+  validation_results: {type: array}
+  completion:
+    type: object
+    required: [disposition, rationale]
+    properties:
+      disposition: {type: [string, 'null']}
+      rationale: {type: [string, 'null']}
+$defs:
+  stage:
+    type: object
+    additionalProperties: false
+    required: [status, started_at, completed_at, summary, refs, reason]
+    properties:
+      status: {type: string, enum: [pending, in-progress, completed, not-applicable]}
+      started_at: {type: [string, 'null']}
+      completed_at: {type: [string, 'null']}
+      summary: {type: [string, 'null']}
+      refs: {type: array, items: {type: string}}
+      reason: {type: [string, 'null']}
+    allOf:
+      - if:
+          properties: {status: {const: not-applicable}}
+        then:
+          properties: {reason: {type: string, minLength: 1}}
