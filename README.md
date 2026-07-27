@@ -4,6 +4,25 @@ The official installable framework for the [AI Flywheel specification](https://g
 
 > A loop repeats. A flywheel compounds.
 
+## AI operator start here
+
+Before performing any repository inspection, analysis, validation, or modification:
+
+1. Read `.flywheel/manifest.yaml`.
+2. Resolve all paths relative to the repository root.
+3. Open the exact file named by the manifest's `entrypoint` field.
+4. Follow that startup protocol without substituting another traversal order.
+
+The manifest is the authoritative boundary for the installed operating model:
+
+- `locations` identifies the canonical artifact locations.
+- `required_files` defines the complete required operating-artifact set and its read order.
+- `.flywheel/state.yaml` identifies the active mission, active goal, active execution, lifecycle stage, blockers, and readiness.
+
+`AGENTS.md` and this README are discovery aids. They do not replace the manifest or its entrypoint. Reading these startup artifacts is always authorized and is not target-repository inspection or goal-directed work.
+
+If the manifest is missing, unreadable, internally invalid, or does not identify an entrypoint, stop and report an Operating Model Defect. Do not search for or invent an alternative entrypoint.
+
 ## Purpose
 
 This repository provides the canonical `.flywheel` structure used to initialize an AI Flywheel inside a target repository.
@@ -27,7 +46,7 @@ The framework is responsible for:
 
 ## Installation model
 
-A user copies the `.flywheel` directory from this repository into the root of a target repository. The user then asks an AI operator to read the complete operating model and begin the active bootstrap mission.
+A user copies the `.flywheel` directory and `AGENTS.md` from this repository into the root of a target repository. The AI operator begins with `.flywheel/manifest.yaml` and follows its declared entrypoint.
 
 The first goals gather onboarding answers, inspect the repository, reconcile conflicts, and populate the configuration files. Later goals use that context to propose, build, validate, and prove the repository-specific Flywheel implementation.
 
