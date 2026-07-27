@@ -1,10 +1,18 @@
 schema_version: 1
 framework:
   name: AI Flywheel
+  version: 0.1.0-development
   mode: manual-bootstrap
   specification: https://github.com/Infoconex/ai-flywheel-spec
 path_base: repository-root
 entrypoint: .flywheel/operating-model/guidance/startup.md
+locations:
+  state: .flywheel/state.yaml
+  operating_model: .flywheel/operating-model
+  missions: .flywheel/operations/missions
+  records: .flywheel/operations/records
+  knowledge: .flywheel/operations/knowledge
+  schemas: .flywheel/operating-model/schemas
 required_files:
   - .flywheel/state.yaml
   - .flywheel/operating-model/guidance/startup.md
