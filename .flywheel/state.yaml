@@ -1,0 +1,6 @@
+schema_version: 1
+phase: onboarding
+active_mission: establish-ai-flywheel-operations
+active_goal: 001-conduct-onboarding-interview
+implementation_available: false
+last_updated_by: framework-installation
