@@ -1,0 +1,20 @@
+schema_version: 1
+id: 001-conduct-onboarding-interview
+title: Conduct Onboarding Interview
+status: active
+objective: Gather human-provided repository context, standards, preferences, constraints, and governance decisions.
+procedure:
+  - Ask one focused onboarding question at a time.
+  - Persist each confirmed answer immediately in the appropriate operating-model file.
+  - Record unanswered items as explicit unknowns rather than guessing.
+  - Mark inferred values as pending approval.
+acceptance_criteria:
+  - Project purpose and repository goals are recorded.
+  - Language, runtime, platform, build, and test information is recorded when known.
+  - Coding, architecture, testing, dependency, security, and compliance constraints are recorded.
+  - Human approval expectations and desired automation level are recorded.
+  - Every populated value identifies whether it was human-confirmed, observed, or inferred.
+evidence_required:
+  - Updated project-context.yaml
+  - Updated governance.yaml
+  - List of remaining unknowns
