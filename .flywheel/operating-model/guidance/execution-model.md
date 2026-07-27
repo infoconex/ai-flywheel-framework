@@ -1,12 +1,20 @@
 # Execution Model
 
-An execution is one traceable attempt to advance an active goal. A session may contain multiple executions, but every material action belongs to exactly one execution.
+This document is normative. `MUST`, `MUST NOT`, `REQUIRED`, `SHALL`, and `SHALL NOT` define mandatory behavior. Explanatory text and examples are informative.
+
+An execution is one traceable attempt to advance an active goal. Every goal-directed action belongs to exactly one execution.
+
+## Goal-directed actions
+
+Goal-directed actions include repository inspection, onboarding questions, commands, repository analysis, validation, evidence collection, approval requests, and file changes. Startup actions are limited to reading the operating contract, resolving active work, performing operating validation, and producing the opening report.
 
 ## Creation boundary
 
-Before the first material action, create a new execution unless `.flywheel/state.yaml` identifies an active resumable execution. Reading the operating contract and producing the opening report are not material actions. Repository inspection, asking an onboarding question, running a command, changing a file, or requesting a material approval are material actions.
+Immediately before the first goal-directed action, create a new execution unless `.flywheel/state.yaml` identifies an active resumable execution.
 
-A new execution must:
+If no execution records exist for the active goal, this is the first execution. The absence of prior execution records is expected and MUST NOT be treated as missing data.
+
+A new execution MUST:
 
 1. Use the canonical location defined in `.flywheel/operating-model/guidance/records.md`.
 2. Identify the active mission and goal.
@@ -14,13 +22,13 @@ A new execution must:
 4. Identify validation and required approvals.
 5. Initialize all eight lifecycle stages as `pending`.
 6. Set status to `in-progress`.
-7. Update state with the execution ID and lifecycle stage `execute` before material work.
+7. Atomically update state with `status: active`, the execution ID, and lifecycle stage `execute` before goal-directed work.
 
 ## During execution
 
-Record material actions, observations, commands, outputs, changes, assumptions, and deviations as they occur. Do not reconstruct evidence from memory at the end.
+Record goal-directed actions, observations, commands, outputs, changes, assumptions, evidence, and deviations as they occur. Do not reconstruct evidence from memory at the end.
 
-Every execution records all lifecycle stages:
+Every execution MUST record all lifecycle stages:
 
 1. Execute
 2. Observe
@@ -35,24 +43,17 @@ A stage may repeat. No stage may be omitted. When a stage has no action or outpu
 
 ## Stage transitions
 
-Before beginning a stage, update the execution and `.flywheel/state.yaml` to that stage. After the stage, persist its status, summary, references, and timestamps. The state lifecycle stage must match the active execution.
+Before beginning a stage, update the execution and `.flywheel/state.yaml` to that stage. After the stage, persist its status, summary, references, and timestamps. The state lifecycle stage MUST match the active execution.
 
 ## Outcomes
 
-Allowed execution outcomes are:
-
-- `succeeded`
-- `partially-succeeded`
-- `failed`
-- `blocked`
-- `abandoned`
-- `interrupted`
+Allowed execution outcomes are `succeeded`, `partially-succeeded`, `failed`, `blocked`, `abandoned`, and `interrupted`.
 
 An execution may succeed without completing the goal. Goal completion requires every acceptance criterion to be satisfied by referenced evidence, validation to pass, blockers to be disposed, and required approvals to exist.
 
 ## Resume behavior
 
-Continue an execution only when state identifies it and its status is `in-progress` or `interrupted`. Otherwise begin a new execution. Read previous executions chronologically and preserve unresolved findings.
+Continue an execution only when state identifies it, its status is `in-progress` or `interrupted`, its mission and goal match state, and its persisted lifecycle stage is known. Otherwise begin a new execution. Read previous executions chronologically and preserve unresolved findings.
 
 ## Closure
 
@@ -60,6 +61,7 @@ When closing an execution:
 
 1. Record its outcome and rationale.
 2. Complete all lifecycle stage records, including justified `not-applicable` stages.
-3. Persist referenced evidence, decisions, findings, and approvals.
+3. Persist referenced evidence, decisions, findings, approvals, and learning.
 4. Clear `state.active_execution` and `state.lifecycle_stage`, unless the execution remains interrupted and resumable.
-5. Update goal and mission state only when their transition rules are satisfied.
+5. Set state status to `ready`, `blocked`, or `suspended` as supported by evidence.
+6. Update goal and mission state only when their transition rules are satisfied.
