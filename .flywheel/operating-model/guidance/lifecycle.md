@@ -1,18 +1,20 @@
 # AI Flywheel Lifecycle
 
-Every execution follows the lifecycle below. Stages may iterate, but none may be silently omitted when applicable.
+Every execution follows and records all eight lifecycle stages. Stages may iterate, but none may be omitted.
+
+Each stage record must include a status, summary, timestamps, and relevant references. Allowed stage statuses are `pending`, `in-progress`, `completed`, and `not-applicable`. A `not-applicable` stage requires a concrete reason.
 
 ## 1. Execute
 
-Perform only the work authorized by the active goal, using the approved plan and constraints.
+Perform only work authorized by the active goal, using the approved plan and constraints.
 
 ## 2. Observe
 
-Capture results, evidence, unexpected behavior, failures, environmental facts, and human feedback.
+Capture actual results, evidence, unexpected behavior, failures, environmental facts, and human feedback.
 
 ## 3. Evaluate
 
-Compare observations with the goal's acceptance criteria, expected outcome, governance rules, and validation requirements.
+Compare observations with acceptance criteria, expected outcomes, governance, and validation requirements.
 
 ## 4. Classify
 
@@ -20,20 +22,20 @@ Classify material outcomes such as defects, findings, decisions, improvements, r
 
 ## 5. Adapt
 
-Change the application, Flywheel tools, configuration, guidance, plan, or scope as justified by the evaluation. Scope expansion requires the appropriate approval or a new goal.
+Change the application, Flywheel tools, configuration, guidance, plan, or scope when justified. Scope expansion requires approval or a new goal. When no adaptation is warranted, record the stage as `not-applicable` and explain why.
 
 ## 6. Validate
 
-Run the required checks and collect evidence. Validation must prove the claimed outcome rather than merely show that an action ran.
+Run required checks and collect evidence proving the claimed outcome. Validation must establish more than command execution.
 
 ## 7. Persist
 
-Update state and store execution records, decisions, evidence, and learning in their canonical locations.
+Update state and store execution records, evidence, decisions, findings, approvals, and learning in canonical locations.
 
 ## 8. Reuse
 
-Make validated knowledge discoverable for later goals and apply relevant prior learning with context-sensitive revalidation.
+Identify relevant validated knowledge for later work and make new validated learning discoverable. When no reusable knowledge applies or results, record the stage as `not-applicable` with a reason.
 
-## Completion Rule
+## Completion rule
 
-A goal may transition to complete only after applicable lifecycle stages have been recorded, acceptance criteria are satisfied, required approvals exist, and completion evidence is persisted.
+An execution may close only after every stage is `completed` or justified as `not-applicable`. A goal may complete only after all acceptance-criterion IDs map to sufficient evidence, required validation passes, blockers are resolved or formally disposed, required approvals exist, and the completion state is persisted.
