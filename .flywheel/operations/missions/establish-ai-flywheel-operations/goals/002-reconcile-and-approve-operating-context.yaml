@@ -1,5 +1,6 @@
 schema_version: 1
 id: 002-reconcile-and-approve-operating-context
+mission_id: establish-ai-flywheel-operations
 title: Reconcile and Approve Operating Context
 status: blocked
 blocked_by:
