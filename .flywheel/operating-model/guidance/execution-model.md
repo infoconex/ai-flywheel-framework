@@ -66,7 +66,7 @@ Before beginning a later stage, update the execution and state together so exact
 
 Allowed execution statuses are `in-progress`, `blocked`, `succeeded`, `partially-succeeded`, `failed`, `abandoned`, and `interrupted`.
 
-`in-progress`, `blocked`, and `interrupted` are resumable and mutable. For `blocked` or `interrupted`, `completed_at`, `outcome`, and completion disposition remain null. `blocked` requires at least one blocker. `interrupted` requires a nonempty interruption reason in `outcome` while remaining resumable.
+`in-progress`, `blocked`, and `interrupted` are resumable and mutable. For all three statuses, `completed_at` and completion disposition remain null. An `in-progress` execution has `outcome: null`. A `blocked` execution requires at least one blocker and may use `outcome` to summarize the blocking condition. An `interrupted` execution requires a nonempty interruption reason in `outcome`.
 
 `succeeded`, `partially-succeeded`, `failed`, and `abandoned` are terminal and immutable. They require all lifecycle stages to be completed or justified as not applicable, plus `completed_at`, outcome, disposition, and rationale.
 
