@@ -2,35 +2,13 @@ $schema: https://json-schema.org/draft/2020-12/schema
 $id: execution.schema.yaml
 type: object
 additionalProperties: false
-required:
-  - schema_version
-  - id
-  - mission_id
-  - goal_id
-  - status
-  - intended_outcome
-  - acceptance_criteria
-  - started_at
-  - completed_at
-  - lifecycle
-  - actions
-  - observations
-  - classifications
-  - adaptations
-  - blockers
-  - approval_refs
-  - evidence_refs
-  - decision_refs
-  - finding_refs
-  - validation_results
-  - outcome
-  - completion
+required: [schema_version, id, mission_id, goal_id, status, intended_outcome, acceptance_criteria, started_at, completed_at, lifecycle, actions, observations, classifications, adaptations, blockers, approval_refs, evidence_refs, decision_refs, finding_refs, validation_results, outcome, completion]
 properties:
   schema_version: {type: integer, const: 1}
-  id: {type: string, minLength: 1}
+  id: {type: string, pattern: '^EX-[0-9]{8}T[0-9]{6}Z-[0-9]{3}$'}
   mission_id: {type: string, minLength: 1}
   goal_id: {type: string, minLength: 1}
-  status: {type: string, enum: [in-progress, succeeded, partially-succeeded, failed, blocked, abandoned, interrupted]}
+  status: {type: string, enum: [in-progress, blocked, interrupted, succeeded, partially-succeeded, failed, abandoned]}
   intended_outcome: {type: string, minLength: 1}
   acceptance_criteria:
     type: array
@@ -52,18 +30,10 @@ properties:
       validate: {$ref: '#/$defs/stage'}
       persist: {$ref: '#/$defs/stage'}
       reuse: {$ref: '#/$defs/stage'}
-  actions:
-    type: array
-    items: {type: string, minLength: 1}
-  observations:
-    type: array
-    items: {type: string, minLength: 1}
-  classifications:
-    type: array
-    items: {type: string, minLength: 1}
-  adaptations:
-    type: array
-    items: {type: string, minLength: 1}
+  actions: {type: array, items: {type: string, minLength: 1}}
+  observations: {type: array, items: {type: string, minLength: 1}}
+  classifications: {type: array, items: {type: string, minLength: 1}}
+  adaptations: {type: array, items: {type: string, minLength: 1}}
   blockers:
     type: array
     uniqueItems: true
@@ -97,7 +67,7 @@ properties:
       rationale: {type: [string, 'null']}
 allOf:
   - if:
-      properties: {status: {const: in-progress}}
+      properties: {status: {enum: [in-progress, blocked, interrupted]}}
       required: [status]
     then:
       properties:
@@ -107,7 +77,7 @@ allOf:
             disposition: {type: 'null'}
             rationale: {type: 'null'}
   - if:
-      properties: {status: {enum: [succeeded, partially-succeeded, failed, blocked, abandoned, interrupted]}}
+      properties: {status: {enum: [succeeded, partially-succeeded, failed, abandoned]}}
       required: [status]
     then:
       properties:
@@ -122,6 +92,11 @@ allOf:
       required: [status]
     then:
       properties: {blockers: {minItems: 1}}
+  - if:
+      properties: {status: {const: interrupted}}
+      required: [status]
+    then:
+      properties: {outcome: {type: string, minLength: 1}}
 $defs:
   stage:
     type: object
@@ -138,32 +113,25 @@ $defs:
         items: {type: string, minLength: 1}
       reason: {type: [string, 'null']}
     allOf:
-      - if:
-          properties: {status: {const: pending}}
-          required: [status]
+      - if: {properties: {status: {const: pending}}, required: [status]}
         then:
           properties:
             started_at: {type: 'null'}
             completed_at: {type: 'null'}
             summary: {type: 'null'}
-      - if:
-          properties: {status: {const: in-progress}}
-          required: [status]
+            reason: {type: 'null'}
+      - if: {properties: {status: {const: in-progress}}, required: [status]}
         then:
           properties:
             started_at: {type: string, format: date-time}
             completed_at: {type: 'null'}
-      - if:
-          properties: {status: {const: completed}}
-          required: [status]
+      - if: {properties: {status: {const: completed}}, required: [status]}
         then:
           properties:
             started_at: {type: string, format: date-time}
             completed_at: {type: string, format: date-time}
             summary: {type: string, minLength: 1}
-      - if:
-          properties: {status: {const: not-applicable}}
-          required: [status]
+      - if: {properties: {status: {const: not-applicable}}, required: [status]}
         then:
           properties:
             started_at: {type: 'null'}
