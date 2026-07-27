@@ -1,0 +1,22 @@
+schema_version: 1
+id: 005-self-host-prove-and-evaluate
+title: Self-Host, Prove, and Evaluate
+status: blocked
+blocked_by:
+  - 004-build-and-validate-operating-tools
+objective: Transition from manual bootstrap to tool-managed operation, prove the implementation, and capture framework learning.
+procedure:
+  - Use the new tools to manage the remaining bootstrap records.
+  - Create and execute a small proving mission through the complete lifecycle.
+  - Evaluate onboarding questions, guidance, schemas, governance, and implementation assumptions.
+  - Persist defects, findings, decisions, improvements, risks, and reusable learning.
+acceptance_criteria:
+  - The tools successfully manage Flywheel records and state.
+  - A proving mission completes with evidence and validation.
+  - Framework gaps and onboarding improvements are persisted.
+  - Human authority confirms the repository is operational.
+evidence_required:
+  - Tool-managed execution records
+  - Completed proving mission
+  - Bootstrap evaluation
+  - Persisted learning records
