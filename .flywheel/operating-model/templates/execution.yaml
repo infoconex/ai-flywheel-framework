@@ -1,22 +1,26 @@
+schema_version: 1
 id: replace-with-execution-id
 mission_id: replace-with-mission-id
 goal_id: replace-with-goal-id
 status: in-progress
+intended_outcome: null
+acceptance_criteria: []
 started_at: null
 completed_at: null
 lifecycle:
-  execute: []
-  observe: []
-  evaluate: []
-  classify: []
-  adapt: []
-  validate: []
-  persist: []
-  reuse: []
-approvals: []
-evidence: []
-classifications: []
-decisions: []
+  execute: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  observe: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  evaluate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  classify: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  adapt: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  validate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  persist: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  reuse: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+approval_refs: []
+evidence_refs: []
+classification_refs: []
+decision_refs: []
+finding_refs: []
 validation_results: []
 completion:
   disposition: null
