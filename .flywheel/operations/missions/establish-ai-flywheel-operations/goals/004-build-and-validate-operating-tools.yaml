@@ -1,0 +1,22 @@
+schema_version: 1
+id: 004-build-and-validate-operating-tools
+title: Build and Validate Operating Tools
+status: blocked
+blocked_by:
+  - 003-define-and-approve-implementation
+objective: Build the approved minimum repository-specific tools required to operate the AI Flywheel.
+procedure:
+  - Implement only approved capabilities using repository-selected language, architecture, standards, and dependencies.
+  - Add automated tests where practical.
+  - Validate mission, goal, execution, evidence, approval, and state-transition behavior.
+  - Record failures, adaptations, and validation evidence.
+acceptance_criteria:
+  - Required capabilities are implemented.
+  - Invalid operations and incomplete goal completion are rejected.
+  - Tests and validation checks pass.
+  - Implementation location and entry points are documented.
+evidence_required:
+  - Source changes
+  - Test results
+  - Validation results
+  - Implementation manifest
