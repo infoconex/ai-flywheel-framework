@@ -1,5 +1,6 @@
 schema_version: 1
 id: 003-define-and-approve-implementation
+mission_id: establish-ai-flywheel-operations
 title: Define and Approve Implementation
 status: blocked
 blocked_by:
