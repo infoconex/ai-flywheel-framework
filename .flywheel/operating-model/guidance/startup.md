@@ -27,9 +27,11 @@ Before producing the opening report, the operator MUST verify:
 
 Operating validation concerns Flywheel artifacts only. Repository build, test, dependency, architecture, or source inspection belongs to goal execution.
 
+During onboarding, before a repository-specific validator exists, Operating Validation SHALL be performed manually using the published validation contract. Manual validation performed according to that contract is authoritative and equivalent to automated validation for governance decisions until a repository-specific validator becomes available.
+
 ## Required opening report
 
-The opening report MUST use these headings in this exact order:
+The opening report SHALL use these headings in this exact order:
 
 1. `Current Phase`
 2. `Status`
@@ -41,10 +43,20 @@ The opening report MUST use these headings in this exact order:
 8. `Lifecycle Stage`
 9. `Known Blockers`
 10. `Required Approvals`
-11. `Operating Validation Status`
-12. `Next Authorized Action`
+11. `Operating Validation`
+12. `Repository Validation`
+13. `Implementation Validation`
+14. `Next Authorized Action`
 
 The report MUST state whether an existing execution will be resumed or a new execution must be created.
+
+At startup, before repository inspection or implementation work begins, the expected validation states are:
+
+- `Operating Validation`: `passed`, or `failed` with a deterministic recovery action.
+- `Repository Validation`: `pending` when execution has not started.
+- `Implementation Validation`: `not-applicable` when no implementation work has occurred.
+
+The operator MUST NOT report Repository Validation or Implementation Validation as passed without evidence gathered during an authorized execution.
 
 ## Startup completion checkpoint
 

@@ -1,4 +1,38 @@
 version: 1
+validation_domains:
+  operating_validation:
+    purpose: Validate the Flywheel operating model, state, governance, schemas, references, startup contract, and operator invariants.
+    startup_expected_state: passed
+    allowed_states:
+      - pending
+      - passed
+      - failed
+      - blocked
+    manual_bootstrap_authoritative: true
+  repository_validation:
+    purpose: Validate repository discovery, context gathering, inventory, constraints, and evidence collected during an authorized execution.
+    startup_expected_state: pending
+    allowed_states:
+      - pending
+      - in-progress
+      - passed
+      - failed
+      - blocked
+  implementation_validation:
+    purpose: Validate implementation changes through tests, acceptance criteria, evidence, and required approvals.
+    startup_expected_state: not-applicable
+    allowed_states:
+      - not-applicable
+      - pending
+      - in-progress
+      - passed
+      - failed
+      - blocked
+bootstrap:
+  manual_operating_validation:
+    required_when_validator_unavailable: true
+    use_published_contract: true
+    equivalent_authority_to_automated_validation: true
 artifact_validation:
   require_required_files: true
   require_schema_validation: true
@@ -63,7 +97,7 @@ cold_start_test:
     - discovers AGENTS.md and manifest entrypoint
     - reads all required files
     - emits the fixed opening report headings in required order
-    - distinguishes operating validation from repository validation
+    - reports operating, repository, and implementation validation independently
     - creates or resumes the correct execution before goal-directed work
     - treats absence of prior executions as expected for a first execution
     - does not invent files or perform application work during onboarding

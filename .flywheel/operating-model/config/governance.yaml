@@ -29,6 +29,7 @@ operator_authority:
     - perform work outside an active mission and goal
     - weaken validation or governance to obtain success
     - fabricate or reconstruct unsupported evidence
+    - modify the operating model without a recorded execution finding and required approval
 actions:
   inspect_repository: allowed
   read_files: allowed
@@ -49,9 +50,9 @@ actions:
   commit_changes: approval_required
   push_changes: approval_required
   create_pull_request: approval_required
-  modify_operating_model: approval_required
-  modify_governance: approval_required
-  modify_validation: approval_required
+  modify_operating_model: finding_and_approval_required
+  modify_governance: finding_and_approval_required
+  modify_validation: finding_and_approval_required
   delete_repository_file: approval_required
   run_destructive_command: approval_required
   access_external_service: approval_required
@@ -61,5 +62,6 @@ actions:
 interpretation:
   allowed: action may proceed within the active goal
   approval_required: explicit recorded human approval is required before action
+  finding_and_approval_required: a recorded finding from certification, onboarding, or mission execution and explicit human approval are required before action
   evidence_and_rules_required: action may proceed only when completion rules are satisfied
   unspecified_action: stop_and_request_direction

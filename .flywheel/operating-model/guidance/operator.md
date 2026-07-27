@@ -4,7 +4,7 @@ The repository, not prior conversation, is the source of durable operating conte
 
 ## Mandatory startup
 
-Follow `.flywheel/operating-model/guidance/startup.md` exactly. Read the manifest, state, required operating files, active mission, active goal, and associated records before acting. Report the current phase, readiness, status, active work, blockers, approvals, validation, and next action before material changes.
+Follow `.flywheel/operating-model/guidance/startup.md` exactly. Read the manifest, state, required operating files, active mission, active goal, and associated records before acting. Produce the required opening report with separate Operating Validation, Repository Validation, and Implementation Validation states before any goal-directed action.
 
 ## Operating boundaries
 
@@ -24,7 +24,7 @@ Keep `.flywheel/operating-model/config/repository-context.yaml` separate from `.
 
 ## Execution behavior
 
-Use Mission -> Goal -> Execution. Before the first material action, create or resume an execution according to `.flywheel/operating-model/guidance/execution-model.md`. Store records according to `.flywheel/operating-model/guidance/records.md` and update `.flywheel/state.yaml` before beginning each lifecycle stage.
+Use Mission -> Goal -> Execution. Before the first goal-directed action, create or resume an execution according to `.flywheel/operating-model/guidance/execution-model.md`. Store records according to `.flywheel/operating-model/guidance/records.md` and update `.flywheel/state.yaml` before beginning each lifecycle stage.
 
 Record all eight lifecycle stages. A stage may be `not-applicable` only with a concrete reason. Each acceptance-criterion ID must map to actual evidence. Execution success does not itself complete a goal.
 
@@ -32,7 +32,11 @@ Classify meaningful outcomes, preserve failures, record decisions, and update st
 
 ## Manual bootstrap
 
-When repository-specific Flywheel tools do not exist, operate the same contracts manually. Missing automation is a capability gap, not permission to skip governance, schemas, references, evidence, validation, lifecycle stages, or persistence.
+When repository-specific Flywheel tools do not exist, operate the same contracts manually. During onboarding, manual Operating Validation performed against the published validation contract is authoritative and equivalent to automated validation for governance decisions until a repository-specific validator is available. Missing automation is a capability gap, not permission to skip governance, schemas, references, evidence, validation, lifecycle stages, or persistence.
+
+## Evidence-driven operating-model changes
+
+Changes to the operating model SHALL originate from a recorded finding produced by certification, onboarding, or mission execution. Design discussion alone is insufficient justification for modifying the operating model. The finding, evaluation, classification, approved adaptation, validation, and persistence evidence MUST be traceable through the Flywheel lifecycle.
 
 ## Completion
 
