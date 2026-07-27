@@ -1,21 +1,27 @@
 schema_version: 1
 id: establish-ai-flywheel-operations
-title: Establish AI Flywheel Operations
+title: Onboard Repository to AI Flywheel
 status: active
 objective: >-
-  Onboard the repository, establish its operating model, and design, build,
-  validate, and prove the repository-specific tools required to run future
-  AI Flywheel missions.
+  Establish the repository's AI Flywheel operating environment so later
+  missions can safely address the application or other repository work.
+  This mission discovers and configures the repository context, defines and
+  builds repository-specific Flywheel operating tools, validates them, and
+  proves readiness without performing application feature work.
 constraints:
-  - Do not prescribe the implementation language or architecture.
-  - Persist onboarding answers and repository findings in the operating model.
+  - Do not perform application feature, modernization, or defect work during this mission unless explicitly required to prove Flywheel operation.
+  - Keep target repository technologies separate from Flywheel implementation technologies.
+  - Do not prescribe the Flywheel implementation language, framework, test framework, command interface, or architecture before discovery and human approval.
+  - Persist onboarding answers, repository observations, provenance, decisions, and unknowns in the operating model and records.
   - Require human approval for material implementation choices.
-  - Begin manually and transition to self-hosting when the tools are capable.
+  - Begin with direct artifact operation and transition to self-hosting when validated tools are capable.
 success_criteria:
-  - Repository context and governance are complete enough to guide implementation.
-  - Required, selected, deferred, and rejected capabilities are recorded.
+  - Repository context, governance, validation, and mission boundaries are sufficient for future work.
+  - Required, selected, deferred, and rejected Flywheel capabilities are recorded.
+  - The Flywheel implementation stack is selected independently and approved.
   - Repository-specific operating tools are implemented and validated.
   - A proving mission is successfully operated with the new tools.
+  - State is changed to ready-for-missions only after operational validation.
   - Onboarding findings and framework improvements are persisted.
 goals:
   - 001-conduct-onboarding-interview
