@@ -1,7 +1,7 @@
 schema_version: 1
 id: EX-20000101T000000Z-001
 mission_id: example-mission
- goal_id: example-goal
+goal_id: example-goal
 status: in-progress
 intended_outcome: Replace with the active goal objective.
 acceptance_criteria:
