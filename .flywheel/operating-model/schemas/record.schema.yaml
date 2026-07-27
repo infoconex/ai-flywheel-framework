@@ -1,0 +1,44 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: record.schema.yaml
+type: object
+required: [schema_version, id, kind, mission_id, goal_id, created_at, summary]
+properties:
+  schema_version: {type: integer, const: 1}
+  id: {type: string, minLength: 1}
+  kind: {type: string, enum: [evidence, decision, finding, approval, knowledge]}
+  mission_id: {type: string, minLength: 1}
+  goal_id: {type: string, minLength: 1}
+  execution_id: {type: [string, 'null']}
+  created_at: {type: string, minLength: 1}
+  created_by: {type: [string, 'null']}
+  summary: {type: string, minLength: 1}
+  status: {type: [string, 'null']}
+  classification: {type: [string, 'null']}
+  criterion_ids:
+    type: array
+    items: {type: string, pattern: '^AC-[0-9]{3,}$'}
+  source_refs: {type: array, items: {type: string}}
+  artifact_refs: {type: array, items: {type: string}}
+  approval:
+    type: [object, 'null']
+    properties:
+      authority: {type: string}
+      decision: {type: string, enum: [approved, rejected, deferred]}
+      scope: {type: string}
+  context:
+    type: [object, 'null']
+  validation:
+    type: [object, 'null']
+allOf:
+  - if:
+      properties: {kind: {const: evidence}}
+    then:
+      required: [criterion_ids, artifact_refs]
+  - if:
+      properties: {kind: {const: approval}}
+    then:
+      required: [approval]
+  - if:
+      properties: {kind: {const: knowledge}}
+    then:
+      required: [context, validation]
