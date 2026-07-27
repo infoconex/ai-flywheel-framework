@@ -3,9 +3,40 @@ framework:
   name: AI Flywheel
   mode: manual-bootstrap
   specification: https://github.com/Infoconex/ai-flywheel-spec
+entrypoint: operating-model/guidance/startup.md
+required_files:
+  - state.yaml
+  - operating-model/guidance/startup.md
+  - operating-model/guidance/authority.md
+  - operating-model/guidance/operator.md
+  - operating-model/guidance/principles.md
+  - operating-model/guidance/lifecycle.md
+  - operating-model/guidance/sop.md
+  - operating-model/guidance/mission-model.md
+  - operating-model/guidance/execution-model.md
+  - operating-model/guidance/evidence.md
+  - operating-model/guidance/decisions.md
+  - operating-model/guidance/failure-handling.md
+  - operating-model/guidance/adaptation.md
+  - operating-model/guidance/persistence.md
+  - operating-model/guidance/readiness.md
+  - operating-model/guidance/classifications.md
+  - operating-model/guidance/tool-usage.md
+  - operating-model/config/repository-context.yaml
+  - operating-model/config/flywheel-context.yaml
+  - operating-model/config/governance.yaml
+  - operating-model/config/capabilities.yaml
+  - operating-model/config/validation.yaml
+  - operating-model/onboarding/process.md
+  - operating-model/onboarding/interview.yaml
+  - operating-model/onboarding/answer-model.yaml
+  - operating-model/schemas/README.md
 onboarding:
   mission: establish-ai-flywheel-operations
   status: ready
 implementation:
   status: not-created
   manifest: null
+compatibility:
+  application_missions_require_readiness: ready-for-missions
+  manual_operation_permitted: true
