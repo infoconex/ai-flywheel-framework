@@ -1,5 +1,7 @@
 # Startup Protocol
 
+This document is normative. `MUST`, `MUST NOT`, `REQUIRED`, `SHALL`, and `SHALL NOT` define mandatory behavior. Explanatory text and examples are informative.
+
 This protocol is mandatory whenever a new operator or chat session begins work in the repository. All paths are repository-root-relative.
 
 ## Read order
@@ -11,53 +13,75 @@ This protocol is mandatory whenever a new operator or chat session begins work i
 5. Read the active mission and active goal identified by state.
 6. Read records for the active goal from the canonical locations defined in `.flywheel/operating-model/guidance/records.md`, oldest first.
 7. When `active_execution` is not null, read that execution last and resume its recorded `lifecycle_stage`.
-8. Inspect the target repository only after the operating contract is understood.
+8. Do not inspect the target repository until startup is complete.
 
-## Startup checks
+## Operating validation
 
-Before changing any file, establish:
+Before producing the opening report, the operator MUST verify:
 
-- The current phase, status, and readiness.
-- The active mission, goal, execution, and lifecycle stage.
-- Whether the requested work belongs to the active goal.
-- Whether a prior execution is incomplete, blocked, or failed.
-- Which approvals are present and still required.
-- Which validation and evidence rules apply.
-- Whether application work is permitted.
-- Whether all required artifacts pass available schema and reference validation.
+- Every manifest-required file exists.
+- State, mission, goal, and any active execution satisfy their schemas when validation is available.
+- Active references resolve uniquely and agree.
+- The requested work belongs to the active mission and goal.
+- Required approvals, blockers, evidence rules, and application-work permission are understood.
+
+Operating validation concerns Flywheel artifacts only. Repository build, test, dependency, architecture, or source inspection belongs to goal execution.
 
 ## Required opening report
 
-Report:
+The opening report MUST use these headings in this exact order:
 
-- Current phase, status, and readiness.
-- Active mission and goal.
-- Active execution and lifecycle stage, or that a new execution must be created.
-- Known blockers and required approvals.
-- Applicable validation.
-- The next authorized action.
+1. `Current Phase`
+2. `Status`
+3. `Readiness`
+4. `Application Missions Permitted`
+5. `Active Mission`
+6. `Active Goal`
+7. `Active Execution`
+8. `Lifecycle Stage`
+9. `Known Blockers`
+10. `Required Approvals`
+11. `Operating Validation Status`
+12. `Next Authorized Action`
 
-## Execution start rule
+The report MUST state whether an existing execution will be resumed or a new execution must be created.
 
-Before the first material action in a session, create a new execution record unless state identifies an active resumable execution. Reading operating files and producing the opening report are not material actions. Repository inspection, asking an onboarding question, running a command, or changing a file are material actions.
+## Startup completion checkpoint
 
-Continue an existing execution only when:
+Startup is complete only when:
 
-- `state.active_execution` identifies it.
-- Its status is `in-progress` or `interrupted`.
-- Its mission and goal match state.
-- Its last persisted lifecycle stage is known.
+- All required operating artifacts have been read.
+- Operating validation has passed or a deterministic recovery action has been selected.
+- The opening report has been produced.
+- The execution decision has been made.
 
-Otherwise create a new execution and update state before proceeding.
+No goal-directed action may occur before this checkpoint.
+
+## Execution boundary
+
+A goal-directed action is any action that advances, investigates, validates, records, or changes the active goal. It includes repository inspection, onboarding questions, commands, analysis of repository content, validation, evidence collection, approval requests, and file changes.
+
+Reading the operating contract and producing the opening report are startup actions, not goal-directed actions.
+
+Immediately before the first goal-directed action, the operator MUST either:
+
+- Resume the execution identified by state when it is resumable and consistent; or
+- Create the first or next execution record, initialize all lifecycle stages, set it to `in-progress`, and atomically update state to `status: active`, the new `active_execution`, and `lifecycle_stage: execute`.
+
+If no execution records exist for the active goal, that absence is expected for the first execution and is not a blocker.
+
+## Repository inspection scope
+
+When repository inspection is authorized by the active goal, it MUST consider applicable repository structure, documentation, configuration, build, tests, automation, tooling, dependencies, standards, constraints, and authoritative external references. The operator MUST record inspected areas, evidence sources, unknowns, and intentionally uninspected areas.
 
 ## Stop conditions
 
-Stop and request human direction when:
+Stop and apply `.flywheel/operating-model/guidance/failure-handling.md` when:
 
 - State and mission, goal, execution, or approval records disagree.
 - The active mission or goal cannot be found.
 - A required operating file is missing.
-- Artifact validation fails in a way that makes authority or active work ambiguous.
+- Artifact validation makes authority or active work ambiguous.
 - Requested work falls outside the active mission or goal.
 - A material decision lacks required approval.
 - Proceeding would weaken governance or validation merely to obtain success.
