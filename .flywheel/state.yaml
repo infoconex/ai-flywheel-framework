@@ -10,6 +10,6 @@ implementation_available: false
 application_missions_allowed: false
 blockers: []
 last_durable_update:
-  at: 2026-07-27T19:41:02Z
+  at: "2026-07-27T19:41:02Z"
   by: framework-installation
   reason: Initial operating-model installation and hardening.
