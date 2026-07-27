@@ -10,18 +10,26 @@ Immediately before the first goal-directed action, create a new execution unless
 
 If no execution records exist for the active goal, this is the first execution. The absence of prior execution records is expected.
 
-## Deterministic execution identity
+## Operator identity
 
-Execution identifiers MUST use `EX-YYYYMMDDTHHMMSSZ-NNN`, where the timestamp is the UTC creation instant and `NNN` is a three-digit collision counter beginning at `001`. The operator MUST select the lowest unused counter for that timestamp beneath the active goal's canonical execution directory. The filename MUST equal `<execution-id>.yaml`.
+Before selecting an execution identifier, the operator MUST resolve one stable identity string for the current session. Use the authenticated repository actor when tooling exposes it. Otherwise use `chatgpt-session`. The same identity MUST be used in state metadata and any startup-failure record created by this transition.
+
+## Timestamp and identity
+
+The creation instant MUST be captured once in UTC at whole-second precision using `YYYY-MM-DDTHH:MM:SSZ`. Fractional seconds are prohibited for execution activation. The compact form is produced by removing `-` and `:` from that exact timestamp.
+
+Execution identifiers MUST use `EX-YYYYMMDDTHHMMSSZ-NNN`, where `NNN` begins at `001`. The operator MUST inspect the canonical execution directory and choose the lowest unused counter for the captured second. The filename MUST equal `<execution-id>.yaml`.
+
+If create-only persistence reports that the selected path already exists, re-list the directory, select the next lowest unused counter for the same captured second, and retry. Repeat until creation succeeds or the counter would exceed `999`. Counter exhaustion is an Operating Validation failure and MUST be persisted as a startup-failure record.
 
 ## Initial activation snapshot
 
-The execution and state MUST become durable as one compare-and-swap transition. The execution artifact created before the state update MUST already contain the activation snapshot that state will reference:
+The execution artifact created before the state update MUST already contain the activation snapshot state will reference:
 
 - `status: in-progress`
-- `started_at`: the execution creation UTC timestamp
+- `started_at`: the captured whole-second UTC creation instant
 - `completed_at: null`
-- `intended_outcome`: the active goal objective
+- `intended_outcome`: the active goal objective exactly
 - `acceptance_criteria`: the active goal acceptance-criterion IDs in goal order
 - `lifecycle.execute.status: in-progress`
 - `lifecycle.execute.started_at`: exactly equal to execution `started_at`
@@ -30,7 +38,7 @@ The execution and state MUST become durable as one compare-and-swap transition. 
 - `outcome: null`
 - Completion disposition and rationale: null
 
-Required approvals are represented by the active goal's `approvals_required` values. Approval records are added to `approval_refs` only after they exist; therefore an initially empty `approval_refs` array is valid.
+Required approvals are represented by the active goal's `approvals_required` values. Approval records are added to `approval_refs` only after they exist.
 
 The corresponding state update MUST set:
 
@@ -38,21 +46,27 @@ The corresponding state update MUST set:
 - `active_execution`: the new execution ID
 - `lifecycle_stage: execute`
 - `last_durable_update.at`: exactly equal to execution `started_at`
-- `last_durable_update.by`: the operator identity used in the execution-creation evidence
+- `last_durable_update.by`: the resolved operator identity
 - `last_durable_update.reason`: `Activated execution <execution-id> for goal <goal-id>.`
 
 All other state fields remain unchanged.
 
 ## Durable creation sequence
 
-1. Read and retain the current state blob SHA.
-2. Select the deterministic execution ID.
-3. Create the fully valid activation-snapshot execution using create-only semantics.
-4. Re-read state and verify its SHA is unchanged.
-5. Update state using compare-and-swap against the retained SHA.
-6. If state changed, do not overwrite it. Persist a startup-failure record using `startup-failure.schema.yaml`, identifying the created execution as orphaned, and stop.
+1. Resolve the stable operator identity.
+2. Capture one whole-second UTC creation instant.
+3. Read and retain the current state blob SHA.
+4. Select the deterministic execution ID.
+5. Create the fully valid activation-snapshot execution using create-only semantics, applying the same-second counter retry rule on path collision.
+6. Re-read state and verify its SHA is unchanged.
+7. Update state using compare-and-swap against the retained SHA.
+8. If state changed, do not overwrite it. Persist a startup-failure record using `startup-failure.schema.yaml`, identifying the created execution as orphaned, and stop.
 
 A finding record is not used for a creation collision because no execution became active.
+
+## Template use
+
+`.flywheel/operating-model/templates/execution.yaml` is a schema-valid example, not an execution record. Before persistence, replace its example identity, timestamps, mission, goal, objective, and acceptance criteria using the rules above. The resulting artifact MUST validate before create-only persistence.
 
 ## During execution
 
@@ -66,7 +80,7 @@ Before beginning a later stage, update the execution and state together so exact
 
 Allowed execution statuses are `in-progress`, `blocked`, `succeeded`, `partially-succeeded`, `failed`, `abandoned`, and `interrupted`.
 
-`in-progress`, `blocked`, and `interrupted` are resumable and mutable. For all three statuses, `completed_at` and completion disposition remain null. An `in-progress` execution has `outcome: null`. A `blocked` execution requires at least one blocker and may use `outcome` to summarize the blocking condition. An `interrupted` execution requires a nonempty interruption reason in `outcome`.
+`in-progress`, `blocked`, and `interrupted` are resumable and mutable. `in-progress` requires `outcome: null`. `blocked` requires at least one blocker and may use `outcome` to state the blocking condition. `interrupted` requires a nonempty interruption reason in `outcome`. All resumable statuses require `completed_at` and completion disposition and rationale to remain null.
 
 `succeeded`, `partially-succeeded`, `failed`, and `abandoned` are terminal and immutable. They require all lifecycle stages to be completed or justified as not applicable, plus `completed_at`, outcome, disposition, and rationale.
 
