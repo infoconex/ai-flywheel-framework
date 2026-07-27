@@ -22,7 +22,7 @@ Before producing the opening report, the operator MUST verify:
 - Every manifest-required file exists.
 - State, mission, goal, and any active execution satisfy their schemas when validation is available.
 - Active references resolve uniquely and agree.
-- The requested work belongs to the active mission and goal.
+- Any requested goal-directed work belongs to the active mission and goal. A startup-only request is authorized by this protocol and ends after the opening report and execution decision.
 - Required approvals, blockers, evidence rules, and application-work permission are understood.
 
 Operating validation concerns Flywheel artifacts only. Repository build, test, dependency, architecture, or source inspection belongs to goal execution.
@@ -94,7 +94,7 @@ Stop and apply `.flywheel/operating-model/guidance/failure-handling.md` when:
 - The active mission or goal cannot be found.
 - A required operating file is missing.
 - Artifact validation makes authority or active work ambiguous.
-- Requested work falls outside the active mission or goal.
+- Requested goal-directed work falls outside the active mission or goal.
 - A material decision lacks required approval.
 - Proceeding would weaken governance or validation merely to obtain success.
 
