@@ -14,9 +14,12 @@ provenance_values:
   - inferred
   - defaulted
   - approved
+  - deferred
+  - rejected
 sections:
   - id: repository-purpose
-    writes_to: operating-model/config/project-context.yaml
+    writes_to:
+      - .flywheel/operating-model/config/repository-context.yaml
     questions:
       - id: repository-purpose
         required: true
@@ -25,7 +28,8 @@ sections:
         required: true
         prompt: What types of work should future Flywheel missions be allowed to perform in this repository?
   - id: repository-constraints
-    writes_to: operating-model/config/project-context.yaml
+    writes_to:
+      - .flywheel/operating-model/config/repository-context.yaml
     questions:
       - id: authoritative-documents
         required: false
@@ -37,7 +41,8 @@ sections:
         required: true
         prompt: What operating systems, network restrictions, credentials, hosted services, or execution environments constrain work?
   - id: governance
-    writes_to: operating-model/config/governance.yaml
+    writes_to:
+      - .flywheel/operating-model/config/governance.yaml
     questions:
       - id: autonomous-boundaries
         required: true
@@ -49,7 +54,8 @@ sections:
         required: true
         prompt: What branch, commit, pull request, review, and merge rules must missions follow?
   - id: validation
-    writes_to: operating-model/config/validation.yaml
+    writes_to:
+      - .flywheel/operating-model/config/validation.yaml
     questions:
       - id: evidence-expectations
         required: true
@@ -58,7 +64,9 @@ sections:
         required: true
         prompt: Which builds, tests, reviews, or other checks are mandatory before changes are accepted?
   - id: flywheel-tool-requirements
-    writes_to: operating-model/config/capabilities.yaml
+    writes_to:
+      - .flywheel/operating-model/config/flywheel-context.yaml
+      - .flywheel/operating-model/config/capabilities.yaml
     questions:
       - id: execution-locations
         required: true
