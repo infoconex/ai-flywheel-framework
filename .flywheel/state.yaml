@@ -8,4 +8,8 @@ active_execution: null
 lifecycle_stage: null
 implementation_available: false
 application_missions_allowed: false
-last_updated_by: framework-installation
+blockers: []
+last_durable_update:
+  at: 2026-07-27T19:41:02Z
+  by: framework-installation
+  reason: Initial operating-model installation and hardening.
