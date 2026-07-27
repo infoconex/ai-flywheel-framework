@@ -1,0 +1,32 @@
+version: 1
+completion:
+  require_acceptance_criteria: true
+  require_evidence_per_criterion: true
+  require_approvals: true
+  require_lifecycle_record: true
+  prohibit_unresolved_blocking_uncertainty: true
+onboarding:
+  require_repository_context: true
+  require_governance_confirmation: true
+  require_validation_confirmation: true
+  require_tool_requirements_before_design: true
+  require_human_approval_before_implementation: true
+readiness:
+  required_state: ready-for-missions
+  required_capabilities:
+    - mission-management
+    - goal-management
+    - execution-recording
+    - lifecycle-enforcement
+    - evidence-capture
+    - completion-validation
+    - classification-recording
+    - knowledge-persistence
+provenance:
+  allowed:
+    - discovered
+    - provided
+    - inferred
+    - defaulted
+    - approved
+  require_approval_for_material_inference: true
