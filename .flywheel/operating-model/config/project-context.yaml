@@ -1,0 +1,32 @@
+schema_version: 1
+project:
+  name: null
+  purpose: null
+  repository_type: null
+technology:
+  languages: []
+  runtimes: []
+  platforms: []
+  build_commands: []
+  test_commands: []
+standards:
+  coding: []
+  architecture: []
+  testing: []
+constraints:
+  dependencies: []
+  security: []
+  compliance: []
+  execution_environment: []
+preferences:
+  implementation_language: null
+  command_interface: null
+  automation_level: null
+provenance:
+  human_confirmed: []
+  repository_observed: []
+  inferred_pending_approval: []
+unknowns:
+  - project purpose
+  - implementation language
+  - required operating capabilities
