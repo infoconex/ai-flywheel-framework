@@ -3,37 +3,39 @@ framework:
   name: AI Flywheel
   mode: manual-bootstrap
   specification: https://github.com/Infoconex/ai-flywheel-spec
-entrypoint: operating-model/guidance/startup.md
+path_base: repository-root
+entrypoint: .flywheel/operating-model/guidance/startup.md
 required_files:
-  - state.yaml
-  - operating-model/guidance/startup.md
-  - operating-model/guidance/authority.md
-  - operating-model/guidance/operator.md
-  - operating-model/guidance/principles.md
-  - operating-model/guidance/lifecycle.md
-  - operating-model/guidance/sop.md
-  - operating-model/guidance/mission-model.md
-  - operating-model/guidance/execution-model.md
-  - operating-model/guidance/evidence.md
-  - operating-model/guidance/decisions.md
-  - operating-model/guidance/failure-handling.md
-  - operating-model/guidance/adaptation.md
-  - operating-model/guidance/persistence.md
-  - operating-model/guidance/readiness.md
-  - operating-model/guidance/classifications.md
-  - operating-model/guidance/tool-usage.md
-  - operating-model/config/repository-context.yaml
-  - operating-model/config/flywheel-context.yaml
-  - operating-model/config/governance.yaml
-  - operating-model/config/capabilities.yaml
-  - operating-model/config/validation.yaml
-  - operating-model/onboarding/process.md
-  - operating-model/onboarding/interview.yaml
-  - operating-model/onboarding/answer-model.yaml
-  - operating-model/schemas/README.md
+  - .flywheel/state.yaml
+  - .flywheel/operating-model/guidance/startup.md
+  - .flywheel/operating-model/guidance/authority.md
+  - .flywheel/operating-model/guidance/operator.md
+  - .flywheel/operating-model/guidance/principles.md
+  - .flywheel/operating-model/guidance/lifecycle.md
+  - .flywheel/operating-model/guidance/sop.md
+  - .flywheel/operating-model/guidance/mission-model.md
+  - .flywheel/operating-model/guidance/execution-model.md
+  - .flywheel/operating-model/guidance/records.md
+  - .flywheel/operating-model/guidance/evidence.md
+  - .flywheel/operating-model/guidance/decisions.md
+  - .flywheel/operating-model/guidance/failure-handling.md
+  - .flywheel/operating-model/guidance/adaptation.md
+  - .flywheel/operating-model/guidance/persistence.md
+  - .flywheel/operating-model/guidance/readiness.md
+  - .flywheel/operating-model/guidance/classifications.md
+  - .flywheel/operating-model/guidance/tool-usage.md
+  - .flywheel/operating-model/config/repository-context.yaml
+  - .flywheel/operating-model/config/flywheel-context.yaml
+  - .flywheel/operating-model/config/governance.yaml
+  - .flywheel/operating-model/config/capabilities.yaml
+  - .flywheel/operating-model/config/validation.yaml
+  - .flywheel/operating-model/onboarding/process.md
+  - .flywheel/operating-model/onboarding/interview.yaml
+  - .flywheel/operating-model/onboarding/answer-model.yaml
+  - .flywheel/operating-model/schemas/README.md
 onboarding:
   mission: establish-ai-flywheel-operations
-  status: ready
+  status: active
 implementation:
   status: not-created
   manifest: null
