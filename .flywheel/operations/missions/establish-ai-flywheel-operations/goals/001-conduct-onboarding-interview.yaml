@@ -1,20 +1,31 @@
 schema_version: 1
 id: 001-conduct-onboarding-interview
-title: Conduct Onboarding Interview
+title: Discover and Onboard Repository Context
 status: active
-objective: Gather human-provided repository context, standards, preferences, constraints, and governance decisions.
+objective: >-
+  Inspect the target repository, identify known facts and material unknowns,
+  ask only the questions needed to complete onboarding, and persist the
+  confirmed operating context required before Flywheel tooling is designed.
 procedure:
-  - Ask one focused onboarding question at a time.
-  - Persist each confirmed answer immediately in the appropriate operating-model file.
-  - Record unanswered items as explicit unknowns rather than guessing.
-  - Mark inferred values as pending approval.
+  - Read the operating model and declarative interview definition.
+  - Inspect repository structure, documentation, configuration, build, test, automation, and constraints before asking questions.
+  - Record direct observations as discovered facts with evidence.
+  - Identify conflicts, unknowns, and material inferences.
+  - Ask one focused unresolved question at a time and explain why it matters.
+  - Persist each accepted answer immediately in the appropriate operating-model file.
+  - Mark material inferences as pending approval and deferred items as explicit unknowns.
+  - Keep target repository technology separate from Flywheel implementation technology.
 acceptance_criteria:
-  - Project purpose and repository goals are recorded.
-  - Language, runtime, platform, build, and test information is recorded when known.
-  - Coding, architecture, testing, dependency, security, and compliance constraints are recorded.
-  - Human approval expectations and desired automation level are recorded.
-  - Every populated value identifies whether it was human-confirmed, observed, or inferred.
+  - Repository purpose, users, scope, and authoritative sources are recorded.
+  - Target application technologies and constraints are recorded as repository context only.
+  - Governance, approval, source-control, validation, and evidence expectations are confirmed.
+  - Required Flywheel execution environments and tool constraints are recorded without prematurely selecting an implementation stack.
+  - Every material value records its provenance as discovered, provided, inferred, defaulted, or approved.
+  - Remaining material unknowns are resolved or explicitly deferred.
 evidence_required:
   - Updated project-context.yaml
   - Updated governance.yaml
-  - List of remaining unknowns
+  - Updated validation.yaml
+  - Updated capabilities.yaml
+  - Repository discovery evidence
+  - List of resolved and deferred unknowns
