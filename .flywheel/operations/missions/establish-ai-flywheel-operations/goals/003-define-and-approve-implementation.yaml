@@ -3,17 +3,29 @@ id: 003-define-and-approve-implementation
 title: Define and Approve Implementation
 status: blocked
 blocked_by:
-  - 002-inspect-and-reconcile-repository
-objective: Select the capabilities and propose the repository-specific implementation for human approval.
+  - 002-reconcile-and-approve-operating-context
+objective: Select capabilities and propose the repository-specific Flywheel implementation for human approval.
 procedure:
   - Classify capabilities as required, selected, deferred, rejected, or repository-defined.
   - Propose language, runtime, architecture, source location, command interface, persistence, logging, testing, and dependency choices.
-  - Explain how the proposal follows repository context and standards.
-  - Obtain required human approval before implementation begins.
+  - Explain how the proposal follows approved repository and Flywheel contexts.
+  - Record alternatives, tradeoffs, risks, and required dependencies.
+  - Obtain explicit human approval before implementation begins.
 acceptance_criteria:
-  - capabilities.yaml records all capability decisions and rationale.
-  - A complete implementation proposal is persisted.
-  - Material decisions have explicit human approval.
+  - id: AC-001
+    statement: Every capability is classified with rationale.
+  - id: AC-002
+    statement: A complete implementation proposal covers language, runtime, architecture, location, interfaces, persistence, logging, testing, dependencies, and validation.
+  - id: AC-003
+    statement: The implementation proposal is independent from target application technology except where approved constraints justify alignment.
+  - id: AC-004
+    statement: Material implementation decisions have explicit recorded human approval.
 evidence_required:
-  - Updated capabilities.yaml
-  - Approved implementation proposal
+  - criterion_id: AC-001
+    artifacts: [.flywheel/operating-model/config/capabilities.yaml]
+  - criterion_id: AC-002
+    artifacts: [implementation proposal]
+  - criterion_id: AC-003
+    artifacts: [.flywheel/operating-model/config/repository-context.yaml, .flywheel/operating-model/config/flywheel-context.yaml, implementation proposal]
+  - criterion_id: AC-004
+    artifacts: [approval records]
