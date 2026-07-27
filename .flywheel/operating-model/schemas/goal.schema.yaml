@@ -1,15 +1,21 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 $id: goal.schema.yaml
 type: object
-required: [schema_version, id, title, status, objective, acceptance_criteria]
+required: [schema_version, id, mission_id, title, status, objective, acceptance_criteria]
 properties:
   schema_version: {type: integer, const: 1}
   id: {type: string, minLength: 1}
+  mission_id: {type: string, minLength: 1}
   title: {type: string, minLength: 1}
   status: {type: string, enum: [proposed, blocked, active, completed, cancelled]}
   objective: {type: string, minLength: 1}
   depends_on:
     type: array
+    uniqueItems: true
+    items: {type: string}
+  blocked_by:
+    type: array
+    uniqueItems: true
     items: {type: string}
   acceptance_criteria:
     type: array
