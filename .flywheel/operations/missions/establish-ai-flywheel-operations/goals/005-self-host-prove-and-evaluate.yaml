@@ -1,5 +1,6 @@
 schema_version: 1
 id: 005-self-host-prove-and-evaluate
+mission_id: establish-ai-flywheel-operations
 title: Self-Host, Prove, and Evaluate
 status: blocked
 blocked_by:
