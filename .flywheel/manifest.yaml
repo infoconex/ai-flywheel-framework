@@ -33,6 +33,10 @@ required_files:
   - .flywheel/operating-model/onboarding/interview.yaml
   - .flywheel/operating-model/onboarding/answer-model.yaml
   - .flywheel/operating-model/schemas/README.md
+  - .flywheel/operating-model/schemas/manifest.schema.yaml
+  - .flywheel/operating-model/schemas/state.schema.yaml
+  - .flywheel/operating-model/schemas/goal.schema.yaml
+  - .flywheel/operating-model/schemas/execution.schema.yaml
 onboarding:
   mission: establish-ai-flywheel-operations
   status: active
