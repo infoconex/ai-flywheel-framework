@@ -1,14 +1,21 @@
 schema_version: 1
-id: replace-with-execution-id
+id: EX-YYYYMMDDTHHMMSSZ-001
 mission_id: replace-with-mission-id
 goal_id: replace-with-goal-id
 status: in-progress
-intended_outcome: null
-acceptance_criteria: []
-started_at: null
+intended_outcome: replace-with-active-goal-objective
+acceptance_criteria:
+  - AC-001
+started_at: "YYYY-MM-DDTHH:MM:SSZ"
 completed_at: null
 lifecycle:
-  execute: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  execute:
+    status: in-progress
+    started_at: "YYYY-MM-DDTHH:MM:SSZ"
+    completed_at: null
+    summary: null
+    refs: []
+    reason: null
   observe: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
   evaluate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
   classify: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
@@ -16,12 +23,17 @@ lifecycle:
   validate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
   persist: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
   reuse: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+actions: []
+observations: []
+classifications: []
+adaptations: []
+blockers: []
 approval_refs: []
 evidence_refs: []
-classification_refs: []
 decision_refs: []
 finding_refs: []
 validation_results: []
+outcome: null
 completion:
   disposition: null
   rationale: null
