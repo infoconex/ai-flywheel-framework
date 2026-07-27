@@ -10,28 +10,39 @@ properties:
     additionalProperties: false
     required: [name, version, mode, specification]
     properties:
-      name: {type: string, minLength: 1}
+      name: {type: string, const: AI Flywheel}
       version: {type: string, pattern: '^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$'}
       mode: {type: string, enum: [manual-bootstrap, tool-managed]}
       specification: {type: string, minLength: 1}
   path_base: {type: string, const: repository-root}
-  entrypoint: {type: string, pattern: '^\.flywheel/'}
+  entrypoint: {const: .flywheel/operating-model/guidance/startup.md}
   locations:
     type: object
     additionalProperties: false
     required: [state, operating_model, missions, records, knowledge, schemas]
     properties:
-      state: {type: string, pattern: '^\.flywheel/'}
-      operating_model: {type: string, pattern: '^\.flywheel/'}
-      missions: {type: string, pattern: '^\.flywheel/'}
-      records: {type: string, pattern: '^\.flywheel/'}
-      knowledge: {type: string, pattern: '^\.flywheel/'}
-      schemas: {type: string, pattern: '^\.flywheel/'}
+      state: {const: .flywheel/state.yaml}
+      operating_model: {const: .flywheel/operating-model}
+      missions: {const: .flywheel/operations/missions}
+      records: {const: .flywheel/operations/records}
+      knowledge: {const: .flywheel/operations/knowledge}
+      schemas: {const: .flywheel/operating-model/schemas}
   required_files:
     type: array
-    minItems: 1
+    minItems: 8
     uniqueItems: true
     items: {type: string, pattern: '^\.flywheel/'}
+    allOf:
+      - contains: {const: .flywheel/state.yaml}
+      - contains: {const: .flywheel/operating-model/guidance/startup.md}
+      - contains: {const: .flywheel/operating-model/schemas/README.md}
+      - contains: {const: .flywheel/operating-model/schemas/manifest.schema.yaml}
+      - contains: {const: .flywheel/operating-model/schemas/state.schema.yaml}
+      - contains: {const: .flywheel/operating-model/schemas/mission.schema.yaml}
+      - contains: {const: .flywheel/operating-model/schemas/goal.schema.yaml}
+      - contains: {const: .flywheel/operating-model/schemas/execution.schema.yaml}
+      - contains: {const: .flywheel/operating-model/schemas/record.schema.yaml}
+      - contains: {const: .flywheel/operating-model/schemas/knowledge.schema.yaml}
   onboarding:
     type: object
     additionalProperties: false
