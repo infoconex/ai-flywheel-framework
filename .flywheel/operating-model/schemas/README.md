@@ -1,26 +1,28 @@
 # Artifact Contracts
 
-These contracts define the minimum required shape and invariants for Flywheel artifacts. Tooling may implement formal JSON Schema, YAML validation, classes, or another mechanism, but it must enforce equivalent rules.
+These contracts define the semantic expectations for Flywheel artifacts. The formal schemas in this directory are authoritative for required shape and allowed values. This document adds cross-artifact invariants that schemas alone may not express.
+
+A narrative requirement and its formal schema MUST agree. A discrepancy is an operating-model defect: startup validation MUST fail, no execution may be created, and no repository inspection may begin until the discrepancy is reconciled.
 
 ## Manifest
 
-Must identify schema version, framework version, required operating files, locations, and compatibility expectations.
+Must identify schema version, framework name and version, required operating files, canonical locations, entrypoint, onboarding state, implementation state, and compatibility expectations.
 
 ## State
 
-Must identify readiness, phase, active mission, active goal, active execution when present, lifecycle stage, blockers, and last durable update. References must resolve to existing artifacts.
+Must identify readiness, phase, status, active mission, active goal, active execution when present, lifecycle stage, application-work permission, blockers, and the last durable update. References must resolve to existing artifacts. A blocked state must contain at least one blocker.
 
 ## Mission
 
-Must contain id, title, objective, status, scope, constraints, success criteria, ordered goals, approval requirements, and completion evidence.
+Must contain schema version, id, title, objective, status, success criteria, and ordered goal references. Constraints and other mission governance fields are included when applicable. Every referenced goal must exist and declare the same mission id.
 
 ## Goal
 
-Must contain id, mission id, title, objective, status, scope, exclusions, acceptance criteria, required evidence, validation, dependencies, approvals, and execution references.
+Must contain schema version, id, mission id, title, objective, status, and acceptance criteria. Required evidence and dependency or blocker references are included when applicable. The goal filename must match its id, and its mission id must match the containing and active mission.
 
 ## Execution
 
-Must contain id, mission id, goal id, status, lifecycle-stage records, actions, observations, classifications, adaptations, validation results, evidence references, decisions, blockers, outcome, and timestamps.
+Must contain id, mission id, goal id, status, lifecycle-stage records, actions, observations, classifications, adaptations, validation results, evidence references, decisions, blockers, outcome, and timestamps as defined by the execution schema and execution guidance.
 
 ## Evidence
 
@@ -41,7 +43,9 @@ Must contain id, status, statement, applicability, limitations, evidence provena
 ## Validation invariants
 
 - Identifiers are stable and unique within their artifact type.
-- References resolve.
+- References resolve and agree in both directions where both artifacts carry the relationship.
+- Manifest locations resolve relative to the repository root.
+- Every required file exists.
 - Terminal states require outcome and evidence.
 - Completion requires acceptance-criterion mapping.
 - Approved status requires approval evidence.
