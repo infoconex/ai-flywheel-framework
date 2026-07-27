@@ -1,18 +1,37 @@
 version: 1
+artifact_validation:
+  require_required_files: true
+  require_schema_validation: true
+  require_reference_validation: true
+  require_unique_active_mission: true
+  require_unique_active_goal: true
+  require_state_execution_consistency: true
+  require_goal_filename_matches_id: true
+  require_acceptance_criterion_ids: true
+  require_evidence_criterion_mapping: true
+  schemas:
+    state: .flywheel/operating-model/schemas/state.schema.yaml
+    goal: .flywheel/operating-model/schemas/goal.schema.yaml
+    execution: .flywheel/operating-model/schemas/execution.schema.yaml
 completion:
   require_acceptance_criteria: true
   require_evidence_per_criterion: true
   require_approvals: true
-  require_lifecycle_record: true
+  require_all_lifecycle_stages_recorded: true
+  allow_not_applicable_stage_with_reason: true
   prohibit_unresolved_blocking_uncertainty: true
 onboarding:
   require_repository_context: true
+  require_flywheel_context: true
   require_governance_confirmation: true
   require_validation_confirmation: true
   require_tool_requirements_before_design: true
   require_human_approval_before_implementation: true
 readiness:
   required_state: ready-for-missions
+  require_artifact_validation: true
+  require_cold_start_test: true
+  require_proving_mission: true
   required_capabilities:
     - mission-management
     - goal-management
@@ -22,6 +41,15 @@ readiness:
     - completion-validation
     - classification-recording
     - knowledge-persistence
+cold_start_test:
+  prompt: Read this repository and operate according to its AI Flywheel.
+  expected:
+    - discovers AGENTS.md and manifest entrypoint
+    - reads all required files
+    - reports phase readiness active work blockers approvals validation and next action
+    - creates or resumes the correct execution before material work
+    - does not invent files or perform application work during onboarding
+    - records all lifecycle stages
 provenance:
   allowed:
     - discovered
@@ -29,4 +57,6 @@ provenance:
     - inferred
     - defaulted
     - approved
+    - deferred
+    - rejected
   require_approval_for_material_inference: true
