@@ -10,9 +10,12 @@ artifact_validation:
   require_acceptance_criterion_ids: true
   require_evidence_criterion_mapping: true
   schemas:
+    manifest: .flywheel/operating-model/schemas/manifest.schema.yaml
     state: .flywheel/operating-model/schemas/state.schema.yaml
+    mission: .flywheel/operating-model/schemas/mission.schema.yaml
     goal: .flywheel/operating-model/schemas/goal.schema.yaml
     execution: .flywheel/operating-model/schemas/execution.schema.yaml
+    record: .flywheel/operating-model/schemas/record.schema.yaml
 completion:
   require_acceptance_criteria: true
   require_evidence_per_criterion: true
