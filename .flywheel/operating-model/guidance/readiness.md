@@ -1,17 +1,10 @@
 # Phase, Status, and Readiness Model
 
-The Flywheel separates lifecycle position, current operability, and permission to begin application missions. These concepts must not be collapsed into one field.
+This document is normative. The Flywheel separates lifecycle position, current operability, and permission to begin application missions. These concepts MUST NOT be collapsed into one field.
 
 ## Phase
 
-Allowed `state.phase` values are:
-
-- `onboarding`: repository context and Flywheel operating capability are being established.
-- `operating`: the Flywheel is executing approved missions.
-- `upgrading`: the operating model or implementation is undergoing a controlled material upgrade.
-- `suspended`: operation has been intentionally paused.
-
-Detailed onboarding progression is represented by the active mission and goal, not by inventing additional phase or readiness values.
+Allowed `state.phase` values are `onboarding`, `operating`, `upgrading`, and `suspended`. Detailed onboarding progression is represented by the active mission and goal, not by inventing additional phase or readiness values.
 
 ## Status
 
@@ -26,40 +19,39 @@ Allowed `state.status` values are:
 
 Allowed `state.readiness` values are:
 
-- `not-ready-for-missions`: application missions are prohibited because onboarding or operational proof is incomplete.
+- `not-ready-for-missions`: application missions are prohibited because onboarding or certification is incomplete.
 - `ready-for-missions`: the repository may accept application missions.
 - `degraded`: the repository was previously ready, but a material operating defect or missing capability prevents reliable operation.
 
-`state.application_missions_allowed` must be false unless readiness is `ready-for-missions`.
+`state.application_missions_allowed` MUST be false unless readiness is `ready-for-missions`.
 
 ## Ready-for-missions gate
 
-All conditions must be satisfied:
+Every condition MUST be satisfied:
 
 - Repository context is sufficient for future mission planning.
 - Flywheel implementation context is approved.
 - Governance and approval boundaries are explicit.
 - Required capabilities are implemented or have an approved manual procedure.
-- Mission, goal, execution, evidence, decision, approval, finding, and knowledge artifacts validate against their contracts.
-- Startup and resume behavior have been tested from a context-free session.
-- A proving mission completed with traceable evidence.
+- Operating artifacts validate against their schemas and invariants.
+- Formal certification defined in `.flywheel/operating-model/guidance/certification.md` passes.
+- A proving mission completes with traceable evidence.
 - Known limitations are recorded and accepted.
-- State, mission, goal, records, and knowledge are internally consistent.
+- State, mission, goal, executions, records, approvals, and knowledge are internally consistent.
 
 ## Readiness transition procedure
 
 A transition to `ready-for-missions` requires:
 
 1. A readiness validation record mapping every gate to evidence.
-2. Successful artifact and reference validation.
-3. Successful context-free cold-start test.
-4. Successful proving mission.
-5. Recorded human approval.
-6. Completion of the onboarding mission and its active goal.
-7. An atomic state update setting `phase: operating`, `readiness: ready-for-missions`, `status: ready`, clearing active onboarding execution and lifecycle stage, and setting `application_missions_allowed: true`.
+2. Successful schema, reference, invariant, lifecycle, evidence, and approval validation.
+3. A passing certification record covering cold start, first execution, resume, recovery, approval boundary, lifecycle completeness, evidence completeness, proving mission, and self-hosting.
+4. Recorded human approval of the certification and known limitations.
+5. Completion of the onboarding mission and its active goal.
+6. An atomic state update setting `phase: operating`, `readiness: ready-for-missions`, `status: ready`, clearing active onboarding execution and lifecycle stage, and setting `application_missions_allowed: true`.
 
-Readiness is not established merely by changing a field.
+Readiness is not established merely by changing a field. A validator MUST reject a readiness transition without the required certification and approval evidence.
 
 ## Degradation
 
-Set readiness to `degraded` when a material failure undermines reliable operation. Existing application work may continue only when governance explicitly permits it and the risk is recorded. Restore readiness only after corrective validation and required approval.
+Set readiness to `degraded` when a material failure undermines reliable operation or invalidates a prior certification assumption. Existing application work may continue only when governance explicitly permits it and the risk is recorded. Restore readiness only after corrective validation, affected certification scenarios are rerun, and required approval is recorded.
