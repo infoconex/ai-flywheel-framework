@@ -1,17 +1,17 @@
 schema_version: 1
-id: EX-YYYYMMDDTHHMMSSZ-001
-mission_id: replace-with-mission-id
-goal_id: replace-with-goal-id
+id: EX-20000101T000000Z-001
+mission_id: example-mission
+ goal_id: example-goal
 status: in-progress
-intended_outcome: replace-with-active-goal-objective
+intended_outcome: Replace with the active goal objective.
 acceptance_criteria:
   - AC-001
-started_at: "YYYY-MM-DDTHH:MM:SSZ"
+started_at: "2000-01-01T00:00:00Z"
 completed_at: null
 lifecycle:
   execute:
     status: in-progress
-    started_at: "YYYY-MM-DDTHH:MM:SSZ"
+    started_at: "2000-01-01T00:00:00Z"
     completed_at: null
     summary: null
     refs: []
