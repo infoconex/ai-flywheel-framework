@@ -1,0 +1,23 @@
+id: replace-with-execution-id
+mission_id: replace-with-mission-id
+goal_id: replace-with-goal-id
+status: in-progress
+started_at: null
+completed_at: null
+lifecycle:
+  execute: []
+  observe: []
+  evaluate: []
+  classify: []
+  adapt: []
+  validate: []
+  persist: []
+  reuse: []
+approvals: []
+evidence: []
+classifications: []
+decisions: []
+validation_results: []
+completion:
+  disposition: null
+  rationale: null
