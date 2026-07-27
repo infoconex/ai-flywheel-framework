@@ -1,0 +1,17 @@
+id: replace-with-goal-id
+title: Replace with goal title
+status: proposed
+mission_id: replace-with-mission-id
+objective: >-
+  Describe the specific outcome this goal must achieve.
+depends_on: []
+scope:
+  includes: []
+  excludes: []
+approval:
+  required_before_start: false
+acceptance_criteria: []
+required_evidence: []
+created_at: null
+started_at: null
+completed_at: null
