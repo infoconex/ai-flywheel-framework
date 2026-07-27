@@ -29,7 +29,7 @@ properties:
       schemas: {const: .flywheel/operating-model/schemas}
   required_files:
     type: array
-    minItems: 8
+    minItems: 11
     uniqueItems: true
     items: {type: string, pattern: '^\.flywheel/'}
     allOf:
@@ -43,6 +43,7 @@ properties:
       - contains: {const: .flywheel/operating-model/schemas/execution.schema.yaml}
       - contains: {const: .flywheel/operating-model/schemas/record.schema.yaml}
       - contains: {const: .flywheel/operating-model/schemas/knowledge.schema.yaml}
+      - contains: {const: .flywheel/operating-model/schemas/startup-failure.schema.yaml}
   onboarding:
     type: object
     additionalProperties: false
