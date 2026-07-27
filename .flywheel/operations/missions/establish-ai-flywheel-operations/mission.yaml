@@ -1,0 +1,25 @@
+schema_version: 1
+id: establish-ai-flywheel-operations
+title: Establish AI Flywheel Operations
+status: active
+objective: >-
+  Onboard the repository, establish its operating model, and design, build,
+  validate, and prove the repository-specific tools required to run future
+  AI Flywheel missions.
+constraints:
+  - Do not prescribe the implementation language or architecture.
+  - Persist onboarding answers and repository findings in the operating model.
+  - Require human approval for material implementation choices.
+  - Begin manually and transition to self-hosting when the tools are capable.
+success_criteria:
+  - Repository context and governance are complete enough to guide implementation.
+  - Required, selected, deferred, and rejected capabilities are recorded.
+  - Repository-specific operating tools are implemented and validated.
+  - A proving mission is successfully operated with the new tools.
+  - Onboarding findings and framework improvements are persisted.
+goals:
+  - 001-conduct-onboarding-interview
+  - 002-inspect-and-reconcile-repository
+  - 003-define-and-approve-implementation
+  - 004-build-and-validate-operating-tools
+  - 005-self-host-prove-and-evaluate
