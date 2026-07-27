@@ -1,5 +1,6 @@
 schema_version: 1
 id: 001-discover-repository-and-gather-context
+mission_id: establish-ai-flywheel-operations
 title: Discover Repository and Gather Context
 status: active
 objective: >-
