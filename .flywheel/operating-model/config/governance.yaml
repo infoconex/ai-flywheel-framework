@@ -1,0 +1,21 @@
+schema_version: 1
+human_authority:
+  required_for:
+    - implementation language and runtime
+    - architecture and source location
+    - dependency additions
+    - scope changes
+    - acceptance of unresolved risk
+    - mission completion
+operator_authority:
+  may:
+    - inspect repository content
+    - ask onboarding questions
+    - populate confirmed answers
+    - propose implementation options
+    - execute approved goals
+  may_not:
+    - silently choose material repository standards
+    - begin implementation before required approval
+    - mark goals complete without evidence
+    - perform work outside an active mission and goal
