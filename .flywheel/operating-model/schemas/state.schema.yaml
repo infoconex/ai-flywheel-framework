@@ -2,7 +2,7 @@ $schema: https://json-schema.org/draft/2020-12/schema
 $id: state.schema.yaml
 type: object
 additionalProperties: false
-required: [schema_version, phase, readiness, status, active_mission, active_goal, active_execution, lifecycle_stage, implementation_available, application_missions_allowed, last_updated_by]
+required: [schema_version, phase, readiness, status, active_mission, active_goal, active_execution, lifecycle_stage, implementation_available, application_missions_allowed, blockers, last_durable_update]
 properties:
   schema_version: {type: integer, const: 1}
   phase: {type: string, enum: [onboarding, operating, upgrading, suspended]}
@@ -14,7 +14,18 @@ properties:
   lifecycle_stage: {type: [string, 'null'], enum: [execute, observe, evaluate, classify, adapt, validate, persist, reuse, null]}
   implementation_available: {type: boolean}
   application_missions_allowed: {type: boolean}
-  last_updated_by: {type: string}
+  blockers:
+    type: array
+    uniqueItems: true
+    items: {type: string, minLength: 1}
+  last_durable_update:
+    type: object
+    additionalProperties: false
+    required: [at, by, reason]
+    properties:
+      at: {type: string, format: date-time}
+      by: {type: string, minLength: 1}
+      reason: {type: string, minLength: 1}
 allOf:
   - if:
       properties: {active_execution: {type: string}}
@@ -24,3 +35,7 @@ allOf:
       properties: {readiness: {const: ready-for-missions}}
     then:
       properties: {application_missions_allowed: {const: true}}
+  - if:
+      properties: {status: {const: blocked}}
+    then:
+      properties: {blockers: {minItems: 1}}
