@@ -1,0 +1,11 @@
+schema_version: 1
+framework:
+  name: AI Flywheel
+  mode: manual-bootstrap
+  specification: https://github.com/Infoconex/ai-flywheel-spec
+onboarding:
+  mission: establish-ai-flywheel-operations
+  status: ready
+implementation:
+  status: not-created
+  manifest: null
