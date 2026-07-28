@@ -39,54 +39,25 @@ properties:
       rationale: {type: [string, 'null']}
 allOf:
   - if: {properties: {status: {const: in-progress}}, required: [status]}
-    then:
-      properties:
-        completed_at: {type: 'null'}
-        outcome: {type: 'null'}
-        lifecycle: {$ref: '#/$defs/lifecycle_active'}
-        completion: {properties: {disposition: {type: 'null'}, rationale: {type: 'null'}}}
+    then: {properties: {completed_at: {type: 'null'}, outcome: {type: 'null'}, lifecycle: {$ref: '#/$defs/lifecycle_active'}, completion: {properties: {disposition: {type: 'null'}, rationale: {type: 'null'}}}}}
   - if: {properties: {status: {const: blocked}}, required: [status]}
-    then:
-      properties:
-        completed_at: {type: 'null'}
-        blockers: {minItems: 1}
-        lifecycle: {$ref: '#/$defs/lifecycle_active'}
-        completion: {properties: {disposition: {type: 'null'}, rationale: {type: 'null'}}}
+    then: {properties: {completed_at: {type: 'null'}, blockers: {minItems: 1}, lifecycle: {$ref: '#/$defs/lifecycle_active'}, completion: {properties: {disposition: {type: 'null'}, rationale: {type: 'null'}}}}}
   - if: {properties: {status: {const: interrupted}}, required: [status]}
-    then:
-      properties:
-        completed_at: {type: 'null'}
-        outcome: {type: string, minLength: 1}
-        lifecycle: {$ref: '#/$defs/lifecycle_active'}
-        completion: {properties: {disposition: {type: 'null'}, rationale: {type: 'null'}}}
+    then: {properties: {completed_at: {type: 'null'}, outcome: {type: string, minLength: 1}, lifecycle: {$ref: '#/$defs/lifecycle_active'}, completion: {properties: {disposition: {type: 'null'}, rationale: {type: 'null'}}}}}
   - if: {properties: {status: {enum: [succeeded, partially-succeeded, failed, abandoned]}}, required: [status]}
-    then:
-      properties:
-        completed_at: {type: string, format: date-time}
-        outcome: {type: string, minLength: 1}
-        lifecycle: {$ref: '#/$defs/lifecycle_terminal'}
-        completion: {properties: {disposition: {type: string}, rationale: {type: string, minLength: 1}}}
+    then: {properties: {completed_at: {type: string, format: date-time}, outcome: {type: string, minLength: 1}, lifecycle: {$ref: '#/$defs/lifecycle_terminal'}, completion: {properties: {disposition: {type: string}, rationale: {type: string, minLength: 1}}}}}
   - if: {properties: {lifecycle: {properties: {observe: {properties: {status: {const: completed}}}}}}}
-    then:
-      properties:
-        observations: {minItems: 1}
-        evidence_refs: {minItems: 1}
-        lifecycle: {properties: {observe: {properties: {refs: {minItems: 1}}}}}
+    then: {properties: {observations: {minItems: 1}, evidence_refs: {minItems: 1}, lifecycle: {properties: {observe: {properties: {refs: {minItems: 1}}}}}}}
   - if: {properties: {lifecycle: {properties: {evaluate: {properties: {status: {const: completed}}}}}}}
-    then:
-      properties:
-        evaluations: {minItems: 1}
-        lifecycle: {properties: {evaluate: {properties: {refs: {minItems: 1}}}}}
+    then: {properties: {evaluations: {minItems: 1}, lifecycle: {properties: {evaluate: {properties: {refs: {minItems: 1}}}}}}}
   - if: {properties: {lifecycle: {properties: {classify: {properties: {status: {const: completed}}}}}}}
-    then:
-      properties:
-        classifications: {minItems: 1}
-        lifecycle: {properties: {classify: {properties: {refs: {minItems: 1}}}}}
+    then: {properties: {classifications: {minItems: 1}, lifecycle: {properties: {classify: {properties: {refs: {minItems: 1}}}}}}}
   - if: {properties: {lifecycle: {properties: {adapt: {properties: {status: {const: completed}}}}}}}
-    then:
-      properties:
-        adaptations: {minItems: 1}
-        lifecycle: {properties: {adapt: {properties: {refs: {minItems: 1}}}}}
+    then: {properties: {adaptations: {minItems: 1}, lifecycle: {properties: {adapt: {properties: {refs: {minItems: 1}}}}}}}
+  - if: {properties: {lifecycle: {properties: {validate: {properties: {status: {const: in-progress}}}}}}}
+    then: {properties: {validation_results: {minItems: 1}, lifecycle: {properties: {validate: {properties: {refs: {minItems: 1}}}}}}}
+  - if: {properties: {lifecycle: {properties: {validate: {properties: {status: {const: completed}}}}}}}
+    then: {properties: {validation_results: {minItems: 1}, lifecycle: {properties: {validate: {properties: {refs: {minItems: 1}}}}}}}
 $defs:
   observation:
     type: object
@@ -138,7 +109,7 @@ $defs:
       related_classification_refs: {type: array, uniqueItems: true, items: {type: string, pattern: '^CLASS-[0-9]{3,}$'}}
       decision_ref: {type: [string, 'null']}
       finding_ref: {type: [string, 'null']}
-      validation_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
+      validation_refs: {type: array, uniqueItems: true, items: {type: string, pattern: '^VAL-[0-9]{3,}$'}}
     allOf:
       - if: {properties: {certainty: {enum: [provisional, disputed]}}, required: [certainty]}
         then: {properties: {uncertainty: {type: string, minLength: 1}}}
@@ -183,43 +154,14 @@ $defs:
         then: {properties: {uncertainty: {type: string, minLength: 1}}}
       - if: {properties: {approval_required: {const: false}}, required: [approval_required]}
         then: {properties: {approval_status: {const: not-required}, approval_refs: {maxItems: 0}}}
-      - if:
-          properties:
-            approval_required: {const: true}
-            disposition: {enum: [proposed, deferred]}
-          required: [approval_required, disposition]
-        then:
-          properties:
-            approval_status: {const: pending}
-            implementation_status: {const: not-started}
-      - if:
-          properties:
-            approval_required: {const: true}
-            disposition: {const: approved}
-          required: [approval_required, disposition]
-        then:
-          properties:
-            approval_status: {const: approved}
-            approval_refs: {minItems: 1}
-            decision_ref: {type: string, minLength: 1}
-      - if:
-          properties:
-            approval_required: {const: true}
-            disposition: {const: rejected}
-          required: [approval_required, disposition]
-        then:
-          properties:
-            approval_status: {const: rejected}
-            approval_refs: {minItems: 1}
-            decision_ref: {type: string, minLength: 1}
+      - if: {properties: {approval_required: {const: true}, disposition: {enum: [proposed, deferred]}}, required: [approval_required, disposition]}
+        then: {properties: {approval_status: {const: pending}, implementation_status: {const: not-started}}}
+      - if: {properties: {approval_required: {const: true}, disposition: {const: approved}}, required: [approval_required, disposition]}
+        then: {properties: {approval_status: {const: approved}, approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}}}
+      - if: {properties: {approval_required: {const: true}, disposition: {const: rejected}}, required: [approval_required, disposition]}
+        then: {properties: {approval_status: {const: rejected}, approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}}}
       - if: {properties: {scope_disposition: {const: scope-expansion-approved}}, required: [scope_disposition]}
-        then:
-          properties:
-            approval_required: {const: true}
-            approval_status: {const: approved}
-            approval_refs: {minItems: 1}
-            decision_ref: {type: string, minLength: 1}
-            disposition: {const: approved}
+        then: {properties: {approval_required: {const: true}, approval_status: {const: approved}, approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}, disposition: {const: approved}}}
       - if: {properties: {scope_disposition: {const: new-goal-required}}, required: [scope_disposition]}
         then: {properties: {disposition: {enum: [proposed, deferred]}, implementation_status: {const: not-started}}}
       - if: {properties: {disposition: {enum: [proposed, deferred]}}, required: [disposition]}
@@ -228,6 +170,47 @@ $defs:
         then: {properties: {implementation_status: {const: not-applicable}, validation_status: {const: not-applicable}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
       - if: {properties: {implementation_status: {enum: [in-progress, completed]}}, required: [implementation_status]}
         then: {properties: {disposition: {const: approved}}}
+  validation_result:
+    type: object
+    additionalProperties: false
+    required: [id, phase, domain, status, severity, adaptation_refs, criterion_refs, rule_refs, method, scope, expected_outcome, actual_outcome, expected_evidence, evidence_refs, eligible, exclusion_reason, executed_at, finding_ref, recovery_action, supersedes_ref]
+    properties:
+      id: {type: string, pattern: '^VAL-[0-9]{3,}$'}
+      phase: {type: string, enum: [planned, executed]}
+      domain: {type: string, enum: [operating, repository, implementation]}
+      status: {type: string, enum: [pending, passed, failed, not-applicable]}
+      severity: {type: string, enum: [info, warning, error, blocker]}
+      adaptation_refs: {type: array, minItems: 1, uniqueItems: true, items: {type: string, pattern: '^ADAPT-[0-9]{3,}$'}}
+      criterion_refs: {type: array, uniqueItems: true, items: {type: string, pattern: '^AC-[0-9]{3,}$'}}
+      rule_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
+      method: {type: string, minLength: 1}
+      scope: {type: array, minItems: 1, uniqueItems: true, items: {type: string, minLength: 1}}
+      expected_outcome: {type: string, minLength: 1}
+      actual_outcome: {type: [string, 'null']}
+      expected_evidence: {type: array, minItems: 1, uniqueItems: true, items: {type: string, minLength: 1}}
+      evidence_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
+      eligible: {type: boolean}
+      exclusion_reason: {type: [string, 'null']}
+      executed_at: {type: [string, 'null'], format: date-time}
+      finding_ref: {type: [string, 'null']}
+      recovery_action: {type: [string, 'null']}
+      supersedes_ref: {type: [string, 'null'], pattern: '^VAL-[0-9]{3,}$'}
+    anyOf:
+      - properties: {criterion_refs: {minItems: 1}}
+      - properties: {rule_refs: {minItems: 1}}
+    allOf:
+      - if: {properties: {phase: {const: planned}}, required: [phase]}
+        then: {properties: {status: {const: pending}, actual_outcome: {type: 'null'}, evidence_refs: {maxItems: 0}, executed_at: {type: 'null'}, finding_ref: {type: 'null'}, recovery_action: {type: 'null'}}}
+      - if: {properties: {phase: {const: executed}}, required: [phase]}
+        then: {properties: {executed_at: {type: string, format: date-time}, actual_outcome: {type: string, minLength: 1}}}
+      - if: {properties: {eligible: {const: false}}, required: [eligible]}
+        then: {properties: {status: {const: not-applicable}, exclusion_reason: {type: string, minLength: 1}, phase: {const: executed}}}
+      - if: {properties: {eligible: {const: true}}, required: [eligible]}
+        then: {properties: {exclusion_reason: {type: 'null'}}}
+      - if: {properties: {status: {const: passed}}, required: [status]}
+        then: {properties: {phase: {const: executed}, eligible: {const: true}, evidence_refs: {minItems: 1}, finding_ref: {type: 'null'}, recovery_action: {type: 'null'}}}
+      - if: {properties: {status: {const: failed}}, required: [status]}
+        then: {properties: {phase: {const: executed}, eligible: {const: true}, evidence_refs: {minItems: 1}, finding_ref: {type: string, minLength: 1}, recovery_action: {type: string, minLength: 1}}}
   lifecycle:
     type: object
     additionalProperties: false
@@ -243,22 +226,14 @@ $defs:
       reuse: {$ref: '#/$defs/stage'}
   lifecycle_active:
     oneOf:
-      - {$ref: '#/$defs/active_execute'}
-      - {$ref: '#/$defs/active_observe'}
-      - {$ref: '#/$defs/active_evaluate'}
-      - {$ref: '#/$defs/active_classify'}
-      - {$ref: '#/$defs/active_adapt'}
-      - {$ref: '#/$defs/active_validate'}
-      - {$ref: '#/$defs/active_persist'}
-      - {$ref: '#/$defs/active_reuse'}
-  active_execute: {$ref: '#/$defs/stage_execute'}
-  active_observe: {$ref: '#/$defs/stage_observe'}
-  active_evaluate: {$ref: '#/$defs/stage_evaluate'}
-  active_classify: {$ref: '#/$defs/stage_classify'}
-  active_adapt: {$ref: '#/$defs/stage_adapt'}
-  active_validate: {$ref: '#/$defs/stage_validate'}
-  active_persist: {$ref: '#/$defs/stage_persist'}
-  active_reuse: {$ref: '#/$defs/stage_reuse'}
+      - {$ref: '#/$defs/stage_execute'}
+      - {$ref: '#/$defs/stage_observe'}
+      - {$ref: '#/$defs/stage_evaluate'}
+      - {$ref: '#/$defs/stage_classify'}
+      - {$ref: '#/$defs/stage_adapt'}
+      - {$ref: '#/$defs/stage_validate'}
+      - {$ref: '#/$defs/stage_persist'}
+      - {$ref: '#/$defs/stage_reuse'}
   stage_execute:
     allOf:
       - {$ref: '#/$defs/lifecycle'}
@@ -315,16 +290,3 @@ $defs:
         then: {properties: {started_at: {type: string, format: date-time}, completed_at: {type: string, format: date-time}, summary: {type: string, minLength: 1}}}
       - if: {properties: {status: {const: not-applicable}}, required: [status]}
         then: {properties: {started_at: {type: 'null'}, completed_at: {type: 'null'}, reason: {type: string, minLength: 1}}}
-  validation_result:
-    type: object
-    additionalProperties: false
-    required: [rule_id, domain, status, severity, message, artifact_path, evidence_refs, recovery_action]
-    properties:
-      rule_id: {type: string, pattern: '^[A-Z]+-[A-Z0-9-]+$'}
-      domain: {type: string, enum: [operating, repository, implementation]}
-      status: {type: string, enum: [passed, failed, pending, not-applicable]}
-      severity: {type: string, enum: [info, warning, error, blocker]}
-      message: {type: string, minLength: 1}
-      artifact_path: {type: [string, 'null']}
-      evidence_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
-      recovery_action: {type: [string, 'null']}
