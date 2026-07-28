@@ -32,7 +32,9 @@ Persistence plan identifiers MUST use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. The counte
 
 ## Record mutability
 
-Evidence, decisions, findings, approvals, and persistence plans are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
+Evidence, decisions, findings, and approvals are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
+
+A persistence plan is created before Persist activation. It may be updated only through compare-and-swap while `status` is `planned` or `applying`. A plan with status `applied`, `failed`, `rolled-back`, or `blocked` is terminal and immutable.
 
 Execution records are mutable only while resumable and MUST use compare-and-swap updates. Terminal execution records are immutable.
 
