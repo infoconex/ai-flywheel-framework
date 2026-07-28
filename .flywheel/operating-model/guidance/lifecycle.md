@@ -36,7 +36,13 @@ Classify may complete only when at least one structured classification exists, t
 
 ## 5. Adapt
 
-Change the application, Flywheel tools, configuration, guidance, plan, or scope when justified. Scope expansion requires approval or a new goal. When no adaptation is warranted, record the stage as `not-applicable` and explain why.
+Define and apply justified changes to the plan, implementation, tooling, configuration, guidance, or operating model.
+
+Every material adaptation must use the structured adaptation model and remain traceable to classifications, evaluations, observations, and evidence. Affected scope, intended effect, alternatives, certainty, approval requirements, decision references, disposition, and downstream lifecycle statuses must be explicit.
+
+At Adapt activation, proposed work must not claim implementation, validation, persistence, or reuse outcomes. Scope expansion requires approval and a decision, while work requiring a new goal must remain not started.
+
+Adapt may complete only when at least one structured adaptation exists, the Adapt stage references its outputs, and all provenance, scope, certainty, approval, decision, and lifecycle-boundary checks pass. When no adaptation is warranted, mark the stage `not-applicable` with a concrete reason.
 
 ## 6. Validate
 
