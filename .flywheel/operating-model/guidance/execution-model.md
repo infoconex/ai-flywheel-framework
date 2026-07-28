@@ -106,7 +106,59 @@ Each material evaluation MUST use the structured evaluation model in `execution.
 - Any applicable acceptance-criterion or rule references.
 - Limitations and rationale.
 
+Evaluate MUST NOT be completed unless at least one structured evaluation exists, the Evaluate stage contains at least one reference, and every evaluation reference resolves to existing observations and evidence. If no material evaluation exists, the stage MUST be `not-applicable` with a concrete reason.
+
 Classifications, recommendations, adaptations, persist decisions, and reuse decisions MUST NOT be asserted as evaluation outputs before their lifecycle stages begin.
+
+## Classification contract
+
+Every material classification MUST use the structured classification model in `execution.schema.yaml` and the semantic rules in `classifications.md`.
+
+Each classification MUST have a unique stable identifier, a permitted type, evaluation and evidence provenance, rationale, certainty, uncertainty disposition, relationship references, and any type-specific record or validation references.
+
+Classify MUST NOT be completed unless at least one structured classification exists, the Classify stage contains at least one reference, all references resolve, and all classification semantic rules pass. If no material outcome requires classification, the stage MUST be `not-applicable` with a concrete reason.
+
+## Durable lifecycle-transition sequence
+
+Every non-initial lifecycle transition that changes both an existing execution artifact and `.flywheel/state.yaml` MUST use this sequence:
+
+1. Resolve the stable operator identity and capture one whole-second UTC transition instant.
+2. Read and retain the current execution blob SHA and complete execution content.
+3. Read and retain the current state blob SHA and complete state content.
+4. Verify state and execution currently agree on mission, goal, execution ID, status, and sole in-progress lifecycle stage.
+5. Construct the complete proposed execution and state artifacts in memory using the same transition instant.
+6. Validate both proposed artifacts, all cross-artifact references, lifecycle ordering, timestamps, semantic rules, and state-execution invariants before writing either artifact.
+7. Re-read both artifacts and verify both retained SHAs are unchanged. If either changed, write nothing and stop with a stale-transition result.
+8. Update the execution first using compare-and-swap against the retained execution SHA.
+9. Re-read state and verify its SHA still equals the retained state SHA.
+10. Update state using compare-and-swap against the retained state SHA.
+11. Re-read both artifacts and verify the durable pair exactly matches the validated proposed transition.
+
+Both artifact updates MUST use compare-and-swap. A force update is prohibited.
+
+### Partial-transition recovery
+
+If the execution update succeeds but the state update does not:
+
+1. Do not retry the state update against a new SHA and do not overwrite concurrent state changes.
+2. Re-read the execution and verify its SHA equals the SHA returned by the successful execution update.
+3. Attempt to restore the retained pre-transition execution content using compare-and-swap against that post-update execution SHA.
+4. Persist a finding record describing the attempted transition, retained SHAs, successful write, failed write, rollback result, current artifact SHAs, and required human recovery.
+5. If rollback succeeds, verify state and execution again match the retained pre-transition pair and stop with the transition not applied.
+6. If rollback fails, mark the condition as a blocker in the finding, perform no further lifecycle work, and require human reconciliation before resume.
+
+Rollback MUST restore only the exact retained pre-transition execution content. Rollback of state is prohibited because the failed state update did not establish ownership of the current state revision.
+
+The operator MUST NOT report a lifecycle transition as durable until the final pair verification succeeds.
+
+Required semantic rule identifiers:
+
+- `TRANSITION-CAS-001`: Both existing artifacts use retained-SHA compare-and-swap.
+- `TRANSITION-PRECHECK-001`: Both retained SHAs are rechecked before the first write.
+- `TRANSITION-ORDER-001`: Execution is updated before state.
+- `TRANSITION-PAIR-001`: Final state and execution must equal the validated proposed pair.
+- `TRANSITION-ROLLBACK-001`: A state-update failure after execution success triggers exact-content execution rollback.
+- `TRANSITION-PARTIAL-001`: Every partial transition produces a durable finding and blocks continuation when consistency cannot be restored.
 
 ## Lifecycle and timestamp invariants
 
