@@ -6,11 +6,26 @@ Persistence makes execution state, records, confirmed context, and selected lear
 
 ## Persist activation
 
-Persist MUST NOT begin until Validate is `completed` or justified as `not-applicable`, no required validation remains pending, every failed required validation has a finding, recovery action, and authorized disposition, and adaptation validation statuses agree with validation results.
+Persist MUST NOT begin until Validate is `completed` or justified as `not-applicable`, no required validation remains pending, every failed required validation has a finding, recovery action, and a valid linked failed-validation disposition, and adaptation validation statuses agree with validation results.
+
+A failed required validation permits Persist only when the latest accepted non-superseded linked disposition is `accepted-risk` or `waived`, has `permits_persistence: true`, and satisfies every rule in `validation.md`. `retry-required` and `adaptation-required` always block Persist.
 
 Before Persist becomes `in-progress`, the operator MUST construct, validate, and create one structured persistence plan using `persistence-plan.schema.yaml`. The plan MUST be referenced by the Persist stage.
 
 The persistence plan is the transaction controller. It MUST NOT include itself in `targets` or `write_order`, and no target digest is computed for the plan itself. This exclusion is mandatory and prevents self-referential digest construction.
+
+## Failed-validation authorization precheck
+
+Before constructing the persistence plan, the operator MUST evaluate every failed required validation:
+
+1. Resolve the validation's finding and recovery action.
+2. Resolve exactly one governing accepted non-superseded decision whose `decision.validation_disposition.validation_ref` equals the validation ID.
+3. Verify the decision's `finding_ref`, scope, recovery action, execution, goal, and mission agree with the failed validation and finding.
+4. Verify the decision appears in execution `decision_refs`.
+5. When approval is required, resolve every approval, verify approval of the same validation and scope, and verify each appears in execution `approval_refs`.
+6. Reject Persist when the disposition is missing, ambiguous, stale, superseded, scope-mismatched, unapproved, or uses `permits_persistence: false`.
+
+The persistence target set MUST include every governing failed-validation decision and required approval that is new or changed during the execution.
 
 ## Persistence-plan lifecycle
 
@@ -32,6 +47,7 @@ Plan creation and plan-status updates are mandatory transaction-control operatio
 The persistence target set MUST be derived from the current execution and include every durable artifact that is new or changed because of the execution:
 
 - Evidence, decisions, findings, and approvals referenced by the execution.
+- Every governing decision and approval for a failed-validation disposition.
 - The active execution record.
 - Goal, mission, state, repository context, or Flywheel context when their durable values change.
 - Knowledge only when promotion requirements are satisfied.
@@ -82,14 +98,15 @@ Persistence-plan creation occurs before this governed write order. Persistence-p
 Before the first governed target write, the operator MUST:
 
 1. Resolve one stable operator identity and one whole-second UTC transaction instant.
-2. Construct the complete proposed governed durable set in memory.
-3. Validate every proposed artifact against its schema and semantic rules.
-4. Validate all paths, identities, target dependencies, references, timestamps, and lifecycle invariants.
-5. Retain the complete content and blob SHA of every update target.
-6. Confirm path absence for every create target.
-7. Create and verify the persistence plan, then move it to `applying` using compare-and-swap.
-8. Re-read every governed target precondition immediately before the first governed write.
-9. Reject the transaction without governed writes when any precondition is stale or any target is missing from the plan.
+2. Complete the failed-validation authorization precheck.
+3. Construct the complete proposed governed durable set in memory.
+4. Validate every proposed artifact against its schema and semantic rules.
+5. Validate all paths, identities, target dependencies, references, timestamps, and lifecycle invariants.
+6. Retain the complete content and blob SHA of every update target.
+7. Confirm path absence for every create target.
+8. Create and verify the persistence plan, then move it to `applying` using compare-and-swap.
+9. Re-read every governed target precondition immediately before the first governed write.
+10. Reject the transaction without governed writes when any precondition is stale or any target is missing from the plan.
 
 ## Application and verification
 
@@ -100,6 +117,7 @@ After all governed writes, re-read the entire target set and verify:
 - Every create target exists exactly once at the planned path.
 - Every update target equals the validated proposed content.
 - Every reference resolves.
+- Every failed-validation disposition still resolves and authorizes the exact failed validation and scope.
 - State and execution agree on mission, goal, execution, status, and sole active stage.
 - No unplanned artifact was changed.
 
@@ -131,6 +149,7 @@ If persistence-plan creation or the transition from `planned` to `applying` fail
 - `PERSIST-PLAN-SELF-001`: The persistence plan MUST NOT appear in its own targets or write order and has no self-digest.
 - `PERSIST-PLAN-LIFECYCLE-001`: The plan is created before governed writes, CAS-updated while active, and immutable when terminal.
 - `PERSIST-DIGEST-001`: Governed target digests use SHA-256 over exact normalized UTF-8 bytes.
+- `PERSIST-VALIDATION-DISPOSITION-001`: Every failed required validation has exactly one governing accepted non-superseded linked disposition; only `accepted-risk` or `waived` permits persistence.
 - `PERSIST-TARGET-001`: Every new or changed durable artifact is represented exactly once in the governed target set.
 - `PERSIST-LOCATION-001`: Every target uses its canonical path and identity rules.
 - `PERSIST-MUTABILITY-001`: Create-only history is never overwritten; mutable artifacts use compare-and-swap.
@@ -144,7 +163,7 @@ If persistence-plan creation or the transition from `planned` to `applying` fail
 
 ## Persist completion
 
-Persist may complete only when the persistence plan is terminal with `status: applied`, final whole-set verification passed, all required references resolve, the Persist stage has summary and timestamps, and no persistence blocker remains.
+Persist may complete only when the persistence plan is terminal with `status: applied`, final whole-set verification passed, all required references and failed-validation authorizations resolve, the Persist stage has summary and timestamps, and no persistence blocker remains.
 
 ## Records versus knowledge
 
