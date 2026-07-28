@@ -34,7 +34,7 @@ Persistence plan identifiers MUST use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. The counte
 
 Evidence, decisions, findings, and approvals are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
 
-A persistence plan is created before Persist activation. It may be updated only through compare-and-swap while `status` is `planned` or `applying`. A plan with status `applied`, `failed`, `rolled-back`, or `blocked` is terminal and immutable.
+A persistence plan is created once before its governed writes, may be updated only through compare-and-swap while `planned` or `applying`, and becomes immutable when terminal. The plan is the transaction controller and MUST NOT enumerate itself as a persistence target or write-order item.
 
 Execution records are mutable only while resumable and MUST use compare-and-swap updates. Terminal execution records are immutable.
 
@@ -54,7 +54,9 @@ Read records by their `created_at` value, oldest first. File names are a seconda
 
 A durable artifact MUST NOT reference a record that is absent from its canonical location. Supporting records MUST be created and verified before an execution, goal, mission, context, or state artifact that references them is updated.
 
-A persistence plan MUST enumerate every record creation and every mutable-artifact update performed by its transaction. Unplanned writes are prohibited.
+A persistence plan MUST enumerate every governed record creation and every governed mutable-artifact update performed by its transaction. Plan creation and plan-status updates are mandatory control operations but are excluded from the plan's `targets` and `write_order`.
+
+Unplanned governed writes are prohibited.
 
 ## Durability
 
