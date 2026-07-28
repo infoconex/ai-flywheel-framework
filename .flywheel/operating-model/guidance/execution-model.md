@@ -118,6 +118,18 @@ Each classification MUST have a unique stable identifier, a permitted type, eval
 
 Classify MUST NOT be completed unless at least one structured classification exists, the Classify stage contains at least one reference, all references resolve, and all classification semantic rules pass. If no material outcome requires classification, the stage MUST be `not-applicable` with a concrete reason.
 
+## Adaptation contract
+
+Every material adaptation MUST use the structured adaptation model in `execution.schema.yaml` and the semantic rules in `adaptation.md`.
+
+Each adaptation MUST have a unique stable identifier and MUST remain traceable to classifications, evaluations, observations, and evidence. It MUST explicitly record affected scope, rationale, intended effect, alternatives, certainty, uncertainty, scope disposition, approval and decision requirements, disposition, and downstream lifecycle statuses.
+
+Adapt MUST NOT be completed unless at least one structured adaptation exists, the Adapt stage contains at least one reference, all references resolve, and all adaptation semantic rules pass. If no adaptation is warranted, the stage MUST be `not-applicable` with a concrete reason.
+
+At Adapt activation, an adaptation MUST NOT claim implementation, validation, persistence, or reuse outcomes. Material or scope-expanding adaptations MUST NOT be approved without required decision and approval records.
+
+Required adaptation semantic rule identifiers are defined in `adaptation.md` and MUST be enforced even when individual YAML documents satisfy schema validation.
+
 ## Durable lifecycle-transition sequence
 
 Every non-initial lifecycle transition that changes both an existing execution artifact and `.flywheel/state.yaml` MUST use this sequence:
