@@ -41,7 +41,7 @@ properties:
   decision:
     type: [object, 'null']
     additionalProperties: false
-    required: [decision, rationale, authority, decided_at, alternatives_considered]
+    required: [decision, rationale, authority, decided_at, alternatives_considered, validation_disposition]
     properties:
       decision: {type: string, minLength: 1}
       rationale: {type: string, minLength: 1}
@@ -50,6 +50,10 @@ properties:
       alternatives_considered:
         type: array
         items: {type: string, minLength: 1}
+      validation_disposition:
+        oneOf:
+          - type: 'null'
+          - $ref: '#/$defs/validation_disposition'
   finding:
     type: [object, 'null']
     additionalProperties: false
@@ -112,3 +116,26 @@ allOf:
         decision: {type: 'null'}
         finding: {type: 'null'}
         approval: {type: object}
+$defs:
+  validation_disposition:
+    type: object
+    additionalProperties: false
+    required: [validation_ref, finding_ref, status, permits_persistence, scope, recovery_action, approval_required, approval_refs]
+    properties:
+      validation_ref: {type: string, pattern: '^VAL-[0-9]{3,}$'}
+      finding_ref: {type: string, minLength: 1}
+      status: {type: string, enum: [retry-required, adaptation-required, accepted-risk, waived]}
+      permits_persistence: {type: boolean}
+      scope: {type: array, minItems: 1, uniqueItems: true, items: {type: string, minLength: 1}}
+      recovery_action: {type: string, minLength: 1}
+      approval_required: {type: boolean}
+      approval_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
+    allOf:
+      - if: {properties: {status: {enum: [retry-required, adaptation-required]}}, required: [status]}
+        then: {properties: {permits_persistence: {const: false}}}
+      - if: {properties: {status: {enum: [accepted-risk, waived]}}, required: [status]}
+        then: {properties: {permits_persistence: {const: true}}}
+      - if: {properties: {approval_required: {const: false}}, required: [approval_required]}
+        then: {properties: {approval_refs: {maxItems: 0}}}
+      - if: {properties: {approval_required: {const: true}}, required: [approval_required]}
+        then: {properties: {approval_refs: {minItems: 1}}}
