@@ -8,7 +8,24 @@ Persistence makes execution state, records, confirmed context, and selected lear
 
 Persist MUST NOT begin until Validate is `completed` or justified as `not-applicable`, no required validation remains pending, every failed required validation has a finding, recovery action, and authorized disposition, and adaptation validation statuses agree with validation results.
 
-Before Persist becomes `in-progress`, the operator MUST construct and validate one structured persistence plan using `persistence-plan.schema.yaml`. The plan MUST be referenced by the Persist stage.
+Before Persist becomes `in-progress`, the operator MUST construct, validate, and create one structured persistence plan using `persistence-plan.schema.yaml`. The plan MUST be referenced by the Persist stage.
+
+The persistence plan is the transaction controller. It MUST NOT include itself in `targets` or `write_order`, and no target digest is computed for the plan itself. This exclusion is mandatory and prevents self-referential digest construction.
+
+## Persistence-plan lifecycle
+
+The plan lifecycle is separate from its governed target set:
+
+1. Construct the complete plan in memory with `status: planned`, all governed targets, their digests, and the exact write order.
+2. Validate the plan and every governed proposed artifact.
+3. Create the plan at its canonical path using create-only semantics and the deterministic identity collision rule.
+4. Re-read the plan and retain its blob SHA.
+5. Before the first governed write, update the plan through compare-and-swap to `status: applying`.
+6. Apply and verify governed targets in the recorded order.
+7. After whole-set verification, update the plan through compare-and-swap to terminal status `applied`, `failed`, `rolled-back`, or `blocked` with final verification and recovery state.
+8. A terminal plan is immutable.
+
+Plan creation and plan-status updates are mandatory transaction-control operations, but they are not governed targets and do not appear in `targets` or `write_order`.
 
 ## Complete target-set derivation
 
@@ -18,16 +35,23 @@ The persistence target set MUST be derived from the current execution and includ
 - The active execution record.
 - Goal, mission, state, repository context, or Flywheel context when their durable values change.
 - Knowledge only when promotion requirements are satisfied.
-- The persistence plan itself.
 
 A referenced artifact MUST NOT be omitted. An unchanged artifact MUST NOT be added merely to enlarge the transaction. Every target MUST have one canonical path, one operation, one mutability rule, one precondition, one proposed-content digest, and one recovery action.
+
+The persistence plan itself MUST NOT appear in the target set.
+
+## Digest calculation
+
+For every governed target, `proposed_content_digest` MUST be calculated from the exact UTF-8 bytes that will be written to that target after canonical line-ending normalization to LF and with no byte-order mark. The digest algorithm MUST be SHA-256 encoded as lowercase hexadecimal.
+
+The persistence plan has no `proposed_content_digest` field for itself. Plan integrity is enforced by create-only creation, retained-SHA compare-and-swap updates while active, and exact re-read verification after each plan write.
 
 ## Canonical mutation semantics
 
 - Evidence, decisions, findings, and approvals are create-only records. Existing records MUST NOT be overwritten.
-- A persistence plan is created before Persist activation, may be updated only through compare-and-swap while its status is `planned` or `applying`, and becomes immutable when `applied`, `failed`, `rolled-back`, or `blocked`.
 - Execution, goal, mission, state, and context artifacts use compare-and-swap updates against retained blob SHAs.
 - Knowledge is create-only for a new identity. Revisions use a new identity and `supersedes` linkage; existing knowledge MUST NOT be silently overwritten.
+- Persistence plans are created once, may be updated only through compare-and-swap while `planned` or `applying`, and become immutable when terminal.
 - Create operations require confirmed path absence immediately before creation.
 - Update operations require retained complete content and retained blob SHA.
 - Identifier or path collision requires selecting the next deterministic identity when the identity contract permits it; otherwise the transaction fails before writing.
@@ -46,43 +70,46 @@ Targets MUST be topologically ordered by their declared dependencies and then by
 8. Mission.
 9. Execution.
 10. State.
-11. Persistence plan finalization.
 
 Within one type, order by target ID ascending. A target MUST NOT be written before every dependency target is durable and verified.
 
 State is the final operational pointer and MUST be written after every artifact it references, including execution. The durable execution/state pair rules in `execution-model.md` remain mandatory within this larger transaction.
 
+Persistence-plan creation occurs before this governed write order. Persistence-plan terminal finalization occurs only after whole-set verification.
+
 ## Pre-write validation
 
-Before the first write, the operator MUST:
+Before the first governed target write, the operator MUST:
 
 1. Resolve one stable operator identity and one whole-second UTC transaction instant.
-2. Construct the complete proposed durable set in memory.
+2. Construct the complete proposed governed durable set in memory.
 3. Validate every proposed artifact against its schema and semantic rules.
 4. Validate all paths, identities, target dependencies, references, timestamps, and lifecycle invariants.
 5. Retain the complete content and blob SHA of every update target.
 6. Confirm path absence for every create target.
-7. Re-read every target precondition immediately before the first write.
-8. Reject the transaction without writing when any precondition is stale or any target is missing from the plan.
+7. Create and verify the persistence plan, then move it to `applying` using compare-and-swap.
+8. Re-read every governed target precondition immediately before the first governed write.
+9. Reject the transaction without governed writes when any precondition is stale or any target is missing from the plan.
 
 ## Application and verification
 
-Apply targets in the exact validated write order. After each write, re-read the artifact and verify its content digest equals the proposed digest before proceeding.
+Apply governed targets in the exact validated write order. After each write, re-read the artifact and verify its SHA-256 digest equals the proposed digest before proceeding.
 
-After all writes, re-read the entire target set and verify:
+After all governed writes, re-read the entire target set and verify:
 
 - Every create target exists exactly once at the planned path.
 - Every update target equals the validated proposed content.
 - Every reference resolves.
 - State and execution agree on mission, goal, execution, status, and sole active stage.
 - No unplanned artifact was changed.
-- The persistence plan records `status: applied` and final verification `result: passed`.
 
-Persist MUST NOT be reported durable or completed until whole-set verification passes.
+Only after those checks pass may the operator CAS-update the persistence plan to `status: applied` with final verification `result: passed`.
+
+Persist MUST NOT be reported durable or completed until the plan finalization is re-read and verified.
 
 ## Partial-persistence recovery
 
-When any write or verification fails:
+When any governed write or verification fails:
 
 1. Stop forward writes immediately.
 2. Preserve the failing result and current artifact revisions.
@@ -91,20 +118,25 @@ When any write or verification fails:
 5. When safe deletion is not possible, create a compensating finding that identifies the orphaned record and prohibits its use.
 6. Re-read the complete affected set and verify restoration.
 7. Persist a finding containing the plan ID, target IDs, preconditions, successful writes, failed write, rollback or compensation results, current revisions, and required recovery.
-8. If restoration succeeds, mark the plan `rolled-back` and leave the lifecycle transition unapplied.
-9. If restoration cannot be proven, mark the plan `blocked`, add a blocker to state through an authorized recovery transition, and require human reconciliation.
+8. If restoration succeeds, CAS-update the plan to `rolled-back` and leave the lifecycle transition unapplied.
+9. If restoration cannot be proven, CAS-update the plan to `blocked`, add a blocker to state through an authorized recovery transition, and require human reconciliation.
 
 A rollback MUST NOT overwrite concurrent changes. Failure to restore one target blocks further lifecycle work.
+
+If persistence-plan creation or the transition from `planned` to `applying` fails, no governed write may begin. If terminal plan finalization fails after governed whole-set verification, the governed artifacts remain durable, the condition MUST be recorded as a blocking finding, and human reconciliation is required before Persist can complete.
 
 ## Required semantic rules
 
 - `PERSIST-PLAN-001`: Persist activation requires a schema-valid complete persistence plan.
-- `PERSIST-TARGET-001`: Every new or changed durable artifact is represented exactly once in the target set.
+- `PERSIST-PLAN-SELF-001`: The persistence plan MUST NOT appear in its own targets or write order and has no self-digest.
+- `PERSIST-PLAN-LIFECYCLE-001`: The plan is created before governed writes, CAS-updated while active, and immutable when terminal.
+- `PERSIST-DIGEST-001`: Governed target digests use SHA-256 over exact normalized UTF-8 bytes.
+- `PERSIST-TARGET-001`: Every new or changed durable artifact is represented exactly once in the governed target set.
 - `PERSIST-LOCATION-001`: Every target uses its canonical path and identity rules.
-- `PERSIST-MUTABILITY-001`: Create-only history is never overwritten; mutable artifacts, including active persistence plans, use compare-and-swap.
+- `PERSIST-MUTABILITY-001`: Create-only history is never overwritten; mutable artifacts use compare-and-swap.
 - `PERSIST-ORDER-001`: Targets follow dependency order and canonical type precedence; state is the final operational pointer.
-- `PERSIST-PRECHECK-001`: Every create absence and update SHA is rechecked before the first write.
-- `PERSIST-VERIFY-001`: Each write and the final whole set are re-read and exactly verified.
+- `PERSIST-PRECHECK-001`: Every create absence and update SHA is rechecked before the first governed write.
+- `PERSIST-VERIFY-001`: Each governed write and the final whole set are re-read and exactly verified.
 - `PERSIST-ROLLBACK-001`: Partial persistence triggers reverse-order exact rollback or explicit compensation.
 - `PERSIST-PARTIAL-001`: Unrecoverable partial persistence creates a durable finding, blocks continuation, and requires human reconciliation.
 - `PERSIST-HISTORY-001`: Prior execution, validation, evidence, decision, finding, approval, and knowledge history is preserved.
@@ -112,7 +144,7 @@ A rollback MUST NOT overwrite concurrent changes. Failure to restore one target 
 
 ## Persist completion
 
-Persist may complete only when the persistence plan is applied, final whole-set verification passes, all required references resolve, the Persist stage has summary and timestamps, and no persistence blocker remains.
+Persist may complete only when the persistence plan is terminal with `status: applied`, final whole-set verification passed, all required references resolve, the Persist stage has summary and timestamps, and no persistence blocker remains.
 
 ## Records versus knowledge
 
