@@ -38,11 +38,11 @@ Classify may complete only when at least one structured classification exists, t
 
 Define and apply justified changes to the plan, implementation, tooling, configuration, guidance, or operating model.
 
-Every material adaptation must use the structured adaptation model and remain traceable to classifications, evaluations, observations, and evidence. Affected scope, intended effect, alternatives, certainty, approval requirements, decision references, disposition, and downstream lifecycle statuses must be explicit.
+Every material adaptation must use the structured adaptation model and remain traceable to classifications, evaluations, observations, and evidence. Affected scope, intended effect, alternatives, certainty, approval requirement and status, decision references, disposition, and downstream lifecycle statuses must be explicit.
 
-At Adapt activation, proposed work must not claim implementation, validation, persistence, or reuse outcomes. Scope expansion requires approval and a decision, while work requiring a new goal must remain not started.
+At Adapt activation, an approval-required adaptation may be proposed or deferred with approval still pending, no approval or decision references yet, and implementation not started. Proposed work must not claim implementation, validation, persistence, or reuse outcomes. Approval and an authorizing decision are required before the adaptation may become approved or implementation may begin. Scope expansion requires approval and a decision, while work requiring a new goal must remain not started.
 
-Adapt may complete only when at least one structured adaptation exists, the Adapt stage references its outputs, and all provenance, scope, certainty, approval, decision, and lifecycle-boundary checks pass. When no adaptation is warranted, mark the stage `not-applicable` with a concrete reason.
+Adapt may complete only when at least one structured adaptation exists, the Adapt stage references its outputs, and all provenance, scope, certainty, approval, decision, and lifecycle-boundary checks pass. Pending-approval adaptations must remain proposed or deferred and not started. When no adaptation is warranted, mark the stage `not-applicable` with a concrete reason.
 
 ## 6. Validate
 
