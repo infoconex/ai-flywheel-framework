@@ -34,7 +34,7 @@ The execution artifact created before the state update MUST already contain the 
 - `lifecycle.execute.status: in-progress`
 - `lifecycle.execute.started_at`: exactly equal to execution `started_at`
 - The other seven lifecycle stages: `pending` with null timestamps, summary, and reason
-- `actions`, `observations`, `classifications`, `adaptations`, `blockers`, `approval_refs`, `evidence_refs`, `decision_refs`, `finding_refs`, and `validation_results`: empty arrays
+- `actions`, `observations`, `evaluations`, `classifications`, `adaptations`, `blockers`, `approval_refs`, `evidence_refs`, `decision_refs`, `finding_refs`, and `validation_results`: empty arrays
 - `outcome: null`
 - Completion disposition and rationale: null
 
@@ -74,7 +74,53 @@ Record goal-directed actions, observations, commands, outputs, changes, assumpti
 
 Every execution records all eight lifecycle stages: execute, observe, evaluate, classify, adapt, validate, persist, and reuse.
 
-Before beginning a later stage, update the execution and state together so exactly that stage is `in-progress`; earlier stages are `completed` or `not-applicable`, and later stages are `pending`. State `lifecycle_stage` MUST equal the execution's sole `in-progress` stage.
+Before beginning a later stage, update the execution and state together so exactly that stage is `in-progress`; every predecessor is `completed` or `not-applicable`; every successor is `pending`; and state `lifecycle_stage` equals the execution's sole `in-progress` stage.
+
+## Observation contract
+
+An observation records an actual result, absence of an expected result, environmental fact, failure, or human feedback. It MUST NOT present an inferred cause, conclusion, classification, recommendation, adaptation, validation conclusion, persist decision, or reuse decision as a directly observed fact.
+
+Each observation MUST use the structured observation model in `execution.schema.yaml` and MUST include a stable identifier, statement, type, status, observation timestamp, source or method, evidence references, uncertainty disposition, and conflict references.
+
+A complete observation MUST reference at least one evidence item. An incomplete, uncertain, or conflicting observation MAY omit evidence only when its uncertainty field explicitly states what is unavailable and why.
+
+Observe MUST NOT be completed unless:
+
+- At least one observation exists.
+- At least one execution-level evidence reference exists.
+- The Observe stage contains at least one reference.
+- Every complete observation references evidence.
+- The stage summary and timestamps exist.
+- Observations contain actual results rather than evaluation conclusions.
+
+## Evaluation contract
+
+Evaluate interprets and compares observations against acceptance criteria, expected outcomes, governance rules, and validation requirements. Evaluate MAY form conclusions or identify limitations, but it MUST NOT introduce a fact that is not traceable to an observation and supporting evidence.
+
+Each material evaluation MUST use the structured evaluation model in `execution.schema.yaml` and MUST include:
+
+- A stable evaluation identifier.
+- A statement and result.
+- At least one observation reference.
+- At least one evidence reference.
+- Any applicable acceptance-criterion or rule references.
+- Limitations and rationale.
+
+Classifications, recommendations, adaptations, persist decisions, and reuse decisions MUST NOT be asserted as evaluation outputs before their lifecycle stages begin.
+
+## Lifecycle and timestamp invariants
+
+These rules are required semantic validation rules even when a schema implementation cannot express them directly:
+
+- `LIFECYCLE-ORDER-001`: A stage may start only when every predecessor is `completed` or `not-applicable` and every successor is `pending`.
+- `LIFECYCLE-SOLE-ACTIVE-001`: Exactly one stage is `in-progress` for a resumable execution.
+- `TIME-EXECUTION-001`: Execution `started_at` MUST be no later than any stage `started_at`.
+- `TIME-STAGE-001`: A stage `completed_at` MUST be equal to or later than its `started_at`.
+- `TIME-TRANSITION-001`: A successor stage `started_at` MUST be equal to or later than its predecessor `completed_at`.
+- `TIME-STATE-001`: State `last_durable_update.at` for a lifecycle transition MUST be equal to or later than the transition instant.
+- `STATE-STAGE-001`: State `lifecycle_stage` MUST equal the execution's sole `in-progress` stage.
+
+An operator or validator MUST reject an artifact or transition that violates any rule above, even when both individual YAML documents satisfy their schemas.
 
 ## Outcomes and resumability
 
