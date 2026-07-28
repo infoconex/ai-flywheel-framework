@@ -24,9 +24,15 @@ Compare observations with acceptance criteria, expected outcomes, governance, an
 
 Material evaluation conclusions must use structured evaluation entries and remain traceable to observations and evidence. Evaluate may interpret supported facts and identify limitations, but it must not introduce unsupported facts or prematurely assert later-stage classifications, adaptations, persistence decisions, or reuse decisions.
 
+Evaluate may complete only when at least one structured evaluation exists, the Evaluate stage references its outputs, and all observation and evidence references resolve. When no material evaluation exists, mark the stage `not-applicable` with a concrete reason.
+
 ## 4. Classify
 
-Classify material outcomes such as defects, findings, decisions, improvements, risks, uncertainties, and validated learning.
+Classify material outcomes such as defects, findings, decisions, improvements, risks, uncertainties, failures, and validated learning.
+
+Classifications must use the structured classification model and remain traceable to evaluations and evidence. Certainty and uncertainty must be explicit, related classifications must be linked, and decision, finding, and validation references must satisfy the type-specific rules in `classifications.md`.
+
+Classify may complete only when at least one structured classification exists, the Classify stage references its outputs, and all classification semantic and reference checks pass. When no material classification exists, mark the stage `not-applicable` with a concrete reason.
 
 ## 5. Adapt
 
@@ -43,6 +49,10 @@ Update state and store execution records, evidence, decisions, findings, approva
 ## 8. Reuse
 
 Identify relevant validated knowledge for later work and make new validated learning discoverable. When no reusable knowledge applies or results, record the stage as `not-applicable` with a reason.
+
+## Durable transitions
+
+Every transition that changes both an existing execution and state must follow the dual-artifact compare-and-swap, final-pair verification, and partial-transition recovery sequence in `execution-model.md`.
 
 ## Timestamp rules
 
