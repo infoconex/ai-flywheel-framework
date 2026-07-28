@@ -22,7 +22,7 @@ properties:
   observations: {type: array, items: {$ref: '#/$defs/observation'}}
   evaluations: {type: array, items: {$ref: '#/$defs/evaluation'}}
   classifications: {type: array, items: {$ref: '#/$defs/classification'}}
-  adaptations: {type: array, items: {type: string, minLength: 1}}
+  adaptations: {type: array, items: {$ref: '#/$defs/adaptation'}}
   blockers: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
   approval_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
   evidence_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
@@ -82,6 +82,11 @@ allOf:
       properties:
         classifications: {minItems: 1}
         lifecycle: {properties: {classify: {properties: {refs: {minItems: 1}}}}}
+  - if: {properties: {lifecycle: {properties: {adapt: {properties: {status: {const: completed}}}}}}}
+    then:
+      properties:
+        adaptations: {minItems: 1}
+        lifecycle: {properties: {adapt: {properties: {refs: {minItems: 1}}}}}
 $defs:
   observation:
     type: object
@@ -145,6 +150,44 @@ $defs:
         then: {properties: {finding_ref: {type: string, minLength: 1}}}
       - if: {properties: {type: {const: validated-learning}}, required: [type]}
         then: {properties: {validation_refs: {minItems: 1}, certainty: {const: confirmed}}}
+  adaptation:
+    type: object
+    additionalProperties: false
+    required: [id, type, statement, classification_refs, evaluation_refs, observation_refs, evidence_refs, affected_scope, rationale, intended_effect, alternatives, certainty, uncertainty, scope_disposition, approval_required, approval_refs, decision_ref, disposition, implementation_status, validation_status, persistence_status, reuse_status]
+    properties:
+      id: {type: string, pattern: '^ADAPT-[0-9]{3,}$'}
+      type: {type: string, enum: [plan, implementation, tooling, configuration, guidance, operating-model]}
+      statement: {type: string, minLength: 1}
+      classification_refs: {type: array, minItems: 1, uniqueItems: true, items: {type: string, pattern: '^CLASS-[0-9]{3,}$'}}
+      evaluation_refs: {type: array, minItems: 1, uniqueItems: true, items: {type: string, pattern: '^EVAL-[0-9]{3,}$'}}
+      observation_refs: {type: array, minItems: 1, uniqueItems: true, items: {type: string, pattern: '^OBS-[0-9]{3,}$'}}
+      evidence_refs: {type: array, minItems: 1, uniqueItems: true, items: {type: string, minLength: 1}}
+      affected_scope: {type: array, minItems: 1, uniqueItems: true, items: {type: string, minLength: 1}}
+      rationale: {type: string, minLength: 1}
+      intended_effect: {type: string, minLength: 1}
+      alternatives: {type: array, minItems: 1, items: {type: string, minLength: 1}}
+      certainty: {type: string, enum: [confirmed, provisional, disputed]}
+      uncertainty: {type: [string, 'null']}
+      scope_disposition: {type: string, enum: [within-goal, scope-expansion-approved, new-goal-required]}
+      approval_required: {type: boolean}
+      approval_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
+      decision_ref: {type: [string, 'null']}
+      disposition: {type: string, enum: [proposed, approved, rejected, deferred]}
+      implementation_status: {type: string, enum: [not-started, in-progress, completed, not-applicable]}
+      validation_status: {type: string, enum: [not-started, pending, passed, failed, not-applicable]}
+      persistence_status: {type: string, enum: [not-persisted, persisted]}
+      reuse_status: {type: string, enum: [not-assessed, reusable, not-reusable]}
+    allOf:
+      - if: {properties: {certainty: {enum: [provisional, disputed]}}, required: [certainty]}
+        then: {properties: {uncertainty: {type: string, minLength: 1}}}
+      - if: {properties: {approval_required: {const: true}}, required: [approval_required]}
+        then: {properties: {approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}}}
+      - if: {properties: {scope_disposition: {const: scope-expansion-approved}}, required: [scope_disposition]}
+        then: {properties: {approval_required: {const: true}, approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}}}
+      - if: {properties: {scope_disposition: {const: new-goal-required}}, required: [scope_disposition]}
+        then: {properties: {disposition: {enum: [proposed, deferred]}, implementation_status: {const: not-started}}}
+      - if: {properties: {disposition: {enum: [proposed, deferred, rejected]}}, required: [disposition]}
+        then: {properties: {implementation_status: {enum: [not-started, not-applicable]}, validation_status: {enum: [not-started, not-applicable]}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
   lifecycle:
     type: object
     additionalProperties: false
