@@ -61,11 +61,15 @@ adapt_completion_contract:
     implementation_status: not-started
     validation_status: not-applicable
     decision_ref: required
+    approval_status_when_required: pending
+    approval_status_when_not_required: not-required
+    prohibit_approved_or_rejected_approval_status: true
   new_goal_required_requires:
     disposition: deferred
     implementation_status: not-started
     validation_status: not-applicable
     decision_ref: required
+    approval_status_when_required: pending
   unresolved_action: block-or-interrupt
   semantic_rule_ids:
     - ADAPT-COMPLETE-001
@@ -75,6 +79,7 @@ adapt_completion_contract:
     - ADAPT-COMPLETE-005
     - ADAPT-COMPLETE-006
     - ADAPT-COMPLETE-007
+    - ADAPTATION-DEFERRAL-001
 validation_contract:
   guidance: .flywheel/operating-model/guidance/validation.md
   require_stable_identity: true
