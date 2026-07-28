@@ -1,6 +1,6 @@
 # Record Locations and Naming
 
-All paths are repository-root-relative.
+This document is normative. All paths are repository-root-relative.
 
 ## Canonical goal record root
 
@@ -15,6 +15,7 @@ Required subdirectories are:
 - `decisions/`
 - `findings/`
 - `approvals/`
+- `persistence/`
 
 ## Naming
 
@@ -25,17 +26,34 @@ Use UTC timestamps and stable identifiers:
 - Decision: `decisions/<decision-id>.yaml`
 - Finding: `findings/<finding-id>.yaml`
 - Approval: `approvals/<approval-id>.yaml`
+- Persistence plan: `persistence/<persistence-plan-id>.yaml`
 
-Recommended identifiers use `YYYYMMDDTHHMMSSZ-<short-name>`.
+Persistence plan identifiers MUST use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. The counter begins at `001`; select the lowest unused counter for the captured second. A create collision requires re-listing and selecting the next unused counter. Counter exhaustion is an operating-validation failure.
+
+## Record mutability
+
+Evidence, decisions, findings, approvals, and persistence plans are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
+
+Execution records are mutable only while resumable and MUST use compare-and-swap updates. Terminal execution records are immutable.
+
+Goal, mission, state, and context artifacts are mutable only through compare-and-swap against retained blob SHAs.
+
+Knowledge uses create-only identity. A revision MUST use a new identity and preserve a `supersedes` relationship.
 
 ## Ordering and discovery
 
-Read records by their `created_at` value, oldest first. File names are a secondary ordering signal only. Records must identify `mission_id` and `goal_id`. Execution records must also identify their lifecycle state and referenced evidence, decisions, findings, and approvals.
+Read records by their `created_at` value, oldest first. File names are a secondary ordering signal only. Records MUST identify `mission_id` and `goal_id`. Execution and persistence-plan records MUST also identify `execution_id` or the execution they govern.
 
 ## Active execution
 
-`.flywheel/state.yaml` is the authoritative pointer to an active execution. It must match an existing execution record under the active mission and goal. A missing or mismatched record is a stop condition.
+`.flywheel/state.yaml` is the authoritative pointer to an active execution. It MUST match an existing execution record under the active mission and goal. A missing or mismatched record is a stop condition.
+
+## Referential integrity
+
+A durable artifact MUST NOT reference a record that is absent from its canonical location. Supporting records MUST be created and verified before an execution, goal, mission, context, or state artifact that references them is updated.
+
+A persistence plan MUST enumerate every record creation and every mutable-artifact update performed by its transaction. Unplanned writes are prohibited.
 
 ## Durability
 
-Do not rely on chat transcripts as records. Persist material observations, commands, outputs, decisions, approvals, failures, and lifecycle results before ending a session.
+Do not rely on chat transcripts as records. Persist material observations, commands, outputs, decisions, approvals, failures, lifecycle results, and the persistence plan before ending a session.
