@@ -25,6 +25,7 @@ lifecycle:
   reuse: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
 actions: []
 observations: []
+evaluations: []
 classifications: []
 adaptations: []
 blockers: []
