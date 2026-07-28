@@ -80,7 +80,7 @@ A persistence plan is the complete transaction description for one Persist activ
 
 Every target is represented exactly once. Create targets require confirmed absence. Update targets require a retained blob SHA and complete retained content. Target dependencies and canonical type precedence determine one total write order.
 
-The persistence plan is create-only history. Its final status may be represented by a new superseding plan or by the transaction-specific finalization method defined in `persistence.md`; prior failed or rolled-back plans remain discoverable.
+A persistence plan is created before Persist activation, may be updated only through compare-and-swap while its status is `planned` or `applying`, and becomes immutable when its status is `applied`, `failed`, `rolled-back`, or `blocked`. Prior terminal plans remain discoverable.
 
 ## Deterministic identities
 
