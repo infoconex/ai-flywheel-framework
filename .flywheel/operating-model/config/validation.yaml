@@ -104,14 +104,24 @@ persistence_contract:
   guidance: .flywheel/operating-model/guidance/persistence.md
   plan_schema: .flywheel/operating-model/schemas/persistence-plan.schema.yaml
   require_plan_before_activation: true
+  plan_is_transaction_controller: true
+  prohibit_plan_in_own_targets: true
+  prohibit_plan_in_own_write_order: true
+  prohibit_plan_self_digest: true
+  require_plan_create_before_governed_writes: true
+  require_plan_cas_while_active: true
+  require_terminal_plan_immutability: true
   require_complete_target_set: true
   require_canonical_locations: true
   require_per_target_operation: true
   require_per_target_mutability: true
   require_per_target_precondition: true
   require_per_target_digest: true
+  digest_algorithm: sha256
+  digest_encoding: lowercase-hex
+  digest_bytes: normalized-utf8-lf-no-bom
   require_dependency_order: true
-  canonical_type_order: [evidence, decision, finding, approval, knowledge, context, goal, mission, execution, state, persistence-plan]
+  canonical_type_order: [evidence, decision, finding, approval, knowledge, context, goal, mission, execution, state]
   state_is_final_operational_pointer: true
   require_create_absence_recheck: true
   require_update_sha_recheck: true
@@ -125,6 +135,9 @@ persistence_contract:
   prohibit_reuse_claims_during_persist: true
   semantic_rule_ids:
     - PERSIST-PLAN-001
+    - PERSIST-PLAN-SELF-001
+    - PERSIST-PLAN-LIFECYCLE-001
+    - PERSIST-DIGEST-001
     - PERSIST-TARGET-001
     - PERSIST-LOCATION-001
     - PERSIST-MUTABILITY-001
