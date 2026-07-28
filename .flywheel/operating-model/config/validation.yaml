@@ -3,31 +3,16 @@ validation_domains:
   operating_validation:
     purpose: Validate the Flywheel operating model, state, governance, schemas, references, startup contract, and operator invariants.
     startup_expected_state: passed
-    allowed_states:
-      - pending
-      - passed
-      - failed
-      - blocked
+    allowed_states: [pending, passed, failed, blocked]
     manual_bootstrap_authoritative: true
   repository_validation:
     purpose: Validate repository discovery, context gathering, inventory, constraints, and evidence collected during an authorized execution.
     startup_expected_state: pending
-    allowed_states:
-      - pending
-      - in-progress
-      - passed
-      - failed
-      - blocked
+    allowed_states: [pending, in-progress, passed, failed, blocked]
   implementation_validation:
     purpose: Validate implementation changes through tests, acceptance criteria, evidence, and required approvals.
     startup_expected_state: not-applicable
-    allowed_states:
-      - not-applicable
-      - pending
-      - in-progress
-      - passed
-      - failed
-      - blocked
+    allowed_states: [not-applicable, pending, in-progress, passed, failed, blocked]
 bootstrap:
   manual_operating_validation:
     required_when_validator_unavailable: true
@@ -56,6 +41,25 @@ artifact_validation:
     goal: .flywheel/operating-model/schemas/goal.schema.yaml
     execution: .flywheel/operating-model/schemas/execution.schema.yaml
     record: .flywheel/operating-model/schemas/record.schema.yaml
+validation_contract:
+  guidance: .flywheel/operating-model/guidance/validation.md
+  require_stable_identity: true
+  identity_pattern: '^VAL-[0-9]{3,}$'
+  require_adaptation_targets: true
+  require_criterion_or_rule_basis: true
+  require_plan_before_execution: true
+  require_method: true
+  require_immutable_scope: true
+  require_expected_outcome: true
+  require_expected_evidence: true
+  require_actual_outcome_after_execution: true
+  require_evidence_for_pass_or_fail: true
+  require_finding_and_recovery_for_failure: true
+  require_eligibility_determination: true
+  require_adaptation_status_synchronization: true
+  prohibit_success_for_unimplemented_work: true
+  prohibit_silent_scope_weakening_after_failure: true
+  require_supersedes_reference_for_revised_validation: true
 completion:
   require_acceptance_criteria: true
   require_evidence_per_criterion: true
@@ -63,6 +67,8 @@ completion:
   require_all_lifecycle_stages_recorded: true
   allow_not_applicable_stage_with_reason: true
   prohibit_unresolved_blocking_uncertainty: true
+  prohibit_pending_required_validation: true
+  prohibit_failed_required_validation_without_authorized_disposition: true
 onboarding:
   require_repository_context: true
   require_flywheel_context: true
@@ -110,12 +116,5 @@ validator_output:
   require_recovery_action: true
   prohibit_silent_normalization: true
 provenance:
-  allowed:
-    - discovered
-    - provided
-    - inferred
-    - defaulted
-    - approved
-    - deferred
-    - rejected
+  allowed: [discovered, provided, inferred, defaulted, approved, deferred, rejected]
   require_approval_for_material_inference: true
