@@ -153,7 +153,7 @@ $defs:
   adaptation:
     type: object
     additionalProperties: false
-    required: [id, type, statement, classification_refs, evaluation_refs, observation_refs, evidence_refs, affected_scope, rationale, intended_effect, alternatives, certainty, uncertainty, scope_disposition, approval_required, approval_refs, decision_ref, disposition, implementation_status, validation_status, persistence_status, reuse_status]
+    required: [id, type, statement, classification_refs, evaluation_refs, observation_refs, evidence_refs, affected_scope, rationale, intended_effect, alternatives, certainty, uncertainty, scope_disposition, approval_required, approval_status, approval_refs, decision_ref, disposition, implementation_status, validation_status, persistence_status, reuse_status]
     properties:
       id: {type: string, pattern: '^ADAPT-[0-9]{3,}$'}
       type: {type: string, enum: [plan, implementation, tooling, configuration, guidance, operating-model]}
@@ -170,6 +170,7 @@ $defs:
       uncertainty: {type: [string, 'null']}
       scope_disposition: {type: string, enum: [within-goal, scope-expansion-approved, new-goal-required]}
       approval_required: {type: boolean}
+      approval_status: {type: string, enum: [not-required, pending, approved, rejected]}
       approval_refs: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
       decision_ref: {type: [string, 'null']}
       disposition: {type: string, enum: [proposed, approved, rejected, deferred]}
@@ -180,14 +181,53 @@ $defs:
     allOf:
       - if: {properties: {certainty: {enum: [provisional, disputed]}}, required: [certainty]}
         then: {properties: {uncertainty: {type: string, minLength: 1}}}
-      - if: {properties: {approval_required: {const: true}}, required: [approval_required]}
-        then: {properties: {approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}}}
+      - if: {properties: {approval_required: {const: false}}, required: [approval_required]}
+        then: {properties: {approval_status: {const: not-required}, approval_refs: {maxItems: 0}}}
+      - if:
+          properties:
+            approval_required: {const: true}
+            disposition: {enum: [proposed, deferred]}
+          required: [approval_required, disposition]
+        then:
+          properties:
+            approval_status: {const: pending}
+            implementation_status: {const: not-started}
+      - if:
+          properties:
+            approval_required: {const: true}
+            disposition: {const: approved}
+          required: [approval_required, disposition]
+        then:
+          properties:
+            approval_status: {const: approved}
+            approval_refs: {minItems: 1}
+            decision_ref: {type: string, minLength: 1}
+      - if:
+          properties:
+            approval_required: {const: true}
+            disposition: {const: rejected}
+          required: [approval_required, disposition]
+        then:
+          properties:
+            approval_status: {const: rejected}
+            approval_refs: {minItems: 1}
+            decision_ref: {type: string, minLength: 1}
       - if: {properties: {scope_disposition: {const: scope-expansion-approved}}, required: [scope_disposition]}
-        then: {properties: {approval_required: {const: true}, approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}}}
+        then:
+          properties:
+            approval_required: {const: true}
+            approval_status: {const: approved}
+            approval_refs: {minItems: 1}
+            decision_ref: {type: string, minLength: 1}
+            disposition: {const: approved}
       - if: {properties: {scope_disposition: {const: new-goal-required}}, required: [scope_disposition]}
         then: {properties: {disposition: {enum: [proposed, deferred]}, implementation_status: {const: not-started}}}
-      - if: {properties: {disposition: {enum: [proposed, deferred, rejected]}}, required: [disposition]}
-        then: {properties: {implementation_status: {enum: [not-started, not-applicable]}, validation_status: {enum: [not-started, not-applicable]}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
+      - if: {properties: {disposition: {enum: [proposed, deferred]}}, required: [disposition]}
+        then: {properties: {implementation_status: {const: not-started}, validation_status: {const: not-started}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
+      - if: {properties: {disposition: {const: rejected}}, required: [disposition]}
+        then: {properties: {implementation_status: {const: not-applicable}, validation_status: {const: not-applicable}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
+      - if: {properties: {implementation_status: {enum: [in-progress, completed]}}, required: [implementation_status]}
+        then: {properties: {disposition: {const: approved}}}
   lifecycle:
     type: object
     additionalProperties: false
