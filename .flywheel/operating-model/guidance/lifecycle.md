@@ -1,8 +1,10 @@
 # AI Flywheel Lifecycle
 
-Every execution follows and records all eight lifecycle stages. Stages may iterate, but none may be omitted.
+Every execution follows and records all eight lifecycle stages. Stages may iterate internally, but none may be omitted or entered out of order.
 
 Each stage record must include a status, summary, timestamps, and relevant references. Allowed stage statuses are `pending`, `in-progress`, `completed`, and `not-applicable`. A `not-applicable` stage requires a concrete reason.
+
+A stage may become `in-progress` only when every predecessor is `completed` or `not-applicable`, every successor is `pending`, and state identifies the same active execution and lifecycle stage.
 
 ## 1. Execute
 
@@ -12,9 +14,15 @@ Perform only work authorized by the active goal, using the approved plan and con
 
 Capture actual results, evidence, unexpected behavior, failures, environmental facts, and human feedback.
 
+Observations must use the structured observation model. A direct observation must not contain an inferred cause, conclusion, classification, recommendation, adaptation, validation conclusion, persist decision, or reuse decision.
+
+Observe may complete only when at least one observation exists, complete observations reference evidence, the execution and stage contain required evidence references, and the stage summary and timestamps are present.
+
 ## 3. Evaluate
 
 Compare observations with acceptance criteria, expected outcomes, governance, and validation requirements.
+
+Material evaluation conclusions must use structured evaluation entries and remain traceable to observations and evidence. Evaluate may interpret supported facts and identify limitations, but it must not introduce unsupported facts or prematurely assert later-stage classifications, adaptations, persistence decisions, or reuse decisions.
 
 ## 4. Classify
 
@@ -35,6 +43,17 @@ Update state and store execution records, evidence, decisions, findings, approva
 ## 8. Reuse
 
 Identify relevant validated knowledge for later work and make new validated learning discoverable. When no reusable knowledge applies or results, record the stage as `not-applicable` with a reason.
+
+## Timestamp rules
+
+Execution and lifecycle timestamps must satisfy the semantic validation rules defined in `execution-model.md`:
+
+- Execution start is no later than any stage start.
+- Stage completion is no earlier than stage start.
+- A successor stage does not start before its predecessor completes.
+- State durable-update time is not earlier than the transition instant.
+
+Violations must be rejected even when timestamp strings independently satisfy schema format validation.
 
 ## Completion rule
 
