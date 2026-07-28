@@ -41,6 +41,7 @@ artifact_validation:
     goal: .flywheel/operating-model/schemas/goal.schema.yaml
     execution: .flywheel/operating-model/schemas/execution.schema.yaml
     record: .flywheel/operating-model/schemas/record.schema.yaml
+    persistence_plan: .flywheel/operating-model/schemas/persistence-plan.schema.yaml
 adapt_completion_contract:
   guidance: .flywheel/operating-model/guidance/adaptation.md
   authoritative_matrix: authoritative-adapt-completion-matrix
@@ -99,6 +100,41 @@ validation_contract:
   prohibit_success_for_unimplemented_work: true
   prohibit_silent_scope_weakening_after_failure: true
   require_supersedes_reference_for_revised_validation: true
+persistence_contract:
+  guidance: .flywheel/operating-model/guidance/persistence.md
+  plan_schema: .flywheel/operating-model/schemas/persistence-plan.schema.yaml
+  require_plan_before_activation: true
+  require_complete_target_set: true
+  require_canonical_locations: true
+  require_per_target_operation: true
+  require_per_target_mutability: true
+  require_per_target_precondition: true
+  require_per_target_digest: true
+  require_dependency_order: true
+  canonical_type_order: [evidence, decision, finding, approval, knowledge, context, goal, mission, execution, state, persistence-plan]
+  state_is_final_operational_pointer: true
+  require_create_absence_recheck: true
+  require_update_sha_recheck: true
+  require_per_write_reread: true
+  require_whole_set_final_verification: true
+  require_reverse_order_recovery: true
+  require_compensating_finding_for_orphans: true
+  block_on_unrecoverable_partial_persistence: true
+  prohibit_unplanned_writes: true
+  prohibit_history_overwrite: true
+  prohibit_reuse_claims_during_persist: true
+  semantic_rule_ids:
+    - PERSIST-PLAN-001
+    - PERSIST-TARGET-001
+    - PERSIST-LOCATION-001
+    - PERSIST-MUTABILITY-001
+    - PERSIST-ORDER-001
+    - PERSIST-PRECHECK-001
+    - PERSIST-VERIFY-001
+    - PERSIST-ROLLBACK-001
+    - PERSIST-PARTIAL-001
+    - PERSIST-HISTORY-001
+    - PERSIST-REUSE-001
 completion:
   require_acceptance_criteria: true
   require_evidence_per_criterion: true
