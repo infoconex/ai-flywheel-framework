@@ -63,7 +63,15 @@ Validate may complete only when all eligible adaptations have complete coverage,
 
 ## 7. Persist
 
-Update state and store execution records, evidence, decisions, findings, approvals, and learning in canonical locations. Persist must not begin while required validation remains pending or failed without an authorized disposition.
+Make the complete execution outcome durable using the multi-artifact contract in `persistence.md`.
+
+Persist must not begin while required validation remains pending or failed without an authorized disposition. Before Persist becomes `in-progress`, a schema-valid persistence plan must enumerate every new or changed durable artifact, canonical path, operation, mutability rule, dependency, precondition, proposed digest, write order, and recovery action.
+
+Supporting records must be written and verified before mutable artifacts that reference them. Execution must be durable before state, and state remains the final operational pointer. Every existing mutable target uses retained-SHA compare-and-swap; every create target requires a final absence check.
+
+Persist may complete only after every planned target is written in deterministic order, each write is re-read and verified, the complete durable set passes final cross-artifact verification, no unplanned artifact changed, and the persistence plan records a successful final result. Partial persistence must be rolled back or explicitly compensated; unrecoverable inconsistency creates a finding, blocks continuation, and requires human reconciliation.
+
+Persist must not claim Reuse completion or promote knowledge that has not met the Reuse requirements.
 
 ## 8. Reuse
 
@@ -71,7 +79,7 @@ Identify relevant validated knowledge for later work and make new validated lear
 
 ## Durable transitions
 
-Every transition that changes both an existing execution and state must follow the dual-artifact compare-and-swap, final-pair verification, and partial-transition recovery sequence in `execution-model.md`.
+Every transition that changes both an existing execution and state must follow the dual-artifact compare-and-swap, final-pair verification, and partial-transition recovery sequence in `execution-model.md`. During Persist, that pair sequence is nested within the complete multi-artifact transaction defined in `persistence.md`.
 
 ## Timestamp rules
 
