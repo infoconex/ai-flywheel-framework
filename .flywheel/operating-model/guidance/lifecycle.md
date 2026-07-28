@@ -42,15 +42,21 @@ Every material adaptation must use the structured adaptation model and remain tr
 
 At Adapt activation, an approval-required adaptation may be proposed or deferred with approval still pending, no approval or decision references yet, and implementation not started. Proposed work must not claim implementation, validation, persistence, or reuse outcomes. Approval and an authorizing decision are required before the adaptation may become approved or implementation may begin. Scope expansion requires approval and a decision, while work requiring a new goal must remain not started.
 
-Adapt may complete only when at least one structured adaptation exists, the Adapt stage references its outputs, and all provenance, scope, certainty, approval, decision, and lifecycle-boundary checks pass. Pending-approval adaptations must remain proposed or deferred and not started. When no adaptation is warranted, mark the stage `not-applicable` with a concrete reason.
+Adapt may complete only when every adaptation has a final Adapt-stage disposition: implemented work is `completed`; rejected work is `not-applicable`; pending-approval, deferred, new-goal-required, not-started, or partially implemented work remains unresolved and prevents Adapt completion unless the execution is formally blocked or interrupted. At least one structured adaptation and Adapt-stage reference are required when Adapt completes. When no adaptation is warranted, mark the stage `not-applicable` with a concrete reason.
 
 ## 6. Validate
 
-Run required checks and collect evidence proving the claimed outcome. Validation must establish more than command execution.
+Define and execute evidence-based checks proving or disproving implemented adaptation outcomes.
+
+Every material validation must use the structured `VAL-NNN` model and the rules in `validation.md`. Before Validate begins, each validation-eligible adaptation must have a planned validation entry identifying its targets, criteria or rules, method, immutable scope, expected outcome, and expected evidence.
+
+Only approved and fully implemented adaptations are validation-eligible. Pending approval, rejected, deferred, new-goal-required, not-started, or partially implemented adaptations cannot pass validation.
+
+Validate may complete only when all eligible adaptations have complete coverage, no required validation remains pending, every pass or failure has sufficient evidence, failures have findings and recovery actions, adaptation validation statuses agree with results, and all validation references resolve. Command execution alone is not proof. When no adaptation is eligible, mark Validate `not-applicable` with a concrete reason.
 
 ## 7. Persist
 
-Update state and store execution records, evidence, decisions, findings, approvals, and learning in canonical locations.
+Update state and store execution records, evidence, decisions, findings, approvals, and learning in canonical locations. Persist must not begin while required validation remains pending or failed without an authorized disposition.
 
 ## 8. Reuse
 
