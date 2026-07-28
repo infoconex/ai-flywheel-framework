@@ -6,7 +6,7 @@ A narrative requirement and its formal schema MUST agree. A discrepancy is an op
 
 ## Validator semantics
 
-Schema validation SHALL use JSON Schema Draft 2020-12 semantics after parsing YAML 1.2. The validator MUST enforce `format`, including `date-time`. Timestamps MUST be RFC 3339 UTC values ending in `Z`. Execution-activation and startup-failure timestamps MUST use whole-second precision with no fractional component.
+Schema validation SHALL use JSON Schema Draft 2020-12 semantics after parsing YAML 1.2. The validator MUST enforce `format`, including `date-time`. Timestamps MUST be RFC 3339 UTC values ending in `Z`. Execution-activation, persistence-plan, and startup-failure timestamps MUST use whole-second precision with no fractional component.
 
 Validation has two required layers:
 
@@ -28,6 +28,7 @@ Canonical paths are:
 - Decision: `.flywheel/operations/records/<mission-id>/<goal-id>/decisions/<record-id>.yaml`
 - Finding: `.flywheel/operations/records/<mission-id>/<goal-id>/findings/<record-id>.yaml`
 - Approval: `.flywheel/operations/records/<mission-id>/<goal-id>/approvals/<record-id>.yaml`
+- Persistence plan: `.flywheel/operations/records/<mission-id>/<goal-id>/persistence/<persistence-plan-id>.yaml`
 - Knowledge: `.flywheel/operations/knowledge/<knowledge-id>.yaml`
 - Startup failure: `.flywheel/operations/records/startup-failures/<startup-failure-id>.yaml`
 
@@ -73,9 +74,17 @@ The acceptance-criterion list must exactly equal the active goal's criterion ide
 
 `in-progress` requires `outcome: null`. `blocked` requires at least one blocker. `interrupted` requires a nonempty interruption reason in `outcome`.
 
+## Persistence plan
+
+A persistence plan is the complete transaction description for one Persist activation or completion attempt. It contains the mission, goal, execution, operator, timestamp, complete target set, exact write order, target preconditions, proposed digests, rollback or compensation behavior, and whole-set verification state.
+
+Every target is represented exactly once. Create targets require confirmed absence. Update targets require a retained blob SHA and complete retained content. Target dependencies and canonical type precedence determine one total write order.
+
+The persistence plan is create-only history. Its final status may be represented by a new superseding plan or by the transaction-specific finalization method defined in `persistence.md`; prior failed or rolled-back plans remain discoverable.
+
 ## Deterministic identities
 
-Execution IDs use `EX-YYYYMMDDTHHMMSSZ-NNN`. Startup-failure IDs use `SF-YYYYMMDDTHHMMSSZ-NNN`. For each type, capture one whole-second UTC timestamp and select the lowest unused three-digit counter beginning at `001` in the canonical directory. The filename equals `<id>.yaml`.
+Execution IDs use `EX-YYYYMMDDTHHMMSSZ-NNN`. Persistence-plan IDs use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. Startup-failure IDs use `SF-YYYYMMDDTHHMMSSZ-NNN`. For each type, capture one whole-second UTC timestamp and select the lowest unused three-digit counter beginning at `001` in the canonical directory. The filename equals `<id>.yaml`.
 
 If create-only persistence collides, re-list the directory and retry with the next lowest unused counter for the same timestamp. Counter exhaustion at `999` is a blocking Operating Validation failure.
 
@@ -83,18 +92,22 @@ If create-only persistence collides, re-list the directory and retry with the ne
 
 Use the authenticated repository actor when tooling exposes it. Otherwise use the literal identity `chatgpt-session`. The same resolved identity is used for the complete transition and any associated failure record.
 
-## Durable update protocol
+## Multi-artifact durable update protocol
 
-Repository files cannot provide a true multi-file transaction. Therefore "atomic" means:
+Repository files cannot provide a true multi-file transaction. Therefore Persist durability means:
 
-1. Resolve operator identity and capture the required whole-second timestamp.
-2. Read and retain the current state hash or blob SHA.
-3. Create the new execution or record at its canonical path using create-only semantics and the deterministic collision rule.
-4. Re-read state and verify its hash is unchanged.
-5. Update state using compare-and-swap against the retained hash.
-6. If state changed, do not overwrite it. Persist a startup-failure record identifying any created execution as orphaned and stop.
+1. Construct one schema-valid persistence plan covering every new or changed durable artifact.
+2. Retain complete content and blob SHAs for all update targets; prove absence for create targets.
+3. Validate the complete proposed set and all references before writing.
+4. Recheck every precondition before the first write.
+5. Apply targets in dependency order and canonical type precedence.
+6. Re-read and verify every artifact immediately after its write.
+7. Keep state as the final operational pointer after all referenced artifacts and execution are durable.
+8. Re-read and exactly verify the complete target set.
+9. On failure, stop forward writes and perform reverse-order rollback or explicit compensation without overwriting concurrent changes.
+10. Persist a finding and block continuation when complete restoration cannot be proven.
 
-Two operators must never overwrite each other's state.
+The execution/state pair compare-and-swap protocol remains mandatory within the larger transaction.
 
 ## Startup-failure persistence
 
@@ -119,3 +132,4 @@ At startup, resolve and report the immutable commit SHA when tooling makes it av
 - Application missions require readiness `ready-for-missions`.
 - Historical records are immutable except through explicit supersession metadata.
 - Validation results use the structure and allowed values defined by the execution schema.
+- Persist requires a complete schema-valid persistence plan and exact whole-set verification.
