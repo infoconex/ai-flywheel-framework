@@ -57,6 +57,7 @@ Scope expansion MUST use `scope_disposition: scope-expansion-approved` only afte
 - `ADAPTATION-APPROVAL-002`: When approval is not required, `approval_status` MUST be `not-required` and `approval_refs` MUST be empty.
 - `ADAPTATION-REJECTION-001`: A rejected approval-required adaptation MUST use `approval_status: rejected`, reference the rejection or approval record, reference the decision, and remain unimplemented.
 - `ADAPTATION-DECISION-001`: A material adaptation MUST reference the decision that authorizes, rejects, or defers it before it reaches that final Adapt-stage disposition. A merely proposed adaptation awaiting a decision MAY use `decision_ref: null`.
+- `ADAPTATION-DEFERRAL-001`: A deferred adaptation represents a final decision not to implement the change in the current execution. When approval is required, it MUST retain `approval_status: pending`; when approval is not required, it MUST use `approval_status: not-required`. A deferred adaptation MUST NOT use `approval_status: approved` or `rejected`; those outcomes require disposition `approved` or `rejected`.
 - `ADAPTATION-IDENTITY-001`: Adaptation identifiers MUST be unique within the execution.
 
 ## Lifecycle boundaries
@@ -84,7 +85,7 @@ This matrix is the authoritative rule for deciding whether one adaptation permit
 |---|---|---|---|---|---|---|
 | `approved` | `approved` when approval is required; otherwise `not-required` | `within-goal` or `scope-expansion-approved` | `completed` | `pending` | Yes | Implemented work proceeds to Validate. Required approval and decision references resolve. |
 | `rejected` | `rejected` when approval was required; otherwise `not-required` | Any valid value | `not-applicable` | `not-applicable` | Yes | The rejection is final and references its decision and applicable approval record. |
-| `deferred` | `pending`, `approved`, `rejected`, or `not-required` as supported by the record | `within-goal` or `new-goal-required` | `not-started` | `not-applicable` | Yes | Deferral is a final decision for this execution and `decision_ref` resolves. No implementation occurs. |
+| `deferred` | `pending` when approval is required; otherwise `not-required` | `within-goal` or `new-goal-required` | `not-started` | `not-applicable` | Yes | Deferral is a final decision for this execution and `decision_ref` resolves. No implementation occurs and the approval process is not represented as approved or rejected. |
 | `proposed` | Any valid value | Any valid value | `not-started` | `not-started` | No | The adaptation remains unresolved. Continue Adapt or mark the execution blocked or interrupted. |
 | `approved` | Any valid value | Any valid value | `not-started` or `in-progress` | `not-started` | No | Authorized work is incomplete. Continue Adapt or mark the execution blocked or interrupted. |
 
@@ -95,10 +96,10 @@ The following rules are derived from the matrix:
 - `ADAPT-COMPLETE-001`: Every adaptation MUST have a final Adapt-stage disposition of `approved`, `rejected`, or `deferred` before Adapt completes.
 - `ADAPT-COMPLETE-002`: An approved adaptation MUST be fully implemented before Adapt completes.
 - `ADAPT-COMPLETE-003`: A rejected adaptation MUST be unimplemented and validation-ineligible.
-- `ADAPT-COMPLETE-004`: A deferred adaptation MUST have a resolving decision, remain unimplemented, and be validation-ineligible.
+- `ADAPT-COMPLETE-004`: A deferred adaptation MUST have a resolving decision, remain unimplemented, be validation-ineligible, and retain `approval_status: pending` when approval is required or `not-required` otherwise.
 - `ADAPT-COMPLETE-005`: A proposed adaptation, including one awaiting approval, prevents Adapt completion.
 - `ADAPT-COMPLETE-006`: An adaptation with `implementation_status: in-progress` prevents Adapt completion.
-- `ADAPT-COMPLETE-007`: `scope_disposition: new-goal-required` permits completion only with `disposition: deferred`, a resolving decision, and no implementation.
+- `ADAPT-COMPLETE-007`: `scope_disposition: new-goal-required` permits completion only with `disposition: deferred`, a resolving decision, no implementation, and the deferred approval-status rule above.
 
 A pending approval may exist during Adapt, but it cannot remain merely proposed when Adapt completes. The operator must obtain a final decision, defer the adaptation for this execution, or mark the execution blocked or interrupted.
 
@@ -127,6 +128,7 @@ Adapt MUST NOT be completed unless:
 - Every adaptation matches a permitted row in the authoritative Adapt completion matrix.
 - Every approved adaptation is fully implemented and has all required approval and decision references.
 - Every rejected or deferred adaptation has its final decision recorded and is validation-ineligible.
+- Every deferred adaptation uses `approval_status: pending` when approval is required or `not-required` otherwise.
 - No adaptation remains proposed or partially implemented.
 - The stage summary and timestamps exist.
 
