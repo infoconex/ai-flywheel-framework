@@ -24,7 +24,8 @@ A referenced artifact MUST NOT be omitted. An unchanged artifact MUST NOT be add
 
 ## Canonical mutation semantics
 
-- Evidence, decisions, findings, approvals, and persistence plans are create-only records. Existing records MUST NOT be overwritten.
+- Evidence, decisions, findings, and approvals are create-only records. Existing records MUST NOT be overwritten.
+- A persistence plan is created before Persist activation, may be updated only through compare-and-swap while its status is `planned` or `applying`, and becomes immutable when `applied`, `failed`, `rolled-back`, or `blocked`.
 - Execution, goal, mission, state, and context artifacts use compare-and-swap updates against retained blob SHAs.
 - Knowledge is create-only for a new identity. Revisions use a new identity and `supersedes` linkage; existing knowledge MUST NOT be silently overwritten.
 - Create operations require confirmed path absence immediately before creation.
@@ -100,7 +101,7 @@ A rollback MUST NOT overwrite concurrent changes. Failure to restore one target 
 - `PERSIST-PLAN-001`: Persist activation requires a schema-valid complete persistence plan.
 - `PERSIST-TARGET-001`: Every new or changed durable artifact is represented exactly once in the target set.
 - `PERSIST-LOCATION-001`: Every target uses its canonical path and identity rules.
-- `PERSIST-MUTABILITY-001`: Create-only history is never overwritten; mutable artifacts use compare-and-swap.
+- `PERSIST-MUTABILITY-001`: Create-only history is never overwritten; mutable artifacts, including active persistence plans, use compare-and-swap.
 - `PERSIST-ORDER-001`: Targets follow dependency order and canonical type precedence; state is the final operational pointer.
 - `PERSIST-PRECHECK-001`: Every create absence and update SHA is rechecked before the first write.
 - `PERSIST-VERIFY-001`: Each write and the final whole set are re-read and exactly verified.
