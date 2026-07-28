@@ -124,11 +124,32 @@ Every material adaptation MUST use the structured adaptation model in `execution
 
 Each adaptation MUST have a unique stable identifier and MUST remain traceable to classifications, evaluations, observations, and evidence. It MUST explicitly record affected scope, rationale, intended effect, alternatives, certainty, uncertainty, scope disposition, approval and decision requirements, disposition, and downstream lifecycle statuses.
 
-Adapt MUST NOT be completed unless at least one structured adaptation exists, the Adapt stage contains at least one reference, all references resolve, and all adaptation semantic rules pass. If no adaptation is warranted, the stage MUST be `not-applicable` with a concrete reason.
+At Adapt activation, an adaptation MAY remain proposed while approval or a decision is pending, but it MUST remain unimplemented and MUST NOT claim validation, persistence, or reuse outcomes.
 
-At Adapt activation, an adaptation MUST NOT claim implementation, validation, persistence, or reuse outcomes. Material or scope-expanding adaptations MUST NOT be approved without required decision and approval records.
+Adapt MUST NOT be completed unless at least one structured adaptation exists, the Adapt stage contains at least one reference, all references resolve, all adaptation semantic rules pass, and every adaptation matches a completion-permitted row in the authoritative matrix in `adaptation.md`.
 
-Required adaptation semantic rule identifiers are defined in `adaptation.md` and MUST be enforced even when individual YAML documents satisfy schema validation.
+The matrix is enforced as follows:
+
+- `approved` requires completed implementation and validation status `pending`.
+- `rejected` requires implementation and validation status `not-applicable` plus the resolving decision and applicable approval record.
+- `deferred` requires a resolving decision, implementation `not-started`, and validation `not-applicable`.
+- `proposed` never permits Adapt completion.
+- `implementation_status: in-progress` never permits Adapt completion.
+- `scope_disposition: new-goal-required` permits completion only when the adaptation is deferred by a recorded decision and remains unimplemented.
+
+When any adaptation does not match the matrix, the operator MUST continue Adapt or set the execution to `blocked` or `interrupted`; Validate MUST NOT begin.
+
+Required Adapt semantic rule identifiers are defined in `adaptation.md` and MUST be enforced even when individual YAML documents satisfy schema validation.
+
+## Validation contract
+
+Every material validation MUST use the structured validation model in `execution.schema.yaml` and the semantic rules in `validation.md`.
+
+Before Validate begins, each approved and fully implemented adaptation MUST have at least one planned validation entry. The plan MUST identify adaptation targets, acceptance criteria or rules, method, immutable scope, expected outcome, and expected evidence.
+
+Validate MUST NOT begin for a proposed, rejected, deferred, pending-approval, new-goal-required, not-started, or partially implemented adaptation. These adaptations are validation-ineligible and MUST use `validation_status: not-applicable`, except unresolved proposed or incomplete adaptations that already prevent Adapt completion.
+
+Validate MUST NOT complete unless all eligible adaptations have complete validation coverage, every required result is executed, no required result remains pending, passed and failed results contain sufficient evidence, failed results identify a finding and recovery action, and adaptation validation statuses agree with the results.
 
 ## Durable lifecycle-transition sequence
 
