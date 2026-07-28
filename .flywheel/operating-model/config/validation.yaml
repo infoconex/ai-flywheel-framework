@@ -41,6 +41,40 @@ artifact_validation:
     goal: .flywheel/operating-model/schemas/goal.schema.yaml
     execution: .flywheel/operating-model/schemas/execution.schema.yaml
     record: .flywheel/operating-model/schemas/record.schema.yaml
+adapt_completion_contract:
+  guidance: .flywheel/operating-model/guidance/adaptation.md
+  authoritative_matrix: authoritative-adapt-completion-matrix
+  require_final_disposition: true
+  permitted_dispositions: [approved, rejected, deferred]
+  prohibit_proposed_at_completion: true
+  prohibit_in_progress_implementation_at_completion: true
+  approved_requires:
+    implementation_status: completed
+    validation_status: pending
+    decision_ref: required
+    approval_refs_when_required: required
+  rejected_requires:
+    implementation_status: not-applicable
+    validation_status: not-applicable
+    decision_ref: required
+  deferred_requires:
+    implementation_status: not-started
+    validation_status: not-applicable
+    decision_ref: required
+  new_goal_required_requires:
+    disposition: deferred
+    implementation_status: not-started
+    validation_status: not-applicable
+    decision_ref: required
+  unresolved_action: block-or-interrupt
+  semantic_rule_ids:
+    - ADAPT-COMPLETE-001
+    - ADAPT-COMPLETE-002
+    - ADAPT-COMPLETE-003
+    - ADAPT-COMPLETE-004
+    - ADAPT-COMPLETE-005
+    - ADAPT-COMPLETE-006
+    - ADAPT-COMPLETE-007
 validation_contract:
   guidance: .flywheel/operating-model/guidance/validation.md
   require_stable_identity: true
