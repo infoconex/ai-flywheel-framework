@@ -76,11 +76,13 @@ The acceptance-criterion list must exactly equal the active goal's criterion ide
 
 ## Persistence plan
 
-A persistence plan is the complete transaction description for one Persist activation or completion attempt. It contains the mission, goal, execution, operator, timestamp, complete target set, exact write order, target preconditions, proposed digests, rollback or compensation behavior, and whole-set verification state.
+A persistence plan is the transaction controller for one Persist activation or completion attempt. It contains the mission, goal, execution, operator, timestamp, complete governed target set, exact governed write order, target preconditions, proposed digests, rollback or compensation behavior, and whole-set verification state.
 
-Every target is represented exactly once. Create targets require confirmed absence. Update targets require a retained blob SHA and complete retained content. Target dependencies and canonical type precedence determine one total write order.
+Every governed target is represented exactly once. Create targets require confirmed absence. Update targets require a retained blob SHA and complete retained content. Target dependencies and canonical type precedence determine one total governed write order.
 
-A persistence plan is created before Persist activation, may be updated only through compare-and-swap while its status is `planned` or `applying`, and becomes immutable when its status is `applied`, `failed`, `rolled-back`, or `blocked`. Prior terminal plans remain discoverable.
+The persistence plan MUST NOT include itself in `targets` or `write_order`, and it MUST NOT carry a digest of its own content. Its integrity is enforced separately: create it before governed writes, re-read it, update it only through compare-and-swap while `planned` or `applying`, and make it immutable when terminal.
+
+Governed target digests use SHA-256 over the exact UTF-8 bytes to be written after LF line-ending normalization and without a byte-order mark. Digests are lowercase hexadecimal.
 
 ## Deterministic identities
 
@@ -96,16 +98,19 @@ Use the authenticated repository actor when tooling exposes it. Otherwise use th
 
 Repository files cannot provide a true multi-file transaction. Therefore Persist durability means:
 
-1. Construct one schema-valid persistence plan covering every new or changed durable artifact.
-2. Retain complete content and blob SHAs for all update targets; prove absence for create targets.
-3. Validate the complete proposed set and all references before writing.
-4. Recheck every precondition before the first write.
-5. Apply targets in dependency order and canonical type precedence.
-6. Re-read and verify every artifact immediately after its write.
-7. Keep state as the final operational pointer after all referenced artifacts and execution are durable.
-8. Re-read and exactly verify the complete target set.
-9. On failure, stop forward writes and perform reverse-order rollback or explicit compensation without overwriting concurrent changes.
-10. Persist a finding and block continuation when complete restoration cannot be proven.
+1. Construct one schema-valid persistence plan covering every governed new or changed durable artifact.
+2. Validate the plan and all governed proposed artifacts.
+3. Create and verify the plan before governed writes.
+4. Retain complete content and blob SHAs for all governed update targets; prove absence for governed create targets.
+5. Move the plan to `applying` through compare-and-swap.
+6. Recheck every governed precondition before the first governed write.
+7. Apply governed targets in dependency order and canonical type precedence.
+8. Re-read and verify every governed artifact immediately after its write.
+9. Keep state as the final operational pointer after all referenced artifacts and execution are durable.
+10. Re-read and exactly verify the complete governed target set.
+11. Finalize the plan through compare-and-swap to a terminal status and verify that finalization.
+12. On failure, stop forward writes and perform reverse-order rollback or explicit compensation without overwriting concurrent changes.
+13. Persist a finding and block continuation when complete restoration or terminal plan finalization cannot be proven.
 
 The execution/state pair compare-and-swap protocol remains mandatory within the larger transaction.
 
@@ -132,4 +137,4 @@ At startup, resolve and report the immutable commit SHA when tooling makes it av
 - Application missions require readiness `ready-for-missions`.
 - Historical records are immutable except through explicit supersession metadata.
 - Validation results use the structure and allowed values defined by the execution schema.
-- Persist requires a complete schema-valid persistence plan and exact whole-set verification.
+- Persist requires a complete schema-valid persistence plan, no plan self-target or self-digest, and exact whole-set verification.
