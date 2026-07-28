@@ -40,9 +40,16 @@ Define and apply justified changes to the plan, implementation, tooling, configu
 
 Every material adaptation must use the structured adaptation model and remain traceable to classifications, evaluations, observations, and evidence. Affected scope, intended effect, alternatives, certainty, approval requirement and status, decision references, disposition, and downstream lifecycle statuses must be explicit.
 
-At Adapt activation, an approval-required adaptation may be proposed or deferred with approval still pending, no approval or decision references yet, and implementation not started. Proposed work must not claim implementation, validation, persistence, or reuse outcomes. Approval and an authorizing decision are required before the adaptation may become approved or implementation may begin. Scope expansion requires approval and a decision, while work requiring a new goal must remain not started.
+At Adapt activation, an approval-required adaptation may be proposed with approval still pending, no approval or decision references yet, and implementation not started. Proposed work must not claim implementation, validation, persistence, or reuse outcomes. Approval and an authorizing decision are required before the adaptation may become approved or implementation may begin.
 
-Adapt may complete only when every adaptation has a final Adapt-stage disposition: implemented work is `completed`; rejected work is `not-applicable`; pending-approval, deferred, new-goal-required, not-started, or partially implemented work remains unresolved and prevents Adapt completion unless the execution is formally blocked or interrupted. At least one structured adaptation and Adapt-stage reference are required when Adapt completes. When no adaptation is warranted, mark the stage `not-applicable` with a concrete reason.
+The authoritative Adapt completion matrix is defined in `adaptation.md`. Adapt may complete only when every adaptation matches a permitted row in that matrix:
+
+- Approved work is fully implemented and moves to Validate with validation pending.
+- Rejected work is unimplemented and validation is not applicable.
+- Deferred work has a final decision, remains unimplemented, and validation is not applicable.
+- Proposed work, pending decisions, and incomplete implementation remain unresolved and prevent Adapt completion.
+
+An unresolved adaptation requires continued Adapt work or a formally blocked or interrupted execution. At least one structured adaptation and Adapt-stage reference are required when Adapt completes. When no adaptation is warranted, mark the stage `not-applicable` with a concrete reason.
 
 ## 6. Validate
 
@@ -50,7 +57,7 @@ Define and execute evidence-based checks proving or disproving implemented adapt
 
 Every material validation must use the structured `VAL-NNN` model and the rules in `validation.md`. Before Validate begins, each validation-eligible adaptation must have a planned validation entry identifying its targets, criteria or rules, method, immutable scope, expected outcome, and expected evidence.
 
-Only approved and fully implemented adaptations are validation-eligible. Pending approval, rejected, deferred, new-goal-required, not-started, or partially implemented adaptations cannot pass validation.
+Only approved and fully implemented adaptations are validation-eligible. Rejected, deferred, new-goal-required, not-started, or partially implemented adaptations cannot pass validation.
 
 Validate may complete only when all eligible adaptations have complete coverage, no required validation remains pending, every pass or failure has sufficient evidence, failures have findings and recovery actions, adaptation validation statuses agree with results, and all validation references resolve. Command execution alone is not proof. When no adaptation is eligible, mark Validate `not-applicable` with a concrete reason.
 
