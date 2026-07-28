@@ -154,8 +154,10 @@ $defs:
         then: {properties: {uncertainty: {type: string, minLength: 1}}}
       - if: {properties: {approval_required: {const: false}}, required: [approval_required]}
         then: {properties: {approval_status: {const: not-required}, approval_refs: {maxItems: 0}}}
-      - if: {properties: {approval_required: {const: true}, disposition: {enum: [proposed, deferred]}}, required: [approval_required, disposition]}
+      - if: {properties: {approval_required: {const: true}, disposition: {const: proposed}}, required: [approval_required, disposition]}
         then: {properties: {approval_status: {const: pending}, implementation_status: {const: not-started}}}
+      - if: {properties: {approval_required: {const: true}, disposition: {const: deferred}}, required: [approval_required, disposition]}
+        then: {properties: {approval_status: {const: pending}, implementation_status: {const: not-started}, decision_ref: {type: string, minLength: 1}}}
       - if: {properties: {approval_required: {const: true}, disposition: {const: approved}}, required: [approval_required, disposition]}
         then: {properties: {approval_status: {const: approved}, approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}}}
       - if: {properties: {approval_required: {const: true}, disposition: {const: rejected}}, required: [approval_required, disposition]}
@@ -164,8 +166,10 @@ $defs:
         then: {properties: {approval_required: {const: true}, approval_status: {const: approved}, approval_refs: {minItems: 1}, decision_ref: {type: string, minLength: 1}, disposition: {const: approved}}}
       - if: {properties: {scope_disposition: {const: new-goal-required}}, required: [scope_disposition]}
         then: {properties: {disposition: {enum: [proposed, deferred]}, implementation_status: {const: not-started}}}
-      - if: {properties: {disposition: {enum: [proposed, deferred]}}, required: [disposition]}
+      - if: {properties: {disposition: {const: proposed}}, required: [disposition]}
         then: {properties: {implementation_status: {const: not-started}, validation_status: {const: not-started}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
+      - if: {properties: {disposition: {const: deferred}}, required: [disposition]}
+        then: {properties: {implementation_status: {const: not-started}, validation_status: {const: not-applicable}, decision_ref: {type: string, minLength: 1}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
       - if: {properties: {disposition: {const: rejected}}, required: [disposition]}
         then: {properties: {implementation_status: {const: not-applicable}, validation_status: {const: not-applicable}, persistence_status: {const: not-persisted}, reuse_status: {const: not-assessed}}}
       - if: {properties: {implementation_status: {enum: [in-progress, completed]}}, required: [implementation_status]}
