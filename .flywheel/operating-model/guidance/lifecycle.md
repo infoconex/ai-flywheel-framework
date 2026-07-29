@@ -75,7 +75,13 @@ Persist must not claim Reuse completion or promote knowledge that has not met th
 
 ## 8. Reuse
 
-Identify relevant validated knowledge for later work and make new validated learning discoverable. When no reusable knowledge applies or results, record the stage as `not-applicable` with a reason.
+Assess validated learning and existing validated knowledge using the structured contract in `reuse.md` and `reuse-assessment.schema.yaml`.
+
+Reuse MUST NOT begin until Persist is completed, its persistence plan is terminal `applied`, final verification passed, all references resolve, and no persistence blocker remains.
+
+Every material candidate learning item and every existing knowledge item considered for use MUST have a structured assessment referenced by the Reuse stage. Promotions require evidence, passed validation provenance, applicability, limitations, actionable guidance, duplicate and conflict resolution, and required decisions or approvals. Existing knowledge use or rejection must record an applicability-based disposition.
+
+Reuse may complete only when every required assessment is completed, all references and proposed knowledge artifacts validate, duplicate and conflict checks pass, adaptation reuse statuses agree, and the stage has references, summary, and timestamps. When no candidate or existing knowledge requires assessment, mark Reuse `not-applicable` with a concrete reason.
 
 ## Durable transitions
 
