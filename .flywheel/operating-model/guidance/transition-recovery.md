@@ -82,9 +82,11 @@ The following current states have deterministic handling.
 When the plan is `planned` or `applying` and every target still matches its retained precondition:
 
 - Do not apply the transition from startup memory.
-- Finalize the plan as `rolled-back` or `failed` according to the recorded failure.
+- Finalize the plan as `rolled-back` with recovery mode `not-started`, a null finding reference, no blocker, and final verification `passed`.
 - Verify the original execution/state pair remains intact.
-- Continue only after the terminal plan is re-read and no other blocker exists.
+- Continue only after the terminal plan and original pair are re-read and no other blocker exists.
+
+A no-target-written plan is not a partial transition and does not require a recovery finding.
 
 ### Execution written, state not written
 
@@ -171,7 +173,8 @@ If the recovery finding, recovery plan, or original-plan finalization cannot be 
 Lifecycle work may continue only when one of these conditions is durably proven:
 
 - The transition plan is `applied`, final verification passed, and the execution/state pair equals the proposed pair.
-- The transition plan is `rolled-back`, the recovery finding is durable, and the execution/state pair equals the retained pre-transition pair.
+- The transition plan is `rolled-back`, recovery mode is `not-started`, no governed target changed, and the execution/state pair equals the retained pre-transition pair.
+- The transition plan is `rolled-back`, recovery mode is `exact-rollback`, the recovery finding is durable, and the execution/state pair equals the retained pre-transition pair.
 
 A `planned`, `applying`, `failed`, or `blocked` transition plan prevents lifecycle continuation until reconciled. A terminal plan whose target set does not match its declared outcome also prevents continuation.
 
