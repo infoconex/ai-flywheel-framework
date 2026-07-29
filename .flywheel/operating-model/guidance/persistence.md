@@ -62,13 +62,15 @@ The target set MUST include every new or changed durable artifact caused by the 
 - Goal, mission, state, repository context, or Flywheel context when values change.
 - Every supporting artifact referenced by a changed durable artifact.
 
+The transaction that commits Reuse activation MUST include every required planned reuse assessment as a create target before the execution and state targets that reference it. The later Reuse output transaction MUST include every planned-to-completed assessment as a CAS update target.
+
 A referenced changed artifact MUST NOT be omitted. An unchanged artifact MUST NOT be added merely to enlarge the transaction. Every target has one canonical path, operation, mutability rule, precondition, proposed digest, dependencies, and recovery action.
 
 ## Digests and mutation semantics
 
 Every target digest is SHA-256 lowercase hexadecimal over the exact UTF-8 bytes to be written after LF normalization and without a byte-order mark.
 
-Evidence, decisions, findings, approvals, and reuse assessments are create-only. Knowledge is create-only for a new identity; revisions use a new identity with `supersedes`. Execution, goal, mission, state, and context use retained-SHA compare-and-swap. Create targets require confirmed absence. Update targets require retained complete content and blob SHA. Identity collisions use the next deterministic identity when permitted or block the transaction.
+Evidence, decisions, findings, and approvals are create-only. A reuse assessment is create-only when first persisted as `planned`, CAS-mutable only from `planned` to `completed`, and immutable after completion. Knowledge is create-only for a new identity; revisions use a new identity with `supersedes`. Execution, goal, mission, state, and context use retained-SHA compare-and-swap. Create targets require confirmed absence. Update targets require retained complete content and blob SHA. Identity collisions use the next deterministic identity when permitted or block the transaction.
 
 ## Deterministic write order
 
@@ -113,7 +115,7 @@ After all writes, re-read the entire set and verify:
 - Every update equals proposed content.
 - Every reference resolves.
 - Failed-validation authorizations still govern the exact validation and scope.
-- Reuse assessments and knowledge satisfy `reuse.md` when present.
+- Reuse assessments satisfy their planned-to-completed lifecycle and knowledge satisfies `reuse.md` when present.
 - State and execution agree on mission, goal, execution, status, and sole active stage or terminal state.
 - No unplanned artifact changed.
 
@@ -146,6 +148,7 @@ Rollback MUST NOT overwrite concurrent changes. Failure to restore one target bl
 - `PERSIST-TARGET-001`: Every new or changed durable artifact appears exactly once.
 - `PERSIST-LOCATION-001`: Every target uses its canonical path.
 - `PERSIST-MUTABILITY-001`: Create-only history is preserved and mutable artifacts use CAS.
+- `PERSIST-REUSE-ASSESSMENT-001`: Planned assessments are created before Reuse activation, completed through CAS during Reuse, and immutable thereafter.
 - `PERSIST-ORDER-001`: Dependency and canonical type order are enforced; state is final.
 - `PERSIST-PRECHECK-001`: Create absence and update SHAs are rechecked before writing.
 - `PERSIST-VERIFY-001`: Every write and the whole set are re-read and verified.
@@ -156,7 +159,7 @@ Rollback MUST NOT overwrite concurrent changes. Failure to restore one target bl
 
 ## Persist completion
 
-Persist may complete only when its plan is terminal `applied`, final verification passed, all required references and authorizations resolve, the stage has summary and timestamps, and no persistence blocker remains. The applied plan commit marker may make a governed execution/state pair containing Persist completion and Reuse activation authoritative without a redundant follow-up transition.
+Persist may complete only when its plan is terminal `applied`, final verification passed, all required references and authorizations resolve, the stage has summary and timestamps, and no persistence blocker remains. The applied plan commit marker may make a governed execution/state pair containing Persist completion and Reuse activation authoritative without a redundant follow-up transition, provided every planned assessment referenced by Reuse was created and verified in the same transaction.
 
 ## Records, knowledge, and Reuse
 
