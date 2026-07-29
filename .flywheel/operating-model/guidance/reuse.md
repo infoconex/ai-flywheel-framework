@@ -83,12 +83,15 @@ Before Reuse completes, the operator MUST create and apply a dedicated persisten
 - Completed reuse assessments under the canonical goal `reuse/` directory.
 - New knowledge artifacts under the canonical knowledge root.
 - Required decisions and approvals.
-- The execution update containing final assessment references, synchronized adaptation reuse statuses, Reuse completion, outcome, and completion disposition when applicable.
+- Goal and mission updates when their terminal values change.
+- The execution update containing final assessment references, synchronized adaptation reuse statuses, Reuse completion, outcome, completion disposition, and completion timestamp when applicable.
 - The state update as the final operational pointer.
 
-The Reuse persistence transaction follows every rule in `persistence.md`. Its canonical type order inserts `reuse-assessment` after approvals and before knowledge. Reuse assessments and knowledge are create-only. Execution and state use retained-SHA compare-and-swap. State is written last. The transaction plan remains its own controller and is excluded from its own targets and write order.
+The Reuse persistence transaction follows every rule in `persistence.md`. Its canonical type order inserts `reuse-assessment` after approvals and before knowledge. Reuse assessments and knowledge are create-only. Goal, mission, execution, and state use retained-SHA compare-and-swap when modeled as existing durable artifacts. State is written last. The transaction plan remains its own controller and is excluded from its own targets and write order.
 
-Reuse MUST NOT report completion until the dedicated plan is terminal `applied`, final whole-set verification passed, and the final execution/state pair was re-read and verified. Partial Reuse persistence uses the same rollback, compensation, blocking, and human-reconciliation rules as any other persistence transaction.
+The governed target content MAY contain the proposed completed Reuse stage, terminal execution, completed goal and mission, and cleared terminal state. While the plan is `planned` or `applying`, those values are transaction-pending and MUST NOT be reported as durable completion. The terminal `applied` plan revision is the commit marker that makes the verified Reuse outputs and lifecycle closure authoritative together.
+
+Reuse MUST NOT report completion until the dedicated plan is terminal `applied`, final whole-set verification passed, and the final governed set was re-read and verified. Partial Reuse persistence uses the same rollback, compensation, blocking, transaction-pending, and human-reconciliation rules as any other persistence transaction.
 
 ## Adaptation synchronization
 
@@ -111,7 +114,7 @@ Reuse may complete only when:
 - The dedicated Reuse persistence plan is terminal `applied` with passed final verification.
 - The Reuse stage has references, summary, and timestamps.
 
-Reuse completion does not itself complete the goal. Execution completion additionally requires every lifecycle stage terminal, acceptance-criterion evidence, approvals, blockers resolved or formally disposed, an outcome, and a completion disposition.
+The applied Reuse plan commit marker may make Reuse completion, terminal execution completion, goal and mission completion, and terminal state cleanup authoritative together. No redundant follow-up lifecycle update is required when those exact values were included in the verified governed set.
 
 ## Required semantic rules
 
@@ -124,7 +127,7 @@ Reuse completion does not itself complete the goal. Execution completion additio
 - `REUSE-SUPERSEDE-001`: Revisions use new identities and explicit supersedes linkage.
 - `REUSE-APPROVAL-001`: Material or risk-bearing knowledge requires the applicable decision and approval.
 - `REUSE-EXISTING-001`: Existing knowledge use or rejection is recorded with applicability reasoning.
-- `REUSE-DURABILITY-001`: Reuse outputs and final lifecycle updates are durable through a dedicated applied persistence plan.
+- `REUSE-DURABILITY-001`: Reuse outputs and final lifecycle updates become authoritative together through the dedicated applied plan commit marker.
 - `REUSE-SYNC-001`: Adaptation reuse status agrees with completed assessments.
 - `REUSE-COMPLETE-001`: Reuse completes only when every required assessment and knowledge artifact passes validation and the Reuse persistence transaction is verified.
 - `REUSE-HISTORY-001`: Knowledge and assessment history is immutable and preserved.
