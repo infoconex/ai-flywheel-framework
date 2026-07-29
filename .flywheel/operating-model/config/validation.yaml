@@ -114,7 +114,7 @@ persistence_contract:
   digest_encoding: lowercase-hex
   digest_bytes: normalized-utf8-lf-no-bom
   require_dependency_order: true
-  canonical_type_order: [evidence, decision, finding, approval, knowledge, context, goal, mission, execution, state]
+  canonical_type_order: [evidence, decision, finding, approval, reuse-assessment, knowledge, context, goal, mission, execution, state]
   state_is_final_operational_pointer: true
   require_create_absence_recheck: true
   require_update_sha_recheck: true
@@ -144,11 +144,13 @@ reuse_contract:
   require_supersedes_linkage: true
   require_approval_for_material_guidance: true
   require_existing_knowledge_disposition: true
+  require_dedicated_persistence_plan: true
+  require_durable_assessments_and_knowledge_before_completion: true
   require_adaptation_status_synchronization: true
   prohibit_direct_observation_promotion: true
   prohibit_unvalidated_promotion: true
   prohibit_history_overwrite: true
-  semantic_rule_ids: [REUSE-ACTIVATE-001, REUSE-ASSESS-001, REUSE-PROMOTE-001, REUSE-DIRECT-001, REUSE-DUPLICATE-001, REUSE-CONFLICT-001, REUSE-SUPERSEDE-001, REUSE-APPROVAL-001, REUSE-EXISTING-001, REUSE-SYNC-001, REUSE-COMPLETE-001, REUSE-HISTORY-001]
+  semantic_rule_ids: [REUSE-ACTIVATE-001, REUSE-ASSESS-001, REUSE-PROMOTE-001, REUSE-DIRECT-001, REUSE-DUPLICATE-001, REUSE-CONFLICT-001, REUSE-SUPERSEDE-001, REUSE-APPROVAL-001, REUSE-EXISTING-001, REUSE-DURABILITY-001, REUSE-SYNC-001, REUSE-COMPLETE-001, REUSE-HISTORY-001]
 completion:
   require_acceptance_criteria: true
   require_evidence_per_criterion: true
