@@ -16,6 +16,7 @@ Required subdirectories are:
 - `findings/`
 - `approvals/`
 - `persistence/`
+- `reuse/`
 
 ## Naming
 
@@ -27,12 +28,15 @@ Use UTC timestamps and stable identifiers:
 - Finding: `findings/<finding-id>.yaml`
 - Approval: `approvals/<approval-id>.yaml`
 - Persistence plan: `persistence/<persistence-plan-id>.yaml`
+- Reuse assessment: `reuse/<reuse-assessment-id>.yaml`
 
 Persistence plan identifiers MUST use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. The counter begins at `001`; select the lowest unused counter for the captured second. A create collision requires re-listing and selecting the next unused counter. Counter exhaustion is an operating-validation failure.
 
+Reuse assessment identifiers MUST use `REUSE-NNN` and be unique within the execution. Revisions use a new identifier and preserve the prior assessment through references in rationale, decisions, or superseding knowledge.
+
 ## Record mutability
 
-Evidence, decisions, findings, and approvals are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
+Evidence, decisions, findings, approvals, and reuse assessments are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
 
 A persistence plan is created once before its governed writes, may be updated only through compare-and-swap while `planned` or `applying`, and becomes immutable when terminal. The plan is the transaction controller and MUST NOT enumerate itself as a persistence target or write-order item.
 
@@ -44,7 +48,7 @@ Knowledge uses create-only identity. A revision MUST use a new identity and pres
 
 ## Ordering and discovery
 
-Read records by their `created_at` value, oldest first. File names are a secondary ordering signal only. Records MUST identify `mission_id` and `goal_id`. Execution and persistence-plan records MUST also identify `execution_id` or the execution they govern.
+Read records by their `created_at` or assessment timestamp, oldest first. File names are a secondary ordering signal only. Records MUST identify `mission_id` and `goal_id`. Execution, persistence-plan, and reuse-assessment records MUST also identify the execution they govern.
 
 ## Active execution
 
@@ -56,8 +60,10 @@ A durable artifact MUST NOT reference a record that is absent from its canonical
 
 A persistence plan MUST enumerate every governed record creation and every governed mutable-artifact update performed by its transaction. Plan creation and plan-status updates are mandatory control operations but are excluded from the plan's `targets` and `write_order`.
 
+Reuse outputs are durable only after a Reuse persistence plan has applied and verified the reuse assessments, proposed knowledge, execution, and state updates. Reuse MUST NOT complete based on in-memory assessments alone.
+
 Unplanned governed writes are prohibited.
 
 ## Durability
 
-Do not rely on chat transcripts as records. Persist material observations, commands, outputs, decisions, approvals, failures, lifecycle results, and the persistence plan before ending a session.
+Do not rely on chat transcripts as records. Persist material observations, commands, outputs, decisions, approvals, failures, lifecycle results, persistence plans, reuse assessments, and promoted knowledge before ending a session.
