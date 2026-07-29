@@ -4,7 +4,6 @@ validation_domains:
     purpose: Validate the Flywheel operating model, state, governance, schemas, references, startup contract, and operator invariants.
     startup_expected_state: passed
     allowed_states: [pending, passed, failed, blocked]
-    manual_bootstrap_authoritative: true
   repository_validation:
     purpose: Validate repository discovery, context gathering, inventory, constraints, and evidence collected during an authorized execution.
     startup_expected_state: pending
@@ -41,7 +40,9 @@ artifact_validation:
     goal: .flywheel/operating-model/schemas/goal.schema.yaml
     execution: .flywheel/operating-model/schemas/execution.schema.yaml
     record: .flywheel/operating-model/schemas/record.schema.yaml
+    knowledge: .flywheel/operating-model/schemas/knowledge.schema.yaml
     persistence_plan: .flywheel/operating-model/schemas/persistence-plan.schema.yaml
+    reuse_assessment: .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
 adapt_completion_contract:
   guidance: .flywheel/operating-model/guidance/adaptation.md
   authoritative_matrix: authoritative-adapt-completion-matrix
@@ -72,15 +73,7 @@ adapt_completion_contract:
     decision_ref: required
     approval_status_when_required: pending
   unresolved_action: block-or-interrupt
-  semantic_rule_ids:
-    - ADAPT-COMPLETE-001
-    - ADAPT-COMPLETE-002
-    - ADAPT-COMPLETE-003
-    - ADAPT-COMPLETE-004
-    - ADAPT-COMPLETE-005
-    - ADAPT-COMPLETE-006
-    - ADAPT-COMPLETE-007
-    - ADAPTATION-DEFERRAL-001
+  semantic_rule_ids: [ADAPT-COMPLETE-001, ADAPT-COMPLETE-002, ADAPT-COMPLETE-003, ADAPT-COMPLETE-004, ADAPT-COMPLETE-005, ADAPT-COMPLETE-006, ADAPT-COMPLETE-007, ADAPTATION-DEFERRAL-001]
 validation_contract:
   guidance: .flywheel/operating-model/guidance/validation.md
   require_stable_identity: true
@@ -133,21 +126,29 @@ persistence_contract:
   prohibit_unplanned_writes: true
   prohibit_history_overwrite: true
   prohibit_reuse_claims_during_persist: true
-  semantic_rule_ids:
-    - PERSIST-PLAN-001
-    - PERSIST-PLAN-SELF-001
-    - PERSIST-PLAN-LIFECYCLE-001
-    - PERSIST-DIGEST-001
-    - PERSIST-TARGET-001
-    - PERSIST-LOCATION-001
-    - PERSIST-MUTABILITY-001
-    - PERSIST-ORDER-001
-    - PERSIST-PRECHECK-001
-    - PERSIST-VERIFY-001
-    - PERSIST-ROLLBACK-001
-    - PERSIST-PARTIAL-001
-    - PERSIST-HISTORY-001
-    - PERSIST-REUSE-001
+  semantic_rule_ids: [PERSIST-PLAN-001, PERSIST-PLAN-SELF-001, PERSIST-PLAN-LIFECYCLE-001, PERSIST-DIGEST-001, PERSIST-TARGET-001, PERSIST-LOCATION-001, PERSIST-MUTABILITY-001, PERSIST-ORDER-001, PERSIST-PRECHECK-001, PERSIST-VERIFY-001, PERSIST-ROLLBACK-001, PERSIST-PARTIAL-001, PERSIST-HISTORY-001, PERSIST-REUSE-001]
+reuse_contract:
+  guidance: .flywheel/operating-model/guidance/reuse.md
+  assessment_schema: .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
+  knowledge_schema: .flywheel/operating-model/schemas/knowledge.schema.yaml
+  require_completed_verified_persist: true
+  require_structured_assessment: true
+  require_candidate_and_existing_knowledge_dispositions: true
+  require_evidence_and_validation_provenance_for_promotion: true
+  require_applicability: true
+  require_limitations_assessment: true
+  require_actionable_reuse_guidance: true
+  require_duplicate_search: true
+  require_conflict_resolution: true
+  require_new_identity_for_revision: true
+  require_supersedes_linkage: true
+  require_approval_for_material_guidance: true
+  require_existing_knowledge_disposition: true
+  require_adaptation_status_synchronization: true
+  prohibit_direct_observation_promotion: true
+  prohibit_unvalidated_promotion: true
+  prohibit_history_overwrite: true
+  semantic_rule_ids: [REUSE-ACTIVATE-001, REUSE-ASSESS-001, REUSE-PROMOTE-001, REUSE-DIRECT-001, REUSE-DUPLICATE-001, REUSE-CONFLICT-001, REUSE-SUPERSEDE-001, REUSE-APPROVAL-001, REUSE-EXISTING-001, REUSE-SYNC-001, REUSE-COMPLETE-001, REUSE-HISTORY-001]
 completion:
   require_acceptance_criteria: true
   require_evidence_per_criterion: true
@@ -176,15 +177,7 @@ readiness:
   require_self_hosting: true
   require_proving_mission: true
   require_human_approval: true
-  required_capabilities:
-    - mission-management
-    - goal-management
-    - execution-recording
-    - lifecycle-enforcement
-    - evidence-capture
-    - completion-validation
-    - classification-recording
-    - knowledge-persistence
+  required_capabilities: [mission-management, goal-management, execution-recording, lifecycle-enforcement, evidence-capture, completion-validation, classification-recording, knowledge-persistence]
 cold_start_test:
   prompt: Read this repository and operate according to its AI Flywheel.
   expected:
