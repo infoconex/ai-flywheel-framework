@@ -1,0 +1,14 @@
+id: replace-with-mission-id
+title: Replace with mission title
+status: proposed
+objective: >-
+  Describe the durable outcome the mission must achieve.
+scope:
+  includes: []
+  excludes: []
+governance:
+  approval_required_to_start: true
+acceptance_criteria: []
+goals: []
+created_at: null
+completed_at: null

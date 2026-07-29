@@ -1,0 +1,28 @@
+schema_version: 1
+id: replace-with-goal-id
+title: Replace with goal title
+status: proposed
+mission_id: replace-with-mission-id
+objective: >-
+  Describe the specific outcome this goal must achieve.
+depends_on: []
+scope:
+  includes: []
+  excludes: []
+approval:
+  required_before_start: false
+  approval_refs: []
+acceptance_criteria:
+  - id: AC-001
+    statement: Replace with measurable criterion.
+required_evidence:
+  - criterion_id: AC-001
+    evidence_types: []
+    artifact_refs: []
+created_at: null
+started_at: null
+completed_at: null
+completion:
+  disposition: null
+  evidence_map: []
+  approval_refs: []

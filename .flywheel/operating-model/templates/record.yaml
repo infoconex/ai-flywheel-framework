@@ -1,0 +1,17 @@
+schema_version: 1
+id: replace-with-record-id
+kind: evidence
+mission_id: replace-with-mission-id
+goal_id: replace-with-goal-id
+execution_id: null
+created_at: null
+created_by: null
+summary: Replace with concise durable summary
+status: proposed
+classification: null
+criterion_ids: []
+source_refs: []
+artifact_refs: []
+approval: null
+context: null
+validation: null
