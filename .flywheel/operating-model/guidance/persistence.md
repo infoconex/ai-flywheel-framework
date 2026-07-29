@@ -40,6 +40,18 @@ Every governing decision and approval created or changed by the execution MUST a
 
 Plan control operations are mandatory but are excluded from governed targets and write order.
 
+## Transaction commit marker
+
+The persistence plan's terminal `applied` revision is the atomic commit marker for its governed target set.
+
+A proposed execution, goal, mission, or state target MAY contain the lifecycle or completion values that will become authoritative when the transaction commits, including Persist completion, Reuse activation, Reuse completion, terminal execution completion, goal completion, mission completion, and cleared terminal state pointers.
+
+While the plan remains `planned` or `applying`, those written target values are transaction-pending and MUST NOT be reported, reused, or interpreted as durably authoritative outside transaction verification and recovery. Only after all governed targets pass whole-set verification and the plan is CAS-finalized to `applied` and re-read successfully do the proposed lifecycle and completion values become authoritative together.
+
+If plan finalization fails after governed writes pass verification, the target set remains transaction-pending rather than completed. The operator MUST create a blocking finding, prohibit lifecycle continuation or reuse of the pending values, and require reconciliation. Recovery MUST either finalize the exact verified plan or roll back or compensate the governed targets according to this contract.
+
+This commit-marker rule removes any requirement for a later lifecycle update whose only purpose would be to restate values already included in the verified governed set.
+
 ## Complete target derivation
 
 The target set MUST include every new or changed durable artifact caused by the transaction:
@@ -105,7 +117,7 @@ After all writes, re-read the entire set and verify:
 - State and execution agree on mission, goal, execution, status, and sole active stage or terminal state.
 - No unplanned artifact changed.
 
-Only after these checks pass may the plan become `applied` with final verification `passed`. A lifecycle stage MUST NOT report durable completion until plan finalization is re-read and verified.
+Only after these checks pass may the plan become `applied` with final verification `passed`. A lifecycle stage or terminal outcome MUST NOT be reported as durably completed until plan finalization is re-read and verified, even when the governed target content already contains that proposed completion state.
 
 ## Partial-persistence recovery
 
@@ -128,6 +140,7 @@ Rollback MUST NOT overwrite concurrent changes. Failure to restore one target bl
 - `PERSIST-PLAN-001`: Activation requires a schema-valid complete plan.
 - `PERSIST-PLAN-SELF-001`: The plan is excluded from its targets and write order and has no self-digest.
 - `PERSIST-PLAN-LIFECYCLE-001`: The plan is created before writes, CAS-updated while active, and immutable when terminal.
+- `PERSIST-COMMIT-001`: Terminal applied plan finalization is the commit marker that makes the verified governed target set authoritative together.
 - `PERSIST-DIGEST-001`: Target digests use normalized UTF-8 SHA-256 lowercase hexadecimal.
 - `PERSIST-VALIDATION-DISPOSITION-001`: Failed required validation has one governing authorized disposition.
 - `PERSIST-TARGET-001`: Every new or changed durable artifact appears exactly once.
@@ -143,7 +156,7 @@ Rollback MUST NOT overwrite concurrent changes. Failure to restore one target bl
 
 ## Persist completion
 
-Persist may complete only when its plan is terminal `applied`, final verification passed, all required references and authorizations resolve, the stage has summary and timestamps, and no persistence blocker remains.
+Persist may complete only when its plan is terminal `applied`, final verification passed, all required references and authorizations resolve, the stage has summary and timestamps, and no persistence blocker remains. The applied plan commit marker may make a governed execution/state pair containing Persist completion and Reuse activation authoritative without a redundant follow-up transition.
 
 ## Records, knowledge, and Reuse
 
