@@ -12,7 +12,17 @@ Only an accepted, non-superseded `accepted-risk` or `waived` disposition with `p
 
 Before any governed persistence transaction begins, the operator MUST construct and validate one persistence plan conforming to `persistence-plan.schema.yaml`. The plan is the transaction controller. It MUST NOT include itself in `targets` or `write_order`, and it has no self-digest.
 
-The same transaction contract applies to the Persist stage and to the dedicated Reuse output transaction required by `reuse.md`.
+The same transaction contract applies to checkpoint persistence during earlier lifecycle stages, the Persist-stage transaction, and the dedicated Reuse output transaction required by `reuse.md`.
+
+## Checkpoint persistence
+
+A lifecycle transition MUST use a checkpoint persistence plan whenever the proposed execution or state pair will reference a new or changed durable artifact that is not already verified at its canonical path.
+
+A checkpoint target set includes every new or changed supporting evidence, decision, finding, approval, or other referenced record, followed by the execution and state transition targets. Supporting targets MUST be written and verified before the execution and state that reference them. The terminal `applied` checkpoint plan is the commit marker for that stage transition.
+
+A checkpoint plan does not complete the lifecycle Persist stage, does not promote knowledge, and does not permit reuse claims. It only makes the current stage records and execution/state transition durable. When a transition changes only execution and state and introduces no new or changed external reference, the dual-artifact compare-and-swap sequence in `execution-model.md` may be used without a checkpoint plan.
+
+The final Persist-stage transaction MUST still derive and verify the complete execution outcome. It MUST include every artifact that remains new or changed at Persist and MUST verify that all earlier checkpoint artifacts referenced by the execution exist unchanged at their canonical paths. An artifact already committed by a checkpoint is not recreated or added as an unchanged target merely to enlarge the final transaction.
 
 ## Failed-validation authorization precheck
 
@@ -25,7 +35,7 @@ Before constructing a plan that persists an execution containing failed required
 5. Resolve and verify required approvals and execution `approval_refs`.
 6. Reject missing, ambiguous, stale, superseded, scope-mismatched, unapproved, or non-permitting dispositions.
 
-Every governing decision and approval created or changed by the execution MUST appear in the target set.
+Every governing decision and approval created or changed by the execution MUST appear in the target set that first makes it durable.
 
 ## Plan lifecycle
 
@@ -44,7 +54,7 @@ Plan control operations are mandatory but are excluded from governed targets and
 
 The persistence plan's terminal `applied` revision is the atomic commit marker for its governed target set.
 
-A proposed execution, goal, mission, or state target MAY contain the lifecycle or completion values that will become authoritative when the transaction commits, including Persist completion, Reuse activation, Reuse completion, terminal execution completion, goal completion, mission completion, and cleared terminal state pointers.
+A proposed execution, goal, mission, or state target MAY contain the lifecycle or completion values that will become authoritative when the transaction commits, including stage transitions, Persist completion, Reuse activation, Reuse completion, terminal execution completion, goal completion, mission completion, and cleared terminal state pointers.
 
 While the plan remains `planned` or `applying`, those written target values are transaction-pending and MUST NOT be reported, reused, or interpreted as durably authoritative outside transaction verification and recovery. Only after all governed targets pass whole-set verification and the plan is CAS-finalized to `applied` and re-read successfully do the proposed lifecycle and completion values become authoritative together.
 
@@ -142,6 +152,7 @@ Rollback MUST NOT overwrite concurrent changes. Failure to restore one target bl
 - `PERSIST-PLAN-001`: Activation requires a schema-valid complete plan.
 - `PERSIST-PLAN-SELF-001`: The plan is excluded from its targets and write order and has no self-digest.
 - `PERSIST-PLAN-LIFECYCLE-001`: The plan is created before writes, CAS-updated while active, and immutable when terminal.
+- `PERSIST-CHECKPOINT-001`: A transition that introduces new or changed external references uses a checkpoint plan that commits supporting records before execution and state.
 - `PERSIST-COMMIT-001`: Terminal applied plan finalization is the commit marker that makes the verified governed target set authoritative together.
 - `PERSIST-DIGEST-001`: Target digests use normalized UTF-8 SHA-256 lowercase hexadecimal.
 - `PERSIST-VALIDATION-DISPOSITION-001`: Failed required validation has one governing authorized disposition.
