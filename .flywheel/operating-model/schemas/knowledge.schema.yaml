@@ -6,7 +6,7 @@ required: [schema_version, id, status, statement, applicability, limitations, ev
 properties:
   schema_version: {type: integer, const: 1}
   id: {type: string, pattern: '^KNOW-[0-9]{3,}$'}
-  status: {type: string, enum: [candidate, validated, deprecated, superseded, rejected]}
+  status: {type: string, enum: [candidate, validated, deprecated, rejected]}
   statement: {type: string, minLength: 1}
   applicability:
     type: array
@@ -61,8 +61,10 @@ allOf:
         validated_at: {type: string, format: date-time}
         validated_by: {type: string, minLength: 1}
   - if:
-      properties: {status: {const: superseded}}
+      properties: {status: {const: deprecated}}
       required: [status]
     then:
       properties:
-        supersedes: {maxItems: 0}
+        supersedes: {minItems: 1}
+        decision_ref: {type: string, minLength: 1}
+        reuse_guidance: {type: string, minLength: 1}
