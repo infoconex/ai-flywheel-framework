@@ -98,6 +98,10 @@ persistence_contract:
   plan_schema: .flywheel/operating-model/schemas/persistence-plan.schema.yaml
   require_plan_before_activation: true
   plan_is_transaction_controller: true
+  terminal_applied_plan_is_commit_marker: true
+  governed_completion_values_are_pending_until_commit: true
+  prohibit_reporting_pending_completion_values: true
+  require_blocking_reconciliation_when_commit_marker_finalization_fails: true
   prohibit_plan_in_own_targets: true
   prohibit_plan_in_own_write_order: true
   prohibit_plan_self_digest: true
@@ -126,7 +130,7 @@ persistence_contract:
   prohibit_unplanned_writes: true
   prohibit_history_overwrite: true
   prohibit_reuse_claims_during_persist: true
-  semantic_rule_ids: [PERSIST-PLAN-001, PERSIST-PLAN-SELF-001, PERSIST-PLAN-LIFECYCLE-001, PERSIST-DIGEST-001, PERSIST-TARGET-001, PERSIST-LOCATION-001, PERSIST-MUTABILITY-001, PERSIST-ORDER-001, PERSIST-PRECHECK-001, PERSIST-VERIFY-001, PERSIST-ROLLBACK-001, PERSIST-PARTIAL-001, PERSIST-HISTORY-001, PERSIST-REUSE-001]
+  semantic_rule_ids: [PERSIST-PLAN-001, PERSIST-PLAN-SELF-001, PERSIST-PLAN-LIFECYCLE-001, PERSIST-COMMIT-001, PERSIST-DIGEST-001, PERSIST-TARGET-001, PERSIST-LOCATION-001, PERSIST-MUTABILITY-001, PERSIST-ORDER-001, PERSIST-PRECHECK-001, PERSIST-VERIFY-001, PERSIST-ROLLBACK-001, PERSIST-PARTIAL-001, PERSIST-HISTORY-001, PERSIST-REUSE-001]
 reuse_contract:
   guidance: .flywheel/operating-model/guidance/reuse.md
   assessment_schema: .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
@@ -146,6 +150,7 @@ reuse_contract:
   require_existing_knowledge_disposition: true
   require_dedicated_persistence_plan: true
   require_durable_assessments_and_knowledge_before_completion: true
+  terminal_reuse_plan_commits_lifecycle_closure: true
   require_adaptation_status_synchronization: true
   prohibit_direct_observation_promotion: true
   prohibit_unvalidated_promotion: true
