@@ -8,7 +8,9 @@ Reuse evaluates validated execution learning and existing validated knowledge fo
 
 Reuse MUST NOT begin until Persist is `completed`, the persistence plan is terminal with `status: applied`, final whole-set verification passed, all durable references resolve, and no persistence blocker remains.
 
-Before Reuse becomes `in-progress`, every material candidate learning item and every existing knowledge item considered for the execution MUST have a planned structured assessment conforming to `reuse-assessment.schema.yaml`. The Reuse stage MUST reference those assessment IDs.
+Before Reuse becomes `in-progress`, every material candidate learning item and every existing knowledge item considered for the execution MUST have a durable planned structured assessment conforming to `reuse-assessment.schema.yaml`. Those planned assessments MUST be created and verified by the transaction whose commit activates Reuse, and the Reuse stage MUST reference their stable IDs.
+
+A planned assessment has no final disposition, rationale, assessed timestamp, or assessor. Its subject, execution, mission, goal, and adaptation scope are fixed at creation.
 
 ## Assessment scope
 
@@ -17,7 +19,7 @@ Each assessment MUST identify exactly one subject:
 - A `candidate-learning` classification from the execution.
 - An `existing-knowledge` artifact considered for the current or future work.
 
-The assessment MUST record evidence and validation provenance, applicability, limitations, conflicts, duplicates, approval requirements, decision references, and a final disposition.
+The completed assessment MUST record evidence and validation provenance, applicability, limitations, conflicts, duplicates, approval requirements, decision references, and a final disposition.
 
 ## Candidate-learning dispositions
 
@@ -74,20 +76,28 @@ A promoted knowledge artifact MUST conform to `knowledge.schema.yaml` and includ
 - Approval and decision references when required.
 - Superseded knowledge references when applicable.
 
+## Assessment lifecycle
+
+A reuse assessment is created once as `planned`, updated through retained-SHA compare-and-swap to `completed`, and immutable after completion.
+
+The update from planned to completed MUST preserve the assessment ID, mission, goal, execution, subject type, subject reference, and adaptation references. It supplies the final disposition, provenance, applicability, limitations, guidance, duplicate and conflict results, proposed knowledge reference, approvals, decision, rationale, timestamp, and assessor.
+
+A stale assessment SHA, changed fixed field, second completion, or attempted completed-to-planned transition MUST be rejected. A later correction requires a new assessment identity with explicit linkage in rationale and governing records.
+
 ## Reuse output durability
 
 Reuse assessments and promoted knowledge are not durable merely because they were evaluated in memory.
 
 Before Reuse completes, the operator MUST create and apply a dedicated persistence plan using `persistence-plan.schema.yaml`. That plan MUST be referenced by the Reuse stage and MUST include every new or changed Reuse output:
 
-- Completed reuse assessments under the canonical goal `reuse/` directory.
+- CAS updates of every required planned reuse assessment to `completed` under the canonical goal `reuse/` directory.
 - New knowledge artifacts under the canonical knowledge root.
 - Required decisions and approvals.
 - Goal and mission updates when their terminal values change.
 - The execution update containing final assessment references, synchronized adaptation reuse statuses, Reuse completion, outcome, completion disposition, and completion timestamp when applicable.
 - The state update as the final operational pointer.
 
-The Reuse persistence transaction follows every rule in `persistence.md`. Its canonical type order inserts `reuse-assessment` after approvals and before knowledge. Reuse assessments and knowledge are create-only. Goal, mission, execution, and state use retained-SHA compare-and-swap when modeled as existing durable artifacts. State is written last. The transaction plan remains its own controller and is excluded from its own targets and write order.
+The Reuse persistence transaction follows every rule in `persistence.md`. Its canonical type order inserts `reuse-assessment` after approvals and before knowledge. Planned assessments use retained-SHA CAS updates; completed assessments and knowledge are immutable. Goal, mission, execution, and state use retained-SHA compare-and-swap when modeled as existing durable artifacts. State is written last. The transaction plan remains its own controller and is excluded from its own targets and write order.
 
 The governed target content MAY contain the proposed completed Reuse stage, terminal execution, completed goal and mission, and cleared terminal state. While the plan is `planned` or `applying`, those values are transaction-pending and MUST NOT be reported as durable completion. The terminal `applied` plan revision is the commit marker that makes the verified Reuse outputs and lifecycle closure authoritative together.
 
@@ -106,7 +116,7 @@ Reuse MUST NOT report completion until the dedicated plan is terminal `applied`,
 Reuse may complete only when:
 
 - At least one structured assessment exists, or the stage is `not-applicable` with a concrete reason proving no candidate or existing knowledge required assessment.
-- Every required assessment is `completed` and has a final disposition.
+- Every required assessment is durably `completed` and has a final disposition.
 - Every reference resolves.
 - Every promotion or supersession has a schema-valid knowledge artifact at its canonical path.
 - Duplicate, conflict, approval, and supersession rules pass.
@@ -118,8 +128,9 @@ The applied Reuse plan commit marker may make Reuse completion, terminal executi
 
 ## Required semantic rules
 
-- `REUSE-ACTIVATE-001`: Reuse requires completed, verified Persist.
-- `REUSE-ASSESS-001`: Every material candidate and considered existing knowledge item has one structured assessment.
+- `REUSE-ACTIVATE-001`: Reuse requires completed, verified Persist and durable planned assessments for every required subject.
+- `REUSE-ASSESS-001`: Every material candidate and considered existing knowledge item has one stable planned-to-completed assessment lifecycle.
+- `REUSE-ASSESS-CAS-001`: Planned assessments complete only through retained-SHA CAS; completed assessments are immutable.
 - `REUSE-PROMOTE-001`: Promotion requires validated learning, passed validation provenance, evidence, applicability, limitations, and reuse guidance.
 - `REUSE-DIRECT-001`: Observations and other unqualified records cannot be promoted directly.
 - `REUSE-DUPLICATE-001`: Unresolved duplicates cannot create new knowledge.
@@ -130,4 +141,4 @@ The applied Reuse plan commit marker may make Reuse completion, terminal executi
 - `REUSE-DURABILITY-001`: Reuse outputs and final lifecycle updates become authoritative together through the dedicated applied plan commit marker.
 - `REUSE-SYNC-001`: Adaptation reuse status agrees with completed assessments.
 - `REUSE-COMPLETE-001`: Reuse completes only when every required assessment and knowledge artifact passes validation and the Reuse persistence transaction is verified.
-- `REUSE-HISTORY-001`: Knowledge and assessment history is immutable and preserved.
+- `REUSE-HISTORY-001`: Completed assessment and knowledge history is immutable and preserved.
