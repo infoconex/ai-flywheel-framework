@@ -45,7 +45,7 @@ $defs:
     required: [id, artifact_type, path, operation, mutability, dependency_refs, expected_precondition, proposed_content_digest, rollback]
     properties:
       id: {type: string, pattern: '^PT-[0-9]{3,}$'}
-      artifact_type: {type: string, enum: [evidence, decision, finding, approval, execution, goal, mission, state, context, knowledge]}
+      artifact_type: {type: string, enum: [evidence, decision, finding, approval, reuse-assessment, execution, goal, mission, state, context, knowledge]}
       path: {type: string, minLength: 1}
       operation: {type: string, enum: [create, update]}
       mutability: {type: string, enum: [create-only, append-only, supersede-only, cas-update]}
