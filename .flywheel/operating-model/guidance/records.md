@@ -32,11 +32,13 @@ Use UTC timestamps and stable identifiers:
 
 Persistence plan identifiers MUST use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. The counter begins at `001`; select the lowest unused counter for the captured second. A create collision requires re-listing and selecting the next unused counter. Counter exhaustion is an operating-validation failure.
 
-Reuse assessment identifiers MUST use `REUSE-NNN` and be unique within the execution. Revisions use a new identifier and preserve the prior assessment through references in rationale, decisions, or superseding knowledge.
+Reuse assessment identifiers MUST use `REUSE-NNN` and be unique within the execution. The identity remains stable while the assessment moves from `planned` to `completed`. A materially revised conclusion after completion requires a new assessment identity that references the prior assessment in rationale and any governing decision or superseding knowledge.
 
 ## Record mutability
 
-Evidence, decisions, findings, approvals, and reuse assessments are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
+Evidence, decisions, findings, and approvals are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
+
+A reuse assessment is created once with `status: planned`, may be updated only through retained-SHA compare-and-swap from `planned` to `completed`, and becomes immutable when completed. A completed assessment MUST NOT return to planned or change disposition, provenance, scope, or rationale. Corrections require a new assessment identity.
 
 A persistence plan is created once before its governed writes, may be updated only through compare-and-swap while `planned` or `applying`, and becomes immutable when terminal. The plan is the transaction controller and MUST NOT enumerate itself as a persistence target or write-order item.
 
@@ -58,9 +60,11 @@ Read records by their `created_at` or assessment timestamp, oldest first. File n
 
 A durable artifact MUST NOT reference a record that is absent from its canonical location. Supporting records MUST be created and verified before an execution, goal, mission, context, or state artifact that references them is updated.
 
+Planned reuse assessments required for Reuse activation MUST be created and verified before the transaction commits the execution/state pair that activates Reuse. The later Reuse transaction updates those same assessments to `completed` using retained-SHA compare-and-swap before creating knowledge that references them.
+
 A persistence plan MUST enumerate every governed record creation and every governed mutable-artifact update performed by its transaction. Plan creation and plan-status updates are mandatory control operations but are excluded from the plan's `targets` and `write_order`.
 
-Reuse outputs are durable only after a Reuse persistence plan has applied and verified the reuse assessments, proposed knowledge, execution, and state updates. Reuse MUST NOT complete based on in-memory assessments alone.
+Reuse outputs are durable only after a Reuse persistence plan has applied and verified completed reuse assessments, proposed knowledge, execution, goal, mission, and state updates. Reuse MUST NOT complete based on in-memory assessments alone.
 
 Unplanned governed writes are prohibited.
 
