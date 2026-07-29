@@ -8,7 +8,7 @@ Reuse evaluates validated execution learning and existing validated knowledge fo
 
 Reuse MUST NOT begin until Persist is `completed`, the persistence plan is terminal with `status: applied`, final whole-set verification passed, all durable references resolve, and no persistence blocker remains.
 
-Before Reuse becomes `in-progress`, every material candidate learning item and every existing knowledge item considered for the execution MUST have a structured assessment conforming to `reuse-assessment.schema.yaml`. The Reuse stage MUST reference those assessments.
+Before Reuse becomes `in-progress`, every material candidate learning item and every existing knowledge item considered for the execution MUST have a planned structured assessment conforming to `reuse-assessment.schema.yaml`. The Reuse stage MUST reference those assessment IDs.
 
 ## Assessment scope
 
@@ -74,6 +74,22 @@ A promoted knowledge artifact MUST conform to `knowledge.schema.yaml` and includ
 - Approval and decision references when required.
 - Superseded knowledge references when applicable.
 
+## Reuse output durability
+
+Reuse assessments and promoted knowledge are not durable merely because they were evaluated in memory.
+
+Before Reuse completes, the operator MUST create and apply a dedicated persistence plan using `persistence-plan.schema.yaml`. That plan MUST be referenced by the Reuse stage and MUST include every new or changed Reuse output:
+
+- Completed reuse assessments under the canonical goal `reuse/` directory.
+- New knowledge artifacts under the canonical knowledge root.
+- Required decisions and approvals.
+- The execution update containing final assessment references, synchronized adaptation reuse statuses, Reuse completion, outcome, and completion disposition when applicable.
+- The state update as the final operational pointer.
+
+The Reuse persistence transaction follows every rule in `persistence.md`. Its canonical type order inserts `reuse-assessment` after approvals and before knowledge. Reuse assessments and knowledge are create-only. Execution and state use retained-SHA compare-and-swap. State is written last. The transaction plan remains its own controller and is excluded from its own targets and write order.
+
+Reuse MUST NOT report completion until the dedicated plan is terminal `applied`, final whole-set verification passed, and the final execution/state pair was re-read and verified. Partial Reuse persistence uses the same rollback, compensation, blocking, and human-reconciliation rules as any other persistence transaction.
+
 ## Adaptation synchronization
 
 `REUSE-SYNC-001`:
@@ -89,12 +105,13 @@ Reuse may complete only when:
 - At least one structured assessment exists, or the stage is `not-applicable` with a concrete reason proving no candidate or existing knowledge required assessment.
 - Every required assessment is `completed` and has a final disposition.
 - Every reference resolves.
-- Every promotion or supersession has a schema-valid proposed knowledge artifact at its canonical path.
+- Every promotion or supersession has a schema-valid knowledge artifact at its canonical path.
 - Duplicate, conflict, approval, and supersession rules pass.
 - Adaptation reuse statuses agree with assessments.
+- The dedicated Reuse persistence plan is terminal `applied` with passed final verification.
 - The Reuse stage has references, summary, and timestamps.
 
-Reuse completion does not itself complete the execution or goal. Execution completion additionally requires every lifecycle stage terminal, acceptance-criterion evidence, approvals, blockers resolved or formally disposed, an outcome, and a completion disposition.
+Reuse completion does not itself complete the goal. Execution completion additionally requires every lifecycle stage terminal, acceptance-criterion evidence, approvals, blockers resolved or formally disposed, an outcome, and a completion disposition.
 
 ## Required semantic rules
 
@@ -107,6 +124,7 @@ Reuse completion does not itself complete the execution or goal. Execution compl
 - `REUSE-SUPERSEDE-001`: Revisions use new identities and explicit supersedes linkage.
 - `REUSE-APPROVAL-001`: Material or risk-bearing knowledge requires the applicable decision and approval.
 - `REUSE-EXISTING-001`: Existing knowledge use or rejection is recorded with applicability reasoning.
+- `REUSE-DURABILITY-001`: Reuse outputs and final lifecycle updates are durable through a dedicated applied persistence plan.
 - `REUSE-SYNC-001`: Adaptation reuse status agrees with completed assessments.
-- `REUSE-COMPLETE-001`: Reuse completes only when every required assessment and proposed knowledge artifact passes validation.
+- `REUSE-COMPLETE-001`: Reuse completes only when every required assessment and knowledge artifact passes validation and the Reuse persistence transaction is verified.
 - `REUSE-HISTORY-001`: Knowledge and assessment history is immutable and preserved.
