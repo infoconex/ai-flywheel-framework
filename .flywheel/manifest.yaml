@@ -31,6 +31,7 @@ required_files:
   - .flywheel/operating-model/guidance/adaptation.md
   - .flywheel/operating-model/guidance/validation.md
   - .flywheel/operating-model/guidance/persistence.md
+  - .flywheel/operating-model/guidance/reuse.md
   - .flywheel/operating-model/guidance/readiness.md
   - .flywheel/operating-model/guidance/certification.md
   - .flywheel/operating-model/guidance/classifications.md
@@ -52,6 +53,7 @@ required_files:
   - .flywheel/operating-model/schemas/record.schema.yaml
   - .flywheel/operating-model/schemas/knowledge.schema.yaml
   - .flywheel/operating-model/schemas/persistence-plan.schema.yaml
+  - .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
   - .flywheel/operating-model/schemas/startup-failure.schema.yaml
 onboarding:
   mission: establish-ai-flywheel-operations
