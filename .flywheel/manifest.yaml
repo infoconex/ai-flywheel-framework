@@ -17,6 +17,7 @@ required_files:
   - .flywheel/state.yaml
   - .flywheel/operating-model/guidance/startup.md
   - .flywheel/operating-model/guidance/authority.md
+  - .flywheel/operating-model/guidance/approval-boundaries.md
   - .flywheel/operating-model/guidance/operator.md
   - .flywheel/operating-model/guidance/invariants.md
   - .flywheel/operating-model/guidance/principles.md
@@ -40,6 +41,7 @@ required_files:
   - .flywheel/operating-model/config/repository-context.yaml
   - .flywheel/operating-model/config/flywheel-context.yaml
   - .flywheel/operating-model/config/governance.yaml
+  - .flywheel/operating-model/config/approval-validation.yaml
   - .flywheel/operating-model/config/capabilities.yaml
   - .flywheel/operating-model/config/validation.yaml
   - .flywheel/operating-model/onboarding/process.md
@@ -52,6 +54,7 @@ required_files:
   - .flywheel/operating-model/schemas/goal.schema.yaml
   - .flywheel/operating-model/schemas/execution.schema.yaml
   - .flywheel/operating-model/schemas/record.schema.yaml
+  - .flywheel/operating-model/schemas/approval-record.schema.yaml
   - .flywheel/operating-model/schemas/knowledge.schema.yaml
   - .flywheel/operating-model/schemas/persistence-plan.schema.yaml
   - .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
