@@ -16,6 +16,7 @@ locations:
 required_files:
   - .flywheel/state.yaml
   - .flywheel/operating-model/guidance/startup.md
+  - .flywheel/operating-model/guidance/startup-failure.md
   - .flywheel/operating-model/guidance/authority.md
   - .flywheel/operating-model/guidance/approval-boundaries.md
   - .flywheel/operating-model/guidance/operator.md
