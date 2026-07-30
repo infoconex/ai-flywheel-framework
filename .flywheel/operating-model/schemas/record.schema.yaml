@@ -228,6 +228,8 @@ $defs:
           properties:
             retained_blob_sha: {type: string, minLength: 1}
             retained_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+            observed_blob_sha: {type: string, minLength: 1}
+            observed_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
       - if:
           properties: {operation: {const: create}}
           required: [operation]
@@ -286,6 +288,12 @@ $defs:
           properties:
             restored_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
             state_mutated: {const: false}
+      - if:
+          properties: {result: {enum: [failed, blocked]}}
+          required: [result]
+        then:
+          properties:
+            restored_content_digest: {type: 'null'}
   validation_disposition:
     type: object
     additionalProperties: false
