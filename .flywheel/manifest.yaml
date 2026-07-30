@@ -44,6 +44,7 @@ required_files:
   - .flywheel/operating-model/config/flywheel-context.yaml
   - .flywheel/operating-model/config/governance.yaml
   - .flywheel/operating-model/config/approval-validation.yaml
+  - .flywheel/operating-model/config/certification-validation.yaml
   - .flywheel/operating-model/config/capabilities.yaml
   - .flywheel/operating-model/config/validation.yaml
   - .flywheel/operating-model/onboarding/process.md
