@@ -32,7 +32,7 @@ Use UTC timestamps and stable identifiers:
 
 Approval identifiers MUST use `APPROVAL-NNN` and be unique within the goal record set. Select the lowest unused counter. A create collision requires re-listing before selecting the next unused identity.
 
-Approval records MUST validate against `.flywheel/operating-model/schemas/approval-record.schema.yaml`. The approval boundary contract in `approval-boundaries.md` is authoritative for authority, exact scope, effective time, delegation, supersession, and revocation. The generic approval shape retained in `record.schema.yaml` is not sufficient by itself for a new approval record.
+New approval records MUST validate against `.flywheel/operating-model/schemas/approval-record.schema.yaml` instead of the generic `record.schema.yaml`. The generic approval shape retained in `record.schema.yaml` is legacy compatibility only and MUST NOT be applied as a second validator to a new structured approval record. The approval boundary contract in `approval-boundaries.md` is authoritative for authority, exact scope, effective time, delegation, supersession, and revocation.
 
 Persistence plan identifiers MUST use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. The counter begins at `001`; select the lowest unused counter for the captured second. A create collision requires re-listing and selecting the next unused counter. Counter exhaustion is an operating-validation failure.
 
