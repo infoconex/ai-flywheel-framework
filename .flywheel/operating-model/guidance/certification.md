@@ -27,7 +27,9 @@ Certification proves that the installed Flywheel can be discovered, operated, re
 
 ## Fixture isolation
 
-Failure fixtures MUST run in a disposable copy, worktree, temporary branch, or in-memory representation pinned to the same source revision. Certification MUST NOT delete or corrupt canonical operating artifacts to prove failure handling. Each fixture declares its source revision, mutation, expected result, cleanup method, and actual result. The fixture environment must be removed or reset after evidence is captured.
+Failure fixtures MUST run in a disposable copy, worktree, temporary branch, or in-memory representation pinned to the same source revision. Certification MUST NOT delete or corrupt canonical operating artifacts to prove failure handling. Each fixture declares its tested framework revision when known, the immutable revision containing its evidence, mutation, expected result, cleanup method, and actual result. The fixture environment must be removed or reset after evidence is captured.
+
+The tested framework revision and evidence revision are distinct identities. A passed scenario MUST identify the exact tested framework commit SHA. A failed scenario may use `tested_framework_revision: null` when the missing revision is itself the reason the evidence is insufficient, but it MUST still identify the immutable evidence revision. A branch name, evidence-repository commit, or chat history MUST NOT be substituted for an unknown tested framework revision.
 
 ## Certification record
 
@@ -41,7 +43,7 @@ The record MUST validate against `.flywheel/operating-model/schemas/certificatio
 - AI system or operator identity.
 - Exact cold-start prompt.
 - Active certification mission, goal, and execution identifiers.
-- Exactly ten scenario fixture definitions, results, source revisions, and evidence references.
+- Exactly ten scenario fixture definitions, results, tested framework revisions, evidence revisions, and evidence references.
 - Validator implementation, JSON Schema draft, YAML version, and format-enforcement behavior.
 - Known limitations.
 - Findings and corrective actions.
@@ -56,7 +58,9 @@ After a durable approval or rejection record is created and verified, the certif
 
 Self-hosting passes only when the certification work itself is represented by schema-valid mission, goal, execution, evidence, validation, persistence, and certification artifacts governed by the same operating model being certified.
 
-The self-hosting execution may succeed when it prepares a complete certification package and reaches the human approval boundary. In that case the certification goal remains blocked or pending human action, the certification record remains `pending-approval`, and readiness remains unchanged. Reaching the approval boundary correctly is not a certification failure.
+The self-hosting execution may succeed even when the certification record fails, provided the execution's authorized objective was to evaluate the package, it correctly detects and records the blocking evidence or validation gap, creates corrective actions, leaves the goal blocked, and does not claim approval or readiness. Successful detection of a certification failure is a successful self-hosting execution, not a passing certification.
+
+The self-hosting execution may also succeed when it prepares a complete certification package and reaches the human approval boundary. In that case the certification goal remains blocked or pending human action, the certification record remains `pending-approval`, and readiness remains unchanged. Reaching the approval boundary correctly is not a certification failure.
 
 A self-hosting result MUST NOT use chat history as certification evidence, invent approval, mark the onboarding mission complete, or transition readiness before the required records are durable and approved.
 
