@@ -41,9 +41,13 @@ artifact_validation:
     goal: .flywheel/operating-model/schemas/goal.schema.yaml
     execution: .flywheel/operating-model/schemas/execution.schema.yaml
     record: .flywheel/operating-model/schemas/record.schema.yaml
+    approval_record: .flywheel/operating-model/schemas/approval-record.schema.yaml
+    certification_record: .flywheel/operating-model/schemas/certification-record.schema.yaml
+    readiness_validation: .flywheel/operating-model/schemas/readiness-validation.schema.yaml
     knowledge: .flywheel/operating-model/schemas/knowledge.schema.yaml
     persistence_plan: .flywheel/operating-model/schemas/persistence-plan.schema.yaml
     reuse_assessment: .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
+    startup_failure: .flywheel/operating-model/schemas/startup-failure.schema.yaml
 adapt_completion_contract:
   guidance: .flywheel/operating-model/guidance/adaptation.md
   authoritative_matrix: authoritative-adapt-completion-matrix
@@ -145,7 +149,7 @@ persistence_contract:
   digest_encoding: lowercase-hex
   digest_bytes: normalized-utf8-lf-no-bom
   require_dependency_order: true
-  canonical_type_order: [evidence, decision, finding, approval, reuse-assessment, knowledge, context, goal, mission, execution, state]
+  canonical_type_order: [evidence, decision, finding, approval, certification, readiness-validation, reuse-assessment, knowledge, context, goal, mission, execution, state]
   state_is_final_operational_pointer: true
   require_create_absence_recheck: true
   require_update_sha_recheck: true
@@ -157,7 +161,7 @@ persistence_contract:
   prohibit_unplanned_writes: true
   prohibit_history_overwrite: true
   prohibit_reuse_claims_during_persist: true
-  semantic_rule_ids: [PERSIST-PLAN-001, PERSIST-PLAN-SELF-001, PERSIST-PLAN-LIFECYCLE-001, PERSIST-COMMIT-001, PERSIST-DIGEST-001, PERSIST-TARGET-001, PERSIST-LOCATION-001, PERSIST-MUTABILITY-001, PERSIST-ORDER-001, PERSIST-PRECHECK-001, PERSIST-VERIFY-001, PERSIST-ROLLBACK-001, PERSIST-PARTIAL-001, PERSIST-HISTORY-001, PERSIST-REUSE-001]
+  semantic_rule_ids: [PERSIST-PLAN-001, PERSIST-PLAN-SELF-001, PERSIST-PLAN-LIFECYCLE-001, PERSIST-COMMIT-001, PERSIST-DIGEST-001, PERSIST-TARGET-001, PERSIST-LOCATION-001, PERSIST-MUTABILITY-001, PERSIST-CERTIFICATION-001, PERSIST-ORDER-001, PERSIST-PRECHECK-001, PERSIST-VERIFY-001, PERSIST-ROLLBACK-001, PERSIST-PARTIAL-001, PERSIST-HISTORY-001, PERSIST-REUSE-001]
 reuse_contract:
   guidance: .flywheel/operating-model/guidance/reuse.md
   assessment_schema: .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
@@ -183,6 +187,20 @@ reuse_contract:
   prohibit_unvalidated_promotion: true
   prohibit_history_overwrite: true
   semantic_rule_ids: [REUSE-ACTIVATE-001, REUSE-ASSESS-001, REUSE-PROMOTE-001, REUSE-DIRECT-001, REUSE-DUPLICATE-001, REUSE-CONFLICT-001, REUSE-SUPERSEDE-001, REUSE-APPROVAL-001, REUSE-EXISTING-001, REUSE-DURABILITY-001, REUSE-SYNC-001, REUSE-COMPLETE-001, REUSE-HISTORY-001]
+certification_contract:
+  config: .flywheel/operating-model/config/certification-validation.yaml
+  guidance: .flywheel/operating-model/guidance/certification.md
+  certification_schema: .flywheel/operating-model/schemas/certification-record.schema.yaml
+  readiness_schema: .flywheel/operating-model/schemas/readiness-validation.schema.yaml
+  require_exact_ten_scenarios: true
+  require_source_revision_and_evidence: true
+  require_self_hosting_artifact_refs: true
+  require_persistence_plan: true
+  require_human_approval_for_pass: true
+  allow_ready_for_approval_without_readiness_change: true
+  prohibit_assumed_approval: true
+  prohibit_readiness_transition_while_pending: true
+  semantic_rule_ids: [CERT-SCENARIO-001, CERT-EVIDENCE-001, CERT-VALIDATOR-001, CERT-SELF-HOST-001, CERT-APPROVAL-001, CERT-RESULT-001, READINESS-RECORD-001, READINESS-GATE-001, READINESS-APPROVAL-001, READINESS-PERSIST-001, READINESS-STATE-001]
 completion:
   require_acceptance_criteria: true
   require_evidence_per_criterion: true
@@ -203,6 +221,8 @@ readiness:
   required_state: ready-for-missions
   require_artifact_validation: true
   require_certification: true
+  require_certification_record_schema: true
+  require_readiness_validation_record: true
   require_cold_start_test: true
   require_first_execution_test: true
   require_resume_test: true
@@ -211,6 +231,9 @@ readiness:
   require_self_hosting: true
   require_proving_mission: true
   require_human_approval: true
+  require_onboarding_completion: true
+  require_terminal_applied_persistence_plan: true
+  prohibit_transition_from_pending_certification: true
   required_capabilities: [mission-management, goal-management, execution-recording, lifecycle-enforcement, evidence-capture, completion-validation, classification-recording, knowledge-persistence]
 cold_start_test:
   prompt: Read this repository and operate according to its AI Flywheel.
