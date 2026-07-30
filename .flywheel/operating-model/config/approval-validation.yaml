@@ -1,4 +1,9 @@
 version: 1
+schema_routing:
+  evidence_decision_finding: .flywheel/operating-model/schemas/record.schema.yaml
+  approval: .flywheel/operating-model/schemas/approval-record.schema.yaml
+  prohibit_legacy_approval_shape_for_new_records: true
+  prohibit_dual_validation_against_conflicting_approval_shapes: true
 approval_contract:
   guidance: .flywheel/operating-model/guidance/approval-boundaries.md
   governance: .flywheel/operating-model/config/governance.yaml
