@@ -129,21 +129,31 @@ If any verification fails, do not guess or overwrite. Recovery becomes blocked a
 
 ## Recovery finding
 
-Every partial transition MUST produce a create-only finding record. The finding MUST include, through its structured fields and references:
+Every partial transition MUST produce a create-only finding record with `kind: finding`, `finding.finding_type: partial-lifecycle-transition`, and a complete `finding.transition_recovery` object conforming to `record.schema.yaml`.
 
-- Transition plan identity and canonical path.
-- Mission, goal, and execution identity.
-- Operator and transition timestamp.
-- Execution and state target identities and paths.
-- Retained precondition SHAs and retained content digests.
-- Proposed target digests.
-- Observed current SHAs and digests.
-- Successful writes and failed writes.
-- Failure message or condition.
-- Rollback attempt and exact result.
+The structured recovery payload MUST record:
+
+- `original_plan_id` and `original_plan_path`.
+- `transition_operator`, `transition_at`, and recovery `observed_at`.
+- One target entry for every governed target, including target identity, artifact type, path, operation, retained revision and digest when applicable, proposed digest, observed revision and digest, write result, and failure detail.
+- A nonempty `failure_condition`.
+- Structured rollback status including whether rollback was attempted, governed target identities, exact result, restored content digest when successful, whether state was mutated, and explanatory detail.
 - Whether the original pair was restored.
-- Whether lifecycle continuation is prohibited.
-- Required recovery or human reconciliation action.
+- The lifecycle-continuation prohibition and its reason.
+- The required recovery action.
+- Whether human reconciliation is required.
+
+The payload MUST contain at least one succeeded target write and at least one failed or not-attempted target write. A successful exact rollback MUST identify the restored digest and MUST record `state_mutated: false`. An unrestored original pair MUST prohibit continuation and require human reconciliation.
+
+Schema validation is necessary but not sufficient. Semantic validation MUST also verify:
+
+- The finding's top-level mission, goal, and execution identities agree with the original transition plan.
+- `original_plan_id`, `original_plan_path`, and the finding's `source_refs` or `artifact_refs` resolve to the same canonical plan.
+- Every recovery target maps exactly once to a target in the original plan.
+- Target paths, operations, retained SHAs, retained digests, and proposed digests equal the original plan.
+- Observed SHAs and digests equal the repository revisions used for recovery.
+- Write results, failure condition, rollback result, restored-pair status, continuation disposition, and recovery action agree with the durable recovery trace.
+- The finding is rejected when any required structured field is absent, null where prohibited, inconsistent, ambiguous, or not traceable to durable artifacts.
 
 The finding MUST be persisted through a separate recovery persistence plan whose governed target is the new finding and any other recovery artifact that can be changed safely. The recovery plan MUST reference the original transition plan through the finding's `source_refs` or `artifact_refs`.
 
@@ -189,5 +199,9 @@ A `planned`, `applying`, `failed`, or `blocked` transition plan prevents lifecyc
 - `TRANSITION-RECOVERY-DURABLE-001`: Fresh-session recovery derives only from the durable plan and repository artifacts.
 - `TRANSITION-ROLLBACK-001`: Execution-written/state-not-written recovery restores exact retained execution content and never retries or rolls back state.
 - `TRANSITION-FINDING-001`: Every partial transition has a durable create-only finding persisted under a separate recovery plan.
+- `TRANSITION-FINDING-CONTENT-001`: A partial-transition finding contains the complete structured recovery payload required by `record.schema.yaml`.
+- `TRANSITION-FINDING-PLAN-001`: Finding identity, plan identity, target identity, paths, operations, preconditions, and proposed digests agree with the original transition plan.
+- `TRANSITION-FINDING-REVISION-001`: Observed revisions and digests agree with the durable artifacts used for recovery.
+- `TRANSITION-FINDING-OUTCOME-001`: Write results, failure, rollback, restoration, continuation, and recovery action agree and are evidence-backed.
 - `TRANSITION-PAIR-001`: Applied or rolled-back completion requires exact final pair verification against the corresponding proposed or retained pair.
 - `TRANSITION-PARTIAL-001`: Unexplained, ambiguous, or unrecoverable partial transitions block lifecycle continuation and require human reconciliation.
