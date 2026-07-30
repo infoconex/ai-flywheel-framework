@@ -31,6 +31,7 @@ artifact_validation:
   require_operator_invariants: true
   require_startup_contract: true
   require_execution_transition_rules: true
+  require_transition_recovery_contract: true
   require_readiness_transition_rules: true
   require_provenance_for_material_values: true
   schemas:
@@ -93,6 +94,32 @@ validation_contract:
   prohibit_success_for_unimplemented_work: true
   prohibit_silent_scope_weakening_after_failure: true
   require_supersedes_reference_for_revised_validation: true
+transition_recovery_contract:
+  guidance: .flywheel/operating-model/guidance/transition-recovery.md
+  record_schema: .flywheel/operating-model/schemas/record.schema.yaml
+  partial_finding_type: partial-lifecycle-transition
+  require_structured_recovery_payload: true
+  require_original_plan_identity: true
+  require_original_plan_path: true
+  require_transition_operator_and_timestamps: true
+  require_complete_target_snapshots: true
+  require_retained_revisions_and_digests: true
+  require_proposed_digests: true
+  require_observed_revisions_and_digests: true
+  require_per_target_write_results: true
+  require_failure_condition: true
+  require_structured_rollback_result: true
+  require_original_pair_restoration_status: true
+  require_continuation_disposition: true
+  require_recovery_action: true
+  require_human_reconciliation_disposition: true
+  require_plan_reference: true
+  require_cross_artifact_identity_match: true
+  require_target_match_to_original_plan: true
+  require_revision_and_digest_match_to_durable_artifacts: true
+  require_outcome_consistency: true
+  reject_missing_or_ambiguous_recovery_data: true
+  semantic_rule_ids: [TRANSITION-FINDING-001, TRANSITION-FINDING-CONTENT-001, TRANSITION-FINDING-PLAN-001, TRANSITION-FINDING-REVISION-001, TRANSITION-FINDING-OUTCOME-001]
 persistence_contract:
   guidance: .flywheel/operating-model/guidance/persistence.md
   plan_schema: .flywheel/operating-model/schemas/persistence-plan.schema.yaml
