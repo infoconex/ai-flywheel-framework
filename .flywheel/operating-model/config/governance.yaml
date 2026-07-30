@@ -10,6 +10,16 @@ human_authority:
     - destructive repository actions
     - governance changes
     - validation weakening or removal
+approval_authority:
+  repository_owner:
+    authority_id: AUTH-GITHUB-INFOCONEX
+    identity: github:infoconex
+    display_name: Infoconex
+    authorization_basis: repository-ownership
+    evidence_ref: repository:Infoconex/ai-flywheel-framework
+  delegates: []
+  guidance: .flywheel/operating-model/guidance/approval-boundaries.md
+  schema: .flywheel/operating-model/schemas/approval-record.schema.yaml
 operator_authority:
   may:
     - inspect repository content
@@ -50,6 +60,8 @@ actions:
   commit_changes: approval_required
   push_changes: approval_required
   create_pull_request: approval_required
+  delegate_approval_authority: approval_required
+  revoke_approval: approval_required
   modify_operating_model: finding_and_approval_required
   modify_governance: finding_and_approval_required
   modify_validation: finding_and_approval_required
@@ -61,7 +73,7 @@ actions:
   complete_mission: approval_required
 interpretation:
   allowed: action may proceed within the active goal
-  approval_required: explicit recorded human approval is required before action
-  finding_and_approval_required: a recorded finding from certification, onboarding, or mission execution and explicit human approval are required before action
+  approval_required: exact durable approval is required before action
+  finding_and_approval_required: a durable finding and exact durable approval are required before action
   evidence_and_rules_required: action may proceed only when completion rules are satisfied
   unspecified_action: stop_and_request_direction
