@@ -56,7 +56,15 @@ properties:
     items:
       type: object
       additionalProperties: false
-      required: [id, name, fixture_definition_refs, result, evidence_refs, actual_result, source_revision]
+      required:
+        - id
+        - name
+        - fixture_definition_refs
+        - result
+        - evidence_refs
+        - actual_result
+        - tested_framework_revision
+        - evidence_revision
       properties:
         id: {type: integer, minimum: 1, maximum: 10}
         name:
@@ -83,10 +91,20 @@ properties:
           uniqueItems: true
           items: {type: string, minLength: 1}
         actual_result: {type: string, minLength: 1}
-        source_revision: {type: string, pattern: '^[0-9a-f]{40}$'}
+        tested_framework_revision:
+          type: [string, 'null']
+          pattern: '^[0-9a-f]{40}$'
+        evidence_revision: {type: string, pattern: '^[0-9a-f]{40}$'}
       allOf:
         - if:
-            properties: {result: {enum: [passed, failed]}}
+            properties: {result: {const: passed}}
+            required: [result]
+          then:
+            properties:
+              evidence_refs: {minItems: 1}
+              tested_framework_revision: {type: string, pattern: '^[0-9a-f]{40}$'}
+        - if:
+            properties: {result: {const: failed}}
             required: [result]
           then:
             properties: {evidence_refs: {minItems: 1}}
@@ -94,7 +112,9 @@ properties:
             properties: {result: {const: not-run}}
             required: [result]
           then:
-            properties: {evidence_refs: {maxItems: 0}}
+            properties:
+              evidence_refs: {maxItems: 0}
+              tested_framework_revision: {type: 'null'}
   validator:
     type: object
     additionalProperties: false
