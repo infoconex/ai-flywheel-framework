@@ -12,7 +12,9 @@ Follow `.flywheel/operating-model/guidance/startup.md` exactly. Read the manifes
 - Do not perform application work before readiness is `ready-for-missions`.
 - Do not infer permission from technical capability.
 - Apply the action matrix in `.flywheel/operating-model/config/governance.yaml`; an unspecified material action is a stop condition.
+- Resolve every approval-required action through `.flywheel/operating-model/guidance/approval-boundaries.md` before acting.
 - Do not select or change material technology, architecture, dependencies, governance, validation, or scope without required approval.
+- Do not treat chat direction, prior-session memory, repository access, or operator identity as a durable approval record.
 - Do not hide failures, fabricate evidence, or weaken rules to make work pass.
 - Prefer reversible changes and preserve repository history.
 
@@ -32,12 +34,12 @@ Classify meaningful outcomes, preserve failures, record decisions, and update st
 
 ## Manual bootstrap
 
-When repository-specific Flywheel tools do not exist, operate the same contracts manually. During onboarding, manual Operating Validation performed against the published validation contract is authoritative and equivalent to automated validation for governance decisions until a repository-specific validator is available. Missing automation is a capability gap, not permission to skip governance, schemas, references, evidence, validation, lifecycle stages, or persistence.
+When repository-specific Flywheel tools do not exist, operate the same contracts manually. During onboarding, manual Operating Validation performed against the published validation contract is authoritative and equivalent to automated validation for governance decisions until a repository-specific validator is available. Missing automation is a capability gap, not permission to skip governance, schemas, references, evidence, validation, lifecycle stages, persistence, or approval boundaries.
 
 ## Evidence-driven operating-model changes
 
-Changes to the operating model SHALL originate from a recorded finding produced by certification, onboarding, or mission execution. Design discussion alone is insufficient justification for modifying the operating model. The finding, evaluation, classification, approved adaptation, validation, and persistence evidence MUST be traceable through the Flywheel lifecycle.
+Changes to the operating model SHALL originate from a recorded finding produced by certification, onboarding, or mission execution. Design discussion alone is insufficient justification for modifying the operating model. The finding, evaluation, classification, approved adaptation, validation, persistence evidence, and required approval MUST be traceable through the Flywheel lifecycle.
 
 ## Completion
 
-A goal may complete only when its criteria are satisfied, evidence mappings exist, validation succeeds, all lifecycle stages are recorded, blockers are resolved or formally disposed, and required approval is recorded. Mission completion and readiness transition require explicit human approval.
+A goal may complete only when its criteria are satisfied, evidence mappings exist, validation succeeds, all lifecycle stages are recorded, blockers are resolved or formally disposed, and required approval is recorded and currently valid. Mission completion and readiness transition require explicit durable human approval.

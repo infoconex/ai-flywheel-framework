@@ -30,6 +30,10 @@ Use UTC timestamps and stable identifiers:
 - Persistence plan: `persistence/<persistence-plan-id>.yaml`
 - Reuse assessment: `reuse/<reuse-assessment-id>.yaml`
 
+Approval identifiers MUST use `APPROVAL-NNN` and be unique within the goal record set. Select the lowest unused counter. A create collision requires re-listing before selecting the next unused identity.
+
+New approval records MUST validate against `.flywheel/operating-model/schemas/approval-record.schema.yaml` instead of the generic `record.schema.yaml`. The generic approval shape retained in `record.schema.yaml` is legacy compatibility only and MUST NOT be applied as a second validator to a new structured approval record. The approval boundary contract in `approval-boundaries.md` is authoritative for authority, exact scope, effective time, delegation, supersession, and revocation.
+
 Persistence plan identifiers MUST use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. The counter begins at `001`; select the lowest unused counter for the captured second. A create collision requires re-listing and selecting the next unused counter. Counter exhaustion is an operating-validation failure.
 
 Reuse assessment identifiers MUST use `REUSE-NNN` and be unique within the execution. The identity remains stable while the assessment moves from `planned` to `completed`. A materially revised conclusion after completion requires a new assessment identity that references the prior assessment in rationale and any governing decision or superseding knowledge.
@@ -37,6 +41,8 @@ Reuse assessment identifiers MUST use `REUSE-NNN` and be unique within the execu
 ## Record mutability
 
 Evidence, decisions, findings, and approvals are create-only history. They MUST NOT be overwritten after creation. Corrections or changed conclusions require a new record that references or supersedes the earlier record.
+
+Approval renewal, delegation, revocation, rejection, deferral, corrected scope, and supersession each require a new `APPROVAL-NNN` record. An existing approval record MUST NOT be edited to change its authority, decision, scope, effective time, expiration, evidence, delegation, revocation, or supersession relationships.
 
 A reuse assessment is created once with `status: planned`, may be updated only through retained-SHA compare-and-swap from `planned` to `completed`, and becomes immutable when completed. A completed assessment MUST NOT return to planned or change disposition, provenance, scope, or rationale. Corrections require a new assessment identity.
 
@@ -52,6 +58,8 @@ Knowledge uses create-only identity. A revision MUST use a new identity and pres
 
 Read records by their `created_at` or assessment timestamp, oldest first. File names are a secondary ordering signal only. Records MUST identify `mission_id` and `goal_id`. Execution, persistence-plan, and reuse-assessment records MUST also identify the execution they govern.
 
+Approval resolution MUST also read later approval records that delegate, supersede, or revoke earlier approval identities before treating an earlier approval as current authorization.
+
 ## Active execution
 
 `.flywheel/state.yaml` is the authoritative pointer to an active execution. It MUST match an existing execution record under the active mission and goal. A missing or mismatched record is a stop condition.
@@ -59,6 +67,8 @@ Read records by their `created_at` or assessment timestamp, oldest first. File n
 ## Referential integrity
 
 A durable artifact MUST NOT reference a record that is absent from its canonical location. Supporting records MUST be created and verified before an execution, goal, mission, context, or state artifact that references them is updated.
+
+An approval record's source evidence, evidence references, delegation reference, supersession reference, revocation reference, target references, and governing persistence plan MUST resolve before the approval may authorize work.
 
 Planned reuse assessments required for Reuse activation MUST be created and verified before the transaction commits the execution/state pair that activates Reuse. The later Reuse transaction updates those same assessments to `completed` using retained-SHA compare-and-swap before creating knowledge that references them.
 

@@ -28,3 +28,68 @@ properties:
   orphaned_execution_id:
     type: [string, 'null']
     pattern: '^EX-[0-9]{8}T[0-9]{6}Z-[0-9]{3}$'
+  reference_failure:
+    oneOf:
+      - type: 'null'
+      - $ref: '#/$defs/reference_failure'
+allOf:
+  - if:
+      properties:
+        failed_rules:
+          contains: {const: STARTUP-REFERENCE-RESOLUTION-001}
+      required: [failed_rules]
+    then:
+      required: [reference_failure]
+      properties:
+        reference_failure: {$ref: '#/$defs/reference_failure'}
+$defs:
+  reference_failure:
+    type: object
+    additionalProperties: false
+    required:
+      - source_artifact_path
+      - source_field
+      - reference_type
+      - referenced_id
+      - expected_canonical_path
+      - resolution_cardinality
+      - observed_candidate_paths
+      - identity_mismatches
+      - selection_prohibited
+    properties:
+      source_artifact_path: {type: string, pattern: '^\.flywheel/'}
+      source_field: {type: string, minLength: 1}
+      reference_type: {type: string, enum: [mission, goal, execution, record]}
+      referenced_id: {type: string, minLength: 1}
+      expected_canonical_path: {type: string, pattern: '^\.flywheel/'}
+      resolution_cardinality: {type: string, enum: [zero, one, multiple]}
+      observed_candidate_paths:
+        type: array
+        uniqueItems: true
+        items: {type: string, pattern: '^\.flywheel/'}
+      identity_mismatches:
+        type: array
+        uniqueItems: true
+        items: {type: string, minLength: 1}
+      selection_prohibited: {type: boolean, const: true}
+    allOf:
+      - if:
+          properties: {resolution_cardinality: {const: zero}}
+          required: [resolution_cardinality]
+        then:
+          properties:
+            observed_candidate_paths: {maxItems: 0}
+            identity_mismatches: {maxItems: 0}
+      - if:
+          properties: {resolution_cardinality: {const: multiple}}
+          required: [resolution_cardinality]
+        then:
+          properties:
+            observed_candidate_paths: {minItems: 2}
+      - if:
+          properties: {resolution_cardinality: {const: one}}
+          required: [resolution_cardinality]
+        then:
+          properties:
+            observed_candidate_paths: {minItems: 1, maxItems: 1}
+            identity_mismatches: {minItems: 1}

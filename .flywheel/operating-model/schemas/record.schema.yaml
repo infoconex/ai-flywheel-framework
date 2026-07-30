@@ -64,6 +64,21 @@ properties:
       impact: {type: string, minLength: 1}
       discovered_at: {type: string, format: date-time}
       disposition: {type: string, enum: [open, accepted, resolved, deferred, rejected]}
+      transition_recovery:
+        oneOf:
+          - type: 'null'
+          - $ref: '#/$defs/transition_recovery'
+    allOf:
+      - if:
+          properties: {finding_type: {const: partial-lifecycle-transition}}
+          required: [finding_type]
+        then:
+          required: [transition_recovery]
+          properties:
+            transition_recovery: {$ref: '#/$defs/transition_recovery'}
+        else:
+          properties:
+            transition_recovery: {type: 'null'}
   approval:
     type: [object, 'null']
     additionalProperties: false
@@ -117,6 +132,168 @@ allOf:
         finding: {type: 'null'}
         approval: {type: object}
 $defs:
+  transition_recovery:
+    type: object
+    additionalProperties: false
+    required:
+      - original_plan_id
+      - original_plan_path
+      - transition_operator
+      - transition_at
+      - observed_at
+      - targets
+      - failure_condition
+      - rollback
+      - original_pair_restored
+      - continuation_prohibited
+      - continuation_reason
+      - recovery_action
+      - human_reconciliation_required
+    properties:
+      original_plan_id: {type: string, pattern: '^PERSIST-[0-9]{8}T[0-9]{6}Z-[0-9]{3}$'}
+      original_plan_path: {type: string, minLength: 1}
+      transition_operator: {type: string, minLength: 1}
+      transition_at: {type: string, format: date-time}
+      observed_at: {type: string, format: date-time}
+      targets:
+        type: array
+        minItems: 2
+        uniqueItems: true
+        items: {$ref: '#/$defs/transition_recovery_target'}
+        allOf:
+          - contains:
+              properties: {write_result: {const: succeeded}}
+              required: [write_result]
+            minContains: 1
+          - contains:
+              properties: {write_result: {enum: [failed, not-attempted]}}
+              required: [write_result]
+            minContains: 1
+      failure_condition: {type: string, minLength: 1}
+      rollback:
+        $ref: '#/$defs/transition_recovery_rollback'
+      original_pair_restored: {type: boolean}
+      continuation_prohibited: {type: boolean, const: true}
+      continuation_reason: {type: string, minLength: 1}
+      recovery_action: {type: string, minLength: 1}
+      human_reconciliation_required: {type: boolean}
+    allOf:
+      - if:
+          properties: {original_pair_restored: {const: false}}
+          required: [original_pair_restored]
+        then:
+          properties:
+            human_reconciliation_required: {const: true}
+      - if:
+          properties:
+            rollback:
+              properties: {result: {const: succeeded}}
+              required: [result]
+          required: [rollback]
+        then:
+          properties:
+            original_pair_restored: {const: true}
+  transition_recovery_target:
+    type: object
+    additionalProperties: false
+    required:
+      - target_id
+      - artifact_type
+      - path
+      - operation
+      - retained_blob_sha
+      - retained_content_digest
+      - proposed_content_digest
+      - observed_blob_sha
+      - observed_content_digest
+      - write_result
+      - failure_detail
+    properties:
+      target_id: {type: string, pattern: '^PT-[0-9]{3,}$'}
+      artifact_type: {type: string, minLength: 1}
+      path: {type: string, minLength: 1}
+      operation: {type: string, enum: [create, update]}
+      retained_blob_sha: {type: [string, 'null']}
+      retained_content_digest: {type: [string, 'null'], pattern: '^[0-9a-f]{64}$'}
+      proposed_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+      observed_blob_sha: {type: [string, 'null']}
+      observed_content_digest: {type: [string, 'null'], pattern: '^[0-9a-f]{64}$'}
+      write_result: {type: string, enum: [succeeded, failed, not-attempted]}
+      failure_detail: {type: [string, 'null']}
+    allOf:
+      - if:
+          properties: {operation: {const: update}}
+          required: [operation]
+        then:
+          properties:
+            retained_blob_sha: {type: string, minLength: 1}
+            retained_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+            observed_blob_sha: {type: string, minLength: 1}
+            observed_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+      - if:
+          properties: {operation: {const: create}}
+          required: [operation]
+        then:
+          properties:
+            retained_blob_sha: {type: 'null'}
+            retained_content_digest: {type: 'null'}
+      - if:
+          properties: {write_result: {const: succeeded}}
+          required: [write_result]
+        then:
+          properties:
+            observed_blob_sha: {type: string, minLength: 1}
+            observed_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+            failure_detail: {type: 'null'}
+      - if:
+          properties: {write_result: {enum: [failed, not-attempted]}}
+          required: [write_result]
+        then:
+          properties:
+            failure_detail: {type: string, minLength: 1}
+  transition_recovery_rollback:
+    type: object
+    additionalProperties: false
+    required: [attempted, target_ids, result, restored_content_digest, state_mutated, detail]
+    properties:
+      attempted: {type: boolean}
+      target_ids:
+        type: array
+        uniqueItems: true
+        items: {type: string, pattern: '^PT-[0-9]{3,}$'}
+      result: {type: string, enum: [not-required, succeeded, failed, blocked]}
+      restored_content_digest: {type: [string, 'null'], pattern: '^[0-9a-f]{64}$'}
+      state_mutated: {type: boolean}
+      detail: {type: string, minLength: 1}
+    allOf:
+      - if:
+          properties: {attempted: {const: false}}
+          required: [attempted]
+        then:
+          properties:
+            target_ids: {maxItems: 0}
+            result: {const: not-required}
+            restored_content_digest: {type: 'null'}
+      - if:
+          properties: {attempted: {const: true}}
+          required: [attempted]
+        then:
+          properties:
+            target_ids: {minItems: 1}
+            result: {enum: [succeeded, failed, blocked]}
+      - if:
+          properties: {result: {const: succeeded}}
+          required: [result]
+        then:
+          properties:
+            restored_content_digest: {type: string, pattern: '^[0-9a-f]{64}$'}
+            state_mutated: {const: false}
+      - if:
+          properties: {result: {enum: [failed, blocked]}}
+          required: [result]
+        then:
+          properties:
+            restored_content_digest: {type: 'null'}
   validation_disposition:
     type: object
     additionalProperties: false
