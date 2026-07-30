@@ -25,7 +25,10 @@ certification:
     - id: 10
       name: self-hosting
   require_exact_scenario_set: true
-  require_source_revision_per_scenario: true
+  require_evidence_revision_per_scenario: true
+  require_tested_framework_revision_for_passed_scenario: true
+  allow_null_tested_framework_revision_for_failed_or_not_run_scenario: true
+  prohibit_evidence_revision_as_tested_framework_revision: true
   require_fixture_definition_refs: true
   require_evidence_for_completed_scenario: true
   require_validator_identity: true
@@ -50,6 +53,7 @@ certification:
   semantic_rule_ids:
     - CERT-SCENARIO-001
     - CERT-EVIDENCE-001
+    - CERT-REVISION-001
     - CERT-VALIDATOR-001
     - CERT-SELF-HOST-001
     - CERT-APPROVAL-001
