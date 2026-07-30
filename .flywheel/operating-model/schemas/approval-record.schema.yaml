@@ -125,10 +125,3 @@ properties:
             decision: {const: approved}
             scope:
               properties: {action: {const: revoke_approval}}
-allOf:
-  - properties:
-      approval:
-        properties:
-          scope:
-            properties:
-              mission_id: {const: {$data: '1/mission_id'}}
