@@ -1,15 +1,16 @@
 schema_version: 1
 phase: onboarding
 readiness: not-ready-for-missions
-status: ready
+status: blocked
 active_mission: establish-ai-flywheel-operations
 active_goal: 003-define-and-approve-implementation
-active_execution: null
-lifecycle_stage: null
+active_execution: EX-20260731T012900Z-001
+lifecycle_stage: reuse
 implementation_available: false
 application_missions_allowed: false
-blockers: []
+blockers:
+  - Explicit repository-owner approval of the complete Goal 003 implementation proposal is required before implementation begins.
 last_durable_update:
-  at: "2026-07-31T01:28:02Z"
+  at: "2026-07-31T01:39:02Z"
   by: chatgpt-session
-  reason: Complete Goal 002 reconciliation and make Goal 003 ready for implementation design.
+  reason: Persist the complete Goal 003 implementation proposal and stop at the human approval boundary.
