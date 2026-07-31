@@ -3,23 +3,23 @@ implementation:
   language:
     value: null
     status: candidate
-    origin: null
+    origin: deferred
   runtime:
     value: null
     status: candidate
-    origin: null
+    origin: deferred
   architecture:
     value: null
     status: candidate
-    origin: null
+    origin: deferred
   test_framework:
     value: null
     status: candidate
-    origin: null
+    origin: deferred
   command_interface:
     value: null
     status: candidate
-    origin: null
+    origin: deferred
   location:
     value: .flywheel/tools
     status: defaulted
@@ -36,9 +36,16 @@ implementation:
     prohibited: []
   supported_platforms: []
 capability_implementation: []
-manual_fallbacks: []
-known_limitations: []
-decisions: []
+manual_fallbacks:
+  - Direct repository artifact operation remains authorized until repository-specific tools are selected, implemented, and validated.
+known_limitations:
+  - Implementation language, runtime, architecture, test framework, command interface, logging, dependencies, and supported platforms require Goal 003 proposal and human approval.
+decisions:
+  - id: CONTEXT-DECISION-001
+    decision: Approve the reconciled operating context while deferring all material implementation selections to Goal 003.
+    rationale: Repository facts, governance, validation, capabilities, and provenance are internally consistent; implementation choices are intentionally outside Goal 002.
+    authority: repository-owner-direction
+    status: approved
 notes:
   - Flywheel implementation choices are independent from target application technologies.
-  - Material selections remain candidates until the required approval is recorded.
+  - Material selections remain candidates until the required Goal 003 approval is recorded.
