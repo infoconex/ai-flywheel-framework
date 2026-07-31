@@ -1,0 +1,124 @@
+schema_version: 1
+id: EX-20260731T012900Z-001
+mission_id: establish-ai-flywheel-operations
+goal_id: 003-define-and-approve-implementation
+status: blocked
+intended_outcome: Define a complete repository-specific Flywheel tooling proposal and stop at the required human approval boundary before implementation.
+acceptance_criteria:
+  - AC-001
+  - AC-002
+  - AC-003
+  - AC-004
+started_at: "2026-07-31T01:29:00Z"
+completed_at: null
+lifecycle:
+  execute: {status: completed, started_at: "2026-07-31T01:29:00Z", completed_at: "2026-07-31T01:30:00Z", summary: "Created the durable Goal 003 execution before implementation design.", refs: [".flywheel/state.yaml"], reason: null}
+  observe: {status: completed, started_at: "2026-07-31T01:30:00Z", completed_at: "2026-07-31T01:32:00Z", summary: "Reviewed repository context, Flywheel context, capabilities, governance, validation, schemas, and existing Python verification tools.", refs: ["OBS-301"], reason: null}
+  evaluate: {status: completed, started_at: "2026-07-31T01:32:00Z", completed_at: "2026-07-31T01:34:00Z", summary: "Evaluated implementation alternatives against portability, deterministic validation, repository-file persistence, and manual fallback requirements.", refs: ["EVAL-301"], reason: null}
+  classify: {status: completed, started_at: "2026-07-31T01:34:00Z", completed_at: "2026-07-31T01:35:00Z", summary: "Classified required, selected, deferred, and rejected capabilities and identified material choices requiring approval.", refs: ["CLASS-301"], reason: null}
+  adapt: {status: completed, started_at: "2026-07-31T01:35:00Z", completed_at: "2026-07-31T01:37:00Z", summary: "Prepared the Python CLI implementation proposal and updated candidate configuration without implementing source code.", refs: ["ADAPT-301"], reason: null}
+  validate: {status: completed, started_at: "2026-07-31T01:37:00Z", completed_at: "2026-07-31T01:38:00Z", summary: "Validated proposal completeness, context independence, capability coverage, and approval boundary preservation.", refs: ["VAL-301"], reason: null}
+  persist: {status: completed, started_at: "2026-07-31T01:38:00Z", completed_at: "2026-07-31T01:39:00Z", summary: "Persisted the implementation proposal and candidate configuration for human review.", refs: [".flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/implementation-proposal.yaml"], reason: null}
+  reuse: {status: in-progress, started_at: "2026-07-31T01:39:00Z", completed_at: null, summary: "Awaiting human approval before the proposal can be marked reusable and Goal 003 completed.", refs: ["APPROVAL-PENDING-GOAL-003"], reason: null}
+actions:
+  - Create the durable execution before proposing implementation choices.
+  - Review operating requirements and existing repository tooling evidence.
+  - Persist a complete implementation proposal without creating implementation source.
+observations:
+  - id: OBS-301
+    statement: The repository already uses Python for deterministic verification tools, while the installed framework remains declarative YAML and Markdown.
+    type: direct
+    status: complete
+    observed_at: "2026-07-31T01:31:00Z"
+    source_or_method: Repository inspection and framework-testing evidence
+    evidence_refs: ["repository:Infoconex/ai-flywheel-framework-testing", ".flywheel/operating-model/config/repository-context.yaml"]
+    uncertainty: null
+    conflicts_with: []
+evaluations:
+  - id: EVAL-301
+    statement: A Python 3 CLI under .flywheel/tools best satisfies cross-platform operation, deterministic validation, repository-file persistence, manual fallback, and existing tooling alignment.
+    result: supports
+    observation_refs: ["OBS-301"]
+    evidence_refs: [".flywheel/operating-model/config/repository-context.yaml", ".flywheel/operating-model/config/flywheel-context.yaml", ".flywheel/operating-model/config/capabilities.yaml"]
+    criterion_refs: ["AC-001", "AC-002", "AC-003"]
+    rule_refs: ["human-authority", "implementation-context-separation", "minimal-dependencies"]
+    limitations:
+      - Python 3, PyYAML, and jsonschema availability must be approved and documented.
+      - PowerShell and Bash remain manual launch alternatives rather than the implementation core.
+    rationale: Python provides the smallest portable implementation aligned with current validation assets without coupling to an application stack.
+classifications:
+  - id: CLASS-301
+    type: decision
+    statement: The proposed implementation stack is Python 3 with a modular CLI and repository-file persistence, pending explicit human approval.
+    evaluation_refs: ["EVAL-301"]
+    evidence_refs: [".flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/implementation-proposal.yaml"]
+    rationale: The proposal covers all required material choices and no implementation may begin before approval.
+    certainty: confirmed
+    uncertainty: null
+    conflicts_with: []
+    related_classification_refs: []
+    decision_ref: DECISION-GOAL-003-PROPOSAL
+    finding_ref: null
+    validation_refs: ["VAL-301"]
+adaptations:
+  - id: ADAPT-301
+    type: plan
+    statement: Adopt the persisted Python CLI proposal only after exact human approval is durably recorded.
+    classification_refs: ["CLASS-301"]
+    evaluation_refs: ["EVAL-301"]
+    observation_refs: ["OBS-301"]
+    evidence_refs: [".flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/implementation-proposal.yaml"]
+    affected_scope: [".flywheel/tools", ".flywheel/operating-model/config/flywheel-context.yaml", ".flywheel/operating-model/config/capabilities.yaml"]
+    rationale: Goal 003 requires a complete proposal and explicit human approval before implementation.
+    intended_effect: Establish an approved minimum tooling stack for Goal 004.
+    alternatives:
+      - PowerShell-only implementation
+      - Bash-only implementation
+      - .NET implementation
+      - Continue manual-only operation
+    certainty: confirmed
+    uncertainty: null
+    scope_disposition: within-goal
+    approval_required: true
+    approval_status: pending
+    approval_refs: []
+    decision_ref: DECISION-GOAL-003-PROPOSAL
+    disposition: proposed
+    implementation_status: not-started
+    validation_status: passed
+    persistence_status: persisted
+    reuse_status: not-assessed
+blockers:
+  - Explicit repository-owner approval of the complete Goal 003 implementation proposal is required before implementation begins.
+approval_refs: []
+evidence_refs:
+  - .flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/implementation-proposal.yaml
+  - .flywheel/operating-model/config/repository-context.yaml
+  - .flywheel/operating-model/config/flywheel-context.yaml
+  - .flywheel/operating-model/config/capabilities.yaml
+decision_refs:
+  - DECISION-GOAL-003-PROPOSAL
+finding_refs: []
+validation_results:
+  - id: VAL-301
+    phase: executed
+    domain: operating
+    status: passed
+    severity: info
+    adaptation_refs: ["ADAPT-301"]
+    criterion_refs: ["AC-001", "AC-002", "AC-003"]
+    rule_refs: ["proposal-completeness", "implementation-context-separation", "approval-boundary"]
+    method: Review the proposal against Goal 003 acceptance criteria and governance requirements.
+    scope: ["capability classification", "implementation proposal", "context separation", "approval boundary"]
+    expected_outcome: The proposal is complete and no implementation begins before approval.
+    actual_outcome: The proposal is complete, independent from target application technology, and blocked only by explicit human approval.
+    expected_evidence: ["implementation proposal", "capability classification", "candidate Flywheel context"]
+    evidence_refs: [".flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/implementation-proposal.yaml", ".flywheel/operating-model/config/capabilities.yaml", ".flywheel/operating-model/config/flywheel-context.yaml"]
+    eligible: true
+    exclusion_reason: null
+    executed_at: "2026-07-31T01:38:00Z"
+    finding_ref: null
+    recovery_action: null
+    supersedes_ref: null
+outcome: null
+completion: {disposition: null, rationale: null}
