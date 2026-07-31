@@ -1,16 +1,26 @@
 schema_version: 1
 purpose:
-  value: null
-  origin: null
-  status: candidate
+  value: Provide the canonical installable AI Flywheel operating-model structure and bootstrap mission used to initialize target repositories.
+  origin: discovered
+  status: confirmed
 repository:
-  type: null
-  primary_artifacts: []
+  type: framework-distribution
+  primary_artifacts:
+    - .flywheel/manifest.yaml
+    - .flywheel/state.yaml
+    - .flywheel/operating-model/
+    - .flywheel/operations/
+    - AGENTS.md
+    - README.md
 application:
-  languages: []
+  languages:
+    - YAML
+    - Markdown
   frameworks: []
   runtimes: []
-  architecture: []
+  architecture:
+    - Repository-distributed declarative operating model
+    - Manual-first bootstrap with repository-specific tooling selected later
 build:
   systems: []
   commands: []
@@ -22,16 +32,43 @@ automation:
   hosted: []
 standards:
   coding: []
-  architecture: []
-  testing: []
+  architecture:
+    - Manifest-first deterministic startup
+    - Canonical repository-relative artifact locations
+    - Immutable evidence and create-only historical records
+  testing:
+    - Behavioral certification is maintained in Infoconex/ai-flywheel-framework-testing
 constraints:
-  platforms: []
-  security: []
+  platforms:
+    - Must remain installable into repositories with differing technology stacks
+  security:
+    - Human authority controls material choices and approval-required actions
   compliance: []
-  dependencies: []
-  network: []
-unknowns: []
+  dependencies:
+    - Do not prescribe implementation dependencies before onboarding approval
+  network:
+    - Core operating artifacts must remain usable from repository content without hosted automation
+unknowns:
+  - Repository-specific Flywheel implementation language, runtime, architecture, test framework, command interface, and dependencies remain intentionally unselected.
+  - The implementation location default of .flywheel/tools requires later reconciliation and approval.
+  - Local build, test, and validation commands for repository-specific operating tools do not yet exist.
 conflicts: []
-provenance_records: []
+provenance_records:
+  - field: purpose
+    origin: discovered
+    evidence: README.md
+  - field: repository.type
+    origin: discovered
+    evidence: README.md and .flywheel/manifest.yaml
+  - field: application.languages
+    origin: discovered
+    evidence: Repository operating artifacts are YAML and Markdown.
+  - field: constraints.dependencies
+    origin: discovered
+    evidence: README.md and .flywheel/operating-model/config/governance.yaml
+  - field: unknowns
+    origin: discovered
+    evidence: .flywheel/operating-model/config/flywheel-context.yaml
 notes:
-  - This file describes the target repository and application, not the Flywheel operating tools.
+  - This file describes the framework repository as the target repository for its own onboarding mission.
+  - Flywheel implementation choices remain separate and unapproved in flywheel-context.yaml.
