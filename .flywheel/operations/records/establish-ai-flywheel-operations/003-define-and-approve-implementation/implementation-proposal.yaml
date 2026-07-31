@@ -1,6 +1,6 @@
 schema_version: 1
 id: IMPLEMENTATION-PROPOSAL-GOAL-003
-status: proposed
+status: approved
 mission_id: establish-ai-flywheel-operations
 goal_id: 003-define-and-approve-implementation
 execution_id: EX-20260731T012900Z-001
@@ -104,9 +104,9 @@ alternatives:
     rationale: Preserved as fallback but insufficient for the machine validation and self-hosting goals.
 approval:
   required: true
-  status: pending
+  status: approved
   authority_id: AUTH-GITHUB-INFOCONEX
-  approval_ref: null
+  approval_ref: APPROVAL-003
   requested_scope:
     - approve Python 3 and CPython 3.11+
     - approve the modular CLI architecture and .flywheel/tools source location
