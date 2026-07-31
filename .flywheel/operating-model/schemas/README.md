@@ -6,7 +6,7 @@ A narrative requirement and its formal schema MUST agree. A discrepancy is an op
 
 ## Validator semantics
 
-Schema validation SHALL use JSON Schema Draft 2020-12 semantics after parsing YAML 1.2. The validator MUST enforce `format`, including `date-time`. Timestamps MUST be RFC 3339 UTC values ending in `Z`. Execution-activation, persistence-plan, and startup-failure timestamps MUST use whole-second precision with no fractional component.
+Schema validation SHALL use JSON Schema Draft 2020-12 semantics after parsing YAML 1.2. The validator MUST enforce `format`, including `date-time`. Timestamps MUST be RFC 3339 UTC values ending in `Z`. Execution-activation, persistence-plan, startup-failure, certification, and readiness-validation timestamps MUST use whole-second precision with no fractional component.
 
 Validation has two required layers:
 
@@ -29,6 +29,9 @@ Canonical paths are:
 - Finding: `.flywheel/operations/records/<mission-id>/<goal-id>/findings/<record-id>.yaml`
 - Approval: `.flywheel/operations/records/<mission-id>/<goal-id>/approvals/<record-id>.yaml`
 - Persistence plan: `.flywheel/operations/records/<mission-id>/<goal-id>/persistence/<persistence-plan-id>.yaml`
+- Reuse assessment: `.flywheel/operations/records/<mission-id>/<goal-id>/reuse/<reuse-assessment-id>.yaml`
+- Certification record: `.flywheel/operations/records/<mission-id>/<goal-id>/certification/<certification-record-id>.yaml`
+- Readiness validation: `.flywheel/operations/records/<mission-id>/<goal-id>/readiness/<readiness-validation-id>.yaml`
 - Knowledge: `.flywheel/operations/knowledge/<knowledge-id>.yaml`
 - Startup failure: `.flywheel/operations/records/startup-failures/<startup-failure-id>.yaml`
 
@@ -74,6 +77,16 @@ The acceptance-criterion list must exactly equal the active goal's criterion ide
 
 `in-progress` requires `outcome: null`. `blocked` requires at least one blocker. `interrupted` requires a nonempty interruption reason in `outcome`.
 
+## Certification and readiness
+
+A certification record contains exactly the ten required certification scenarios, source revisions, fixture definitions, evidence, validator identity, limitations, findings, corrective actions, self-hosting references, and approval state. The scenario ID and name mapping defined by `certification-validation.yaml` is exact and ordered.
+
+A certification record may be `ready-for-approval` only when all ten scenarios pass and no blocking defect remains. It remains `pending-approval` until a durable authorized approval record is referenced. It may be `approved` and `passed` only when that approval resolves and remains current.
+
+A readiness validation maps each readiness gate to evidence and references the governing certification. A pending or failed record cannot carry a proposed ready-for-missions state. A passed record requires all gates passed, no blockers, a durable approval reference, and the complete proposed terminal state.
+
+Certification and readiness records MUST NOT use chat history, an unpersisted test result, or assumed human intent as evidence or approval.
+
 ## Persistence plan
 
 A persistence plan is the transaction controller for one Persist activation or completion attempt. It contains the mission, goal, execution, operator, timestamp, complete governed target set, exact governed write order, target preconditions, proposed digests, rollback or compensation behavior, and whole-set verification state.
@@ -86,7 +99,7 @@ Governed target digests use SHA-256 over the exact UTF-8 bytes to be written aft
 
 ## Deterministic identities
 
-Execution IDs use `EX-YYYYMMDDTHHMMSSZ-NNN`. Persistence-plan IDs use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. Startup-failure IDs use `SF-YYYYMMDDTHHMMSSZ-NNN`. For each type, capture one whole-second UTC timestamp and select the lowest unused three-digit counter beginning at `001` in the canonical directory. The filename equals `<id>.yaml`.
+Execution IDs use `EX-YYYYMMDDTHHMMSSZ-NNN`. Persistence-plan IDs use `PERSIST-YYYYMMDDTHHMMSSZ-NNN`. Startup-failure IDs use `SF-YYYYMMDDTHHMMSSZ-NNN`. Certification IDs use `CERT-YYYYMMDDTHHMMSSZ-NNN`. Readiness-validation IDs use `READINESS-YYYYMMDDTHHMMSSZ-NNN`. For each type, capture one whole-second UTC timestamp and select the lowest unused three-digit counter beginning at `001` in the canonical directory. The filename equals `<id>.yaml`.
 
 If create-only persistence collides, re-list the directory and retry with the next lowest unused counter for the same timestamp. Counter exhaustion at `999` is a blocking Operating Validation failure.
 
@@ -114,6 +127,8 @@ Repository files cannot provide a true multi-file transaction. Therefore Persist
 
 The execution/state pair compare-and-swap protocol remains mandatory within the larger transaction.
 
+For final readiness, approval records precede certification and readiness-validation updates; those records precede goal, mission, execution, and state updates; state remains the final pointer.
+
 ## Startup-failure persistence
 
 A startup-failure ID uses the deterministic identity rule above. Its canonical filename is `<startup-failure-id>.yaml`. Recording a startup defect is a startup action, not goal-directed work. The record contains the observed revision, branch, operator, timestamp, failed rules, artifact paths, evidence, recovery action, and orphaned execution identifier when applicable.
@@ -134,6 +149,8 @@ At startup, resolve and report the immutable commit SHA when tooling makes it av
 - Terminal executions have no pending or in-progress stages.
 - Goal completion requires evidence mapped to every acceptance criterion.
 - Approved status requires approval evidence.
+- Certification pass requires all ten scenarios and durable authorized approval.
+- Readiness pass requires a passed certification, readiness validation, completion evidence, and exact approval.
 - Application missions require readiness `ready-for-missions`.
 - Historical records are immutable except through explicit supersession metadata.
 - Validation results use the structure and allowed values defined by the execution schema.

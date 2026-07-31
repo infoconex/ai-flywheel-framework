@@ -44,6 +44,7 @@ required_files:
   - .flywheel/operating-model/config/flywheel-context.yaml
   - .flywheel/operating-model/config/governance.yaml
   - .flywheel/operating-model/config/approval-validation.yaml
+  - .flywheel/operating-model/config/certification-validation.yaml
   - .flywheel/operating-model/config/capabilities.yaml
   - .flywheel/operating-model/config/validation.yaml
   - .flywheel/operating-model/onboarding/process.md
@@ -57,6 +58,8 @@ required_files:
   - .flywheel/operating-model/schemas/execution.schema.yaml
   - .flywheel/operating-model/schemas/record.schema.yaml
   - .flywheel/operating-model/schemas/approval-record.schema.yaml
+  - .flywheel/operating-model/schemas/certification-record.schema.yaml
+  - .flywheel/operating-model/schemas/readiness-validation.schema.yaml
   - .flywheel/operating-model/schemas/knowledge.schema.yaml
   - .flywheel/operating-model/schemas/persistence-plan.schema.yaml
   - .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
