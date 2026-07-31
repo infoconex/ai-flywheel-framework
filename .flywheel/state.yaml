@@ -1,17 +1,15 @@
 schema_version: 1
 phase: onboarding
 readiness: not-ready-for-missions
-status: blocked
+status: ready
 active_mission: establish-ai-flywheel-operations
-active_goal: 004-build-and-validate-operating-tools
-active_execution: EX-20260731T032400Z-001
-lifecycle_stage: validate
+active_goal: 001-discover-repository-and-gather-context
+active_execution: null
+lifecycle_stage: null
 implementation_available: false
 application_missions_allowed: false
-blockers:
-  - Runtime pytest execution and full-repository CLI validation are pending.
-  - Remaining approved mission, goal, execution, evidence, approval, and readiness commands are not yet implemented.
+blockers: []
 last_durable_update:
-  at: "2026-07-31T03:39:02Z"
-  by: chatgpt-session
-  reason: Persist the initial Goal 004 CLI implementation and stop at pending runtime validation and remaining command completion.
+  at: "2026-07-27T19:41:02Z"
+  by: framework-installation
+  reason: Initial operating-model installation and hardening.
