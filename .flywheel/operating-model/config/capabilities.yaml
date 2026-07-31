@@ -11,7 +11,39 @@ recommended:
   - structured logging
   - human-readable status reporting
   - reusable validation commands
-selected: []
-deferred: []
-rejected: []
-repository_defined: []
+selected:
+  - capability: read and validate Flywheel configuration
+    rationale: Core deterministic startup and validation requirement.
+  - capability: associate work with an active mission and goal
+    rationale: Required governance boundary.
+  - capability: create and update mission, goal, and execution records
+    rationale: Required for repository-managed operations.
+  - capability: enforce valid state transitions and approval gates
+    rationale: Required to preserve lifecycle and human authority.
+  - capability: capture evidence, decisions, findings, and learning
+    rationale: Required for evidence-based completion and reuse.
+  - capability: validate completion before persistence
+    rationale: Required to reject unsupported terminal states.
+  - capability: list and filter missions and goals
+    rationale: Selected for practical navigation and CRUD workflows.
+  - capability: structured logging
+    rationale: Selected with goal and execution association for operational diagnosis.
+  - capability: human-readable status reporting
+    rationale: Selected to support manual operation and review.
+  - capability: reusable validation commands
+    rationale: Selected to make schema and invariant checks repeatable.
+deferred:
+  - capability: graphical user interface
+    rationale: Not required for initial self-hosting readiness.
+  - capability: hosted service integration
+    rationale: Core operation must not depend on hosted automation.
+  - capability: GitHub Actions automation
+    rationale: Repository owner explicitly requires no dependency on GitHub Actions minutes at this stage.
+rejected:
+  - capability: application-stack-specific implementation
+    rationale: Flywheel tooling must remain independent from target application technology.
+repository_defined:
+  - capability: compare-and-swap repository writes
+    rationale: Required by the framework durable update protocol.
+  - capability: goal and execution scoped logging
+    rationale: Repository owner prefers low-level diagnostic logs associated with the goal and execution.
