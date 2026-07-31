@@ -1,51 +1,75 @@
 schema_version: 1
 implementation:
   language:
-    value: null
+    value: Python 3
     status: candidate
-    origin: deferred
+    origin: proposed
   runtime:
-    value: null
+    value: CPython 3.11 or later
     status: candidate
-    origin: deferred
+    origin: proposed
   architecture:
-    value: null
+    value: Modular command-line application with separated domain services and repository adapters
     status: candidate
-    origin: deferred
+    origin: proposed
   test_framework:
-    value: null
+    value: pytest
     status: candidate
-    origin: deferred
+    origin: proposed
   command_interface:
-    value: null
+    value: python -m flywheel
     status: candidate
-    origin: deferred
+    origin: proposed
   location:
     value: .flywheel/tools
-    status: defaulted
-    origin: defaulted
+    status: candidate
+    origin: proposed
   storage:
     value: repository-files
-    status: defaulted
-    origin: defaulted
+    status: candidate
+    origin: proposed
   logging:
-    sinks: []
-    structure: null
+    sinks:
+      - console
+      - configurable log file
+      - structured JSON lines
+    structure: goal-and-execution-scoped structured events
   dependencies:
-    allowed: []
-    prohibited: []
-  supported_platforms: []
-capability_implementation: []
+    allowed:
+      - PyYAML
+      - jsonschema
+      - pytest
+    prohibited:
+      - hosted service required for core operation
+      - GitHub Actions required for validation
+      - target-application dependency without approved justification
+  supported_platforms:
+    - Windows
+    - macOS
+    - Linux
+capability_implementation:
+  - validation services for schemas, references, state, lifecycle, approvals, and readiness
+  - mission, goal, execution, evidence, and approval CRUD commands
+  - filtered list and status commands
+  - compare-and-swap repository persistence
+  - structured goal and execution logging
 manual_fallbacks:
-  - Direct repository artifact operation remains authorized until repository-specific tools are selected, implemented, and validated.
+  - Direct repository artifact operation remains authorized under the durable update protocol when the CLI is unavailable.
 known_limitations:
-  - Implementation language, runtime, architecture, test framework, command interface, logging, dependencies, and supported platforms require Goal 003 proposal and human approval.
+  - The proposal requires explicit repository-owner approval before source implementation begins.
+  - Python 3 and approved packages must be installed locally.
+  - The initial implementation will not require a graphical interface or hosted automation.
 decisions:
   - id: CONTEXT-DECISION-001
     decision: Approve the reconciled operating context while deferring all material implementation selections to Goal 003.
     rationale: Repository facts, governance, validation, capabilities, and provenance are internally consistent; implementation choices are intentionally outside Goal 002.
     authority: repository-owner-direction
     status: approved
+  - id: CONTEXT-DECISION-002
+    decision: Propose Python 3, a modular CLI, repository-file persistence, structured logging, pytest, PyYAML, and jsonschema for explicit human approval.
+    rationale: This is the smallest cross-platform stack aligned with existing deterministic framework verification assets and independent from target application technology.
+    authority: operator-proposal
+    status: pending
 notes:
   - Flywheel implementation choices are independent from target application technologies.
-  - Material selections remain candidates until the required Goal 003 approval is recorded.
+  - These values are proposed candidates, not approved implementation selections.

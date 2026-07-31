@@ -2,7 +2,7 @@ schema_version: 1
 id: 003-define-and-approve-implementation
 mission_id: establish-ai-flywheel-operations
 title: Define and Approve Implementation
-status: ready
+status: completed
 blocked_by: []
 objective: Select capabilities and propose the repository-specific Flywheel implementation for human approval.
 procedure:
@@ -24,8 +24,8 @@ evidence_required:
   - criterion_id: AC-001
     artifacts: [.flywheel/operating-model/config/capabilities.yaml]
   - criterion_id: AC-002
-    artifacts: [implementation proposal]
+    artifacts: [.flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/implementation-proposal.yaml]
   - criterion_id: AC-003
-    artifacts: [.flywheel/operating-model/config/repository-context.yaml, .flywheel/operating-model/config/flywheel-context.yaml, implementation proposal]
+    artifacts: [.flywheel/operating-model/config/repository-context.yaml, .flywheel/operating-model/config/flywheel-context.yaml, .flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/implementation-proposal.yaml]
   - criterion_id: AC-004
-    artifacts: [approval records]
+    artifacts: [.flywheel/operations/records/establish-ai-flywheel-operations/003-define-and-approve-implementation/approvals/APPROVAL-003.yaml]
