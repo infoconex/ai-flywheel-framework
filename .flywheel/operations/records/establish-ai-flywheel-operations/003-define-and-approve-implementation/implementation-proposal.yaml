@@ -1,0 +1,115 @@
+schema_version: 1
+id: IMPLEMENTATION-PROPOSAL-GOAL-003
+status: proposed
+mission_id: establish-ai-flywheel-operations
+goal_id: 003-define-and-approve-implementation
+execution_id: EX-20260731T012900Z-001
+summary: Build a small cross-platform Python CLI that operates and validates repository-local AI Flywheel artifacts while preserving manual fallback and human approval boundaries.
+proposal:
+  language: Python 3
+  runtime: CPython 3.11 or later
+  architecture:
+    - modular command-line application
+    - domain services separated from file-system adapters
+    - schema and cross-reference validation as reusable services
+    - compare-and-swap writes using retained blob or content identities
+    - repository-relative paths resolved from the Flywheel root
+  source_location: .flywheel/tools
+  command_interface:
+    executable: python -m flywheel
+    commands:
+      - validate
+      - status
+      - mission create
+      - mission update
+      - mission list
+      - goal create
+      - goal update
+      - goal list
+      - execution create
+      - execution resume
+      - execution update
+      - evidence record
+      - approval record
+      - readiness validate
+    filters:
+      - id
+      - mission_id
+      - goal_id
+      - status
+      - lifecycle_stage
+  persistence:
+    mechanism: repository YAML files
+    rules:
+      - preserve canonical paths and schemas
+      - use create-only identities for historical records
+      - use retained-SHA compare-and-swap for mutable artifacts
+      - never mutate application source as an implicit side effect
+  logging:
+    interface: structured logger abstraction
+    sinks:
+      - console
+      - configurable log file
+      - structured JSON lines
+    scope: logs are associated with the active goal and execution rather than only the mission
+  testing:
+    framework: pytest
+    strategy:
+      - unit tests for domain and transition rules
+      - temporary-repository integration tests
+      - negative tests for invalid references, approvals, collisions, and stale writes
+      - regression fixtures corresponding to canonical AI verification prompts
+  dependencies:
+    required:
+      - name: PyYAML
+        purpose: YAML parsing and serialization
+      - name: jsonschema
+        purpose: JSON Schema Draft 2020-12 validation
+      - name: pytest
+        purpose: test execution during development
+    prohibited:
+      - hosted service required for core operation
+      - GitHub Actions required for validation
+      - application-stack dependency chosen only because a target repository uses it
+  supported_platforms:
+    - Windows
+    - macOS
+    - Linux
+  validation:
+    - manifest-required-file validation
+    - YAML and schema validation
+    - filename-to-ID validation
+    - cross-reference validation
+    - mission, goal, execution, lifecycle, evidence, approval, and readiness invariants
+    - repository mutation boundary validation
+  manual_fallback:
+    - all canonical artifacts remain directly readable and editable under the documented durable update protocol
+    - operator guidance remains authoritative when the CLI is unavailable
+  known_limitations:
+    - Python and approved packages must be installed locally
+    - initial version will not provide a graphical interface
+    - initial version will not require hosted automation
+alternatives:
+  - option: PowerShell-only
+    disposition: rejected
+    rationale: Strong Windows fit but weaker cross-platform portability and reuse in Linux/macOS repositories.
+  - option: Bash-only
+    disposition: rejected
+    rationale: Strong Unix availability but poor native Windows experience and weaker structured YAML/schema implementation ergonomics.
+  - option: .NET CLI
+    disposition: deferred
+    rationale: Viable and familiar to the repository owner, but larger bootstrap and distribution footprint than needed for the minimum self-hosting tool.
+  - option: manual-only
+    disposition: rejected
+    rationale: Preserved as fallback but insufficient for the machine validation and self-hosting goals.
+approval:
+  required: true
+  status: pending
+  authority_id: AUTH-GITHUB-INFOCONEX
+  approval_ref: null
+  requested_scope:
+    - approve Python 3 and CPython 3.11+
+    - approve the modular CLI architecture and .flywheel/tools source location
+    - approve PyYAML, jsonschema, and pytest dependencies
+    - approve repository-file persistence, structured logging, command surface, and cross-platform targets
+    - authorize Goal 004 to implement and validate this proposal
