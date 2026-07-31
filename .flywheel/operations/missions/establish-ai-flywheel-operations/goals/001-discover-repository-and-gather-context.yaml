@@ -2,7 +2,7 @@ schema_version: 1
 id: 001-discover-repository-and-gather-context
 mission_id: establish-ai-flywheel-operations
 title: Discover Repository and Gather Context
-status: completed
+status: active
 objective: >-
   Inspect the target repository, identify known facts and material unknowns,
   ask only the questions needed to gather onboarding context, and persist the
@@ -40,6 +40,6 @@ evidence_required:
   - criterion_id: AC-004
     artifacts: [.flywheel/operating-model/config/flywheel-context.yaml, .flywheel/operating-model/config/capabilities.yaml]
   - criterion_id: AC-005
-    artifacts: [.flywheel/operations/records/establish-ai-flywheel-operations/001-discover-repository-and-gather-context/executions/EX-20260731T010400Z-001.yaml]
+    artifacts: [repository discovery evidence]
   - criterion_id: AC-006
-    artifacts: [.flywheel/operating-model/config/repository-context.yaml]
+    artifacts: [unresolved and deferred unknowns list]

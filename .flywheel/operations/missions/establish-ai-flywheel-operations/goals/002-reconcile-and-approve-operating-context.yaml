@@ -2,8 +2,9 @@ schema_version: 1
 id: 002-reconcile-and-approve-operating-context
 mission_id: establish-ai-flywheel-operations
 title: Reconcile and Approve Operating Context
-status: completed
-blocked_by: []
+status: blocked
+blocked_by:
+  - 001-discover-repository-and-gather-context
 objective: Reconcile discovered repository facts, human-provided context, inferences, defaults, and deferred unknowns into an approved operating context.
 procedure:
   - Review discovery evidence and onboarding answers.
@@ -25,7 +26,7 @@ acceptance_criteria:
     statement: Remaining deferred items do not prevent implementation design or are recorded as blockers.
 evidence_required:
   - criterion_id: AC-001
-    artifacts: [.flywheel/operating-model/config/flywheel-context.yaml]
+    artifacts: [reconciliation decisions]
   - criterion_id: AC-002
     artifacts: [.flywheel/operating-model/config/repository-context.yaml]
   - criterion_id: AC-003
@@ -33,4 +34,4 @@ evidence_required:
   - criterion_id: AC-004
     artifacts: [.flywheel/operating-model/config/governance.yaml, .flywheel/operating-model/config/validation.yaml, .flywheel/operating-model/config/capabilities.yaml]
   - criterion_id: AC-005
-    artifacts: [.flywheel/operating-model/config/flywheel-context.yaml]
+    artifacts: [deferred items and blockers list]
