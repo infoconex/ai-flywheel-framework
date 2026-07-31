@@ -13,26 +13,142 @@ acceptance_criteria:
 started_at: "2026-07-31T03:24:00Z"
 completed_at: null
 lifecycle:
-  execute: {status: in-progress, started_at: "2026-07-31T03:24:00Z", completed_at: null, summary: null, refs: [], reason: null}
-  observe: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
-  evaluate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
-  classify: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
-  adapt: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
-  validate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  execute: {status: completed, started_at: "2026-07-31T03:24:00Z", completed_at: "2026-07-31T03:25:00Z", summary: "Created and activated the durable Goal 004 execution before implementation.", refs: [".flywheel/state.yaml"], reason: null}
+  observe: {status: completed, started_at: "2026-07-31T03:25:00Z", completed_at: "2026-07-31T03:28:00Z", summary: "Reviewed the approved proposal, operating schemas, repository layout, validation requirements, and manual fallback boundary.", refs: ["OBS-401"], reason: null}
+  evaluate: {status: completed, started_at: "2026-07-31T03:28:00Z", completed_at: "2026-07-31T03:30:00Z", summary: "Selected the first implementation slice needed to establish repository discovery, validation, status, filtered listing, CAS persistence, and structured logging.", refs: ["EVAL-401"], reason: null}
+  classify: {status: completed, started_at: "2026-07-31T03:30:00Z", completed_at: "2026-07-31T03:31:00Z", summary: "Classified the committed tool set as a partial implementation; remaining approved CRUD and readiness commands are required before goal completion.", refs: ["CLASS-401"], reason: null}
+  adapt: {status: completed, started_at: "2026-07-31T03:31:00Z", completed_at: "2026-07-31T03:38:00Z", summary: "Implemented the Python package, CLI commands, validation services, repository adapter, structured logger, tests, and implementation documentation.", refs: ["ADAPT-401"], reason: null}
+  validate: {status: in-progress, started_at: "2026-07-31T03:38:00Z", completed_at: null, summary: "Source review and negative test definitions are complete; runtime pytest execution and validation against the full framework repository remain pending.", refs: ["VAL-401", "VAL-402"], reason: null}
   persist: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
   reuse: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
 actions:
   - Create the durable Goal 004 execution before implementation.
-observations: []
-evaluations: []
-classifications: []
-adaptations: []
-blockers: []
+  - Implement the approved Python package and command entry point.
+  - Implement repository discovery, status, validation, filtered listing, compare-and-swap persistence, and structured logging.
+  - Add automated positive and negative tests and implementation documentation.
+observations:
+  - id: OBS-401
+    statement: The approved Goal 003 proposal requires a cross-platform Python CLI, repository-file persistence, machine validation, negative tests, structured logging, and manual fallback.
+    type: direct
+    status: complete
+    observed_at: "2026-07-31T03:27:00Z"
+    source_or_method: APPROVAL-003 and IMPLEMENTATION-PROPOSAL-GOAL-003
+    evidence_refs: ["APPROVAL-003", "IMPLEMENTATION-PROPOSAL-GOAL-003"]
+    uncertainty: null
+    conflicts_with: []
+evaluations:
+  - id: EVAL-401
+    statement: A first slice implementing discovery, validation, status, filtered listing, CAS persistence, and logging provides the foundation required for the remaining command surface.
+    result: supports
+    observation_refs: ["OBS-401"]
+    evidence_refs: [".flywheel/tools/implementation-manifest.yaml", ".flywheel/tools/README.md"]
+    criterion_refs: ["AC-001", "AC-002", "AC-003", "AC-005"]
+    rule_refs: ["approved-implementation-scope", "manual-fallback", "no-hosted-dependency"]
+    limitations:
+      - Runtime tests have not yet executed in the connector environment.
+      - The complete approved CRUD, execution, evidence, approval, and readiness command surface remains unfinished.
+    rationale: The slice establishes core adapters and validation behavior without claiming full Goal 004 completion.
+classifications:
+  - id: CLASS-401
+    type: improvement
+    statement: The approved Python CLI foundation is implemented but Goal 004 remains active pending complete commands and runtime validation.
+    evaluation_refs: ["EVAL-401"]
+    evidence_refs: [".flywheel/tools/flywheel", ".flywheel/tools/tests", ".flywheel/tools/implementation-manifest.yaml"]
+    rationale: The implementation is useful and reviewable, but acceptance criteria AC-001 and AC-004 require the full approved capability set and executed tests.
+    certainty: confirmed
+    uncertainty: null
+    conflicts_with: []
+    related_classification_refs: []
+    decision_ref: null
+    finding_ref: "FINDING-GOAL-004-PENDING-VALIDATION"
+    validation_refs: ["VAL-401", "VAL-402"]
+adaptations:
+  - id: ADAPT-401
+    type: implementation
+    statement: Add the approved Python CLI foundation and tests under .flywheel/tools.
+    classification_refs: ["CLASS-401"]
+    evaluation_refs: ["EVAL-401"]
+    observation_refs: ["OBS-401"]
+    evidence_refs: [".flywheel/tools/pyproject.toml", ".flywheel/tools/flywheel", ".flywheel/tools/tests", ".flywheel/tools/implementation-manifest.yaml"]
+    affected_scope: [".flywheel/tools"]
+    rationale: This implements the reusable core needed by the remaining approved Goal 004 commands.
+    intended_effect: Provide deterministic local operation and validation without hosted automation.
+    alternatives:
+      - Continue manual-only operation.
+      - Implement the entire command surface without intermediate review.
+    certainty: confirmed
+    uncertainty: null
+    scope_disposition: within-goal
+    approval_required: true
+    approval_status: approved
+    approval_refs: ["APPROVAL-003"]
+    decision_ref: "DECISION-GOAL-003-PROPOSAL"
+    disposition: approved
+    implementation_status: in-progress
+    validation_status: pending
+    persistence_status: persisted
+    reuse_status: not-assessed
+blockers:
+  - Runtime pytest execution and full-repository CLI validation are pending.
+  - Remaining approved mission, goal, execution, evidence, approval, and readiness commands are not yet implemented.
 approval_refs:
   - APPROVAL-003
-evidence_refs: []
-decision_refs: []
-finding_refs: []
-validation_results: []
+evidence_refs:
+  - .flywheel/tools/pyproject.toml
+  - .flywheel/tools/flywheel/__init__.py
+  - .flywheel/tools/flywheel/__main__.py
+  - .flywheel/tools/flywheel/cli.py
+  - .flywheel/tools/flywheel/repository.py
+  - .flywheel/tools/flywheel/validation.py
+  - .flywheel/tools/flywheel/logging.py
+  - .flywheel/tools/tests/test_repository.py
+  - .flywheel/tools/tests/test_validation.py
+  - .flywheel/tools/implementation-manifest.yaml
+  - .flywheel/tools/README.md
+decision_refs:
+  - DECISION-GOAL-003-PROPOSAL
+finding_refs:
+  - FINDING-GOAL-004-PENDING-VALIDATION
+validation_results:
+  - id: VAL-401
+    phase: executed
+    domain: implementation
+    status: passed
+    severity: info
+    adaptation_refs: ["ADAPT-401"]
+    criterion_refs: ["AC-005"]
+    rule_refs: ["approved-scope", "documentation-completeness"]
+    method: Static review of source layout, dependencies, entry points, commands, limitations, and hosted-automation boundary.
+    scope: [".flywheel/tools"]
+    expected_outcome: The implementation remains within APPROVAL-003 and is fully documented.
+    actual_outcome: The implementation uses the approved language, runtime, dependencies, location, architecture, logging model, platforms, and manual fallback.
+    expected_evidence: ["implementation manifest", "package configuration", "source files", "README"]
+    evidence_refs: [".flywheel/tools/implementation-manifest.yaml", ".flywheel/tools/pyproject.toml", ".flywheel/tools/README.md"]
+    eligible: true
+    exclusion_reason: null
+    executed_at: "2026-07-31T03:39:00Z"
+    finding_ref: null
+    recovery_action: null
+    supersedes_ref: null
+  - id: VAL-402
+    phase: planned
+    domain: implementation
+    status: pending
+    severity: blocker
+    adaptation_refs: ["ADAPT-401"]
+    criterion_refs: ["AC-001", "AC-002", "AC-003", "AC-004"]
+    rule_refs: ["runtime-tests", "negative-transitions", "full-repository-validation"]
+    method: Install the test dependencies, run pytest, run flywheel validate against the repository, and exercise permitted and prohibited command transitions.
+    scope: [".flywheel/tools", ".flywheel"]
+    expected_outcome: All tests pass, invalid operations are rejected, schemas and references validate, and all required approved capabilities are implemented.
+    actual_outcome: null
+    expected_evidence: ["pytest output", "CLI validation output", "negative command results"]
+    evidence_refs: []
+    eligible: true
+    exclusion_reason: null
+    executed_at: null
+    finding_ref: null
+    recovery_action: null
+    supersedes_ref: null
 outcome: null
 completion: {disposition: null, rationale: null}
