@@ -1,0 +1,38 @@
+schema_version: 1
+id: EX-20260731T032400Z-001
+mission_id: establish-ai-flywheel-operations
+goal_id: 004-build-and-validate-operating-tools
+status: in-progress
+intended_outcome: Build and validate the approved minimum Python CLI for repository-local AI Flywheel operation.
+acceptance_criteria:
+  - AC-001
+  - AC-002
+  - AC-003
+  - AC-004
+  - AC-005
+started_at: "2026-07-31T03:24:00Z"
+completed_at: null
+lifecycle:
+  execute: {status: in-progress, started_at: "2026-07-31T03:24:00Z", completed_at: null, summary: null, refs: [], reason: null}
+  observe: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  evaluate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  classify: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  adapt: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  validate: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  persist: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+  reuse: {status: pending, started_at: null, completed_at: null, summary: null, refs: [], reason: null}
+actions:
+  - Create the durable Goal 004 execution before implementation.
+observations: []
+evaluations: []
+classifications: []
+adaptations: []
+blockers: []
+approval_refs:
+  - APPROVAL-003
+evidence_refs: []
+decision_refs: []
+finding_refs: []
+validation_results: []
+outcome: null
+completion: {disposition: null, rationale: null}
