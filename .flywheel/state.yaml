@@ -3,13 +3,13 @@ phase: onboarding
 readiness: not-ready-for-missions
 status: ready
 active_mission: establish-ai-flywheel-operations
-active_goal: 002-reconcile-and-approve-operating-context
+active_goal: 003-define-and-approve-implementation
 active_execution: null
 lifecycle_stage: null
 implementation_available: false
 application_missions_allowed: false
 blockers: []
 last_durable_update:
-  at: "2026-07-31T01:18:02Z"
+  at: "2026-07-31T01:28:02Z"
   by: chatgpt-session
-  reason: Complete Goal 001 discovery and make Goal 002 ready for execution.
+  reason: Complete Goal 002 reconciliation and make Goal 003 ready for implementation design.
