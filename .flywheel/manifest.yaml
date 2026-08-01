@@ -27,7 +27,6 @@ required_files:
   - .flywheel/operating-model/guidance/sop.md
   - .flywheel/operating-model/guidance/mission-model.md
   - .flywheel/operating-model/guidance/execution-model.md
-  - .flywheel/operating-model/guidance/programmatic-operations.md
   - .flywheel/operating-model/guidance/transition-recovery.md
   - .flywheel/operating-model/guidance/records.md
   - .flywheel/operating-model/guidance/evidence.md
@@ -47,7 +46,6 @@ required_files:
   - .flywheel/operating-model/config/approval-validation.yaml
   - .flywheel/operating-model/config/certification-validation.yaml
   - .flywheel/operating-model/config/capabilities.yaml
-  - .flywheel/operating-model/config/programmatic-capabilities.yaml
   - .flywheel/operating-model/config/validation.yaml
   - .flywheel/operating-model/onboarding/process.md
   - .flywheel/operating-model/onboarding/interview.yaml
@@ -62,7 +60,6 @@ required_files:
   - .flywheel/operating-model/schemas/approval-record.schema.yaml
   - .flywheel/operating-model/schemas/certification-record.schema.yaml
   - .flywheel/operating-model/schemas/readiness-validation.schema.yaml
-  - .flywheel/operating-model/schemas/programmatic-capabilities.schema.yaml
   - .flywheel/operating-model/schemas/knowledge.schema.yaml
   - .flywheel/operating-model/schemas/persistence-plan.schema.yaml
   - .flywheel/operating-model/schemas/reuse-assessment.schema.yaml
