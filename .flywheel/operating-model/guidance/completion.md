@@ -37,12 +37,26 @@ The completion operation MUST:
 
 Completing the final goal does not by itself prove mission completion.
 
-When no next goal is eligible, the completion operation MUST either:
+When no next goal is eligible, the completion operation MUST evaluate and durably record mission completion using the mission `completion` structure.
 
-- complete the mission when every mission success criterion is supported, no unresolved mission blocker remains, and no required mission-level approval is pending; or
-- retain the mission as active and record the concrete reason that mission completion remains governed or approval-bound.
+The evaluation MUST:
 
-An approval required only for a later external action, such as tagging, publishing, releasing, uploading artifacts, or enabling hosted automation, MUST NOT keep a preparation mission active when that external action is explicitly outside the mission objective. Such work should be represented by a later goal, mission, or approval-bound operation.
+- include exactly one `criterion_evidence` entry for every mission success-criterion ID;
+- include one or more durable evidence references for every satisfied criterion;
+- reject duplicate, missing, or unknown criterion IDs;
+- record every unresolved mission-scoped blocker in `blocker_refs`;
+- evaluate every declared approval requirement with its scope, status, rationale, and approval reference when applicable;
+- distinguish approvals required within the mission objective from approvals governing external follow-on work;
+- record completion timestamp, completing authority, and summary when the mission becomes terminal.
+
+The completion operation MUST either:
+
+- complete the mission when every mission success criterion is supported, `blocker_refs` is empty, and no `mission-objective` approval remains pending; or
+- retain the mission as active or blocked and record the concrete criterion, blocker, or mission-objective approval preventing completion.
+
+An approval required only for a later external action, such as tagging, publishing, releasing, uploading artifacts, or enabling hosted automation, MUST use scope `external-follow-on` and MUST NOT keep a preparation mission active when that external action is explicitly outside the mission objective. Such work should be represented by a later goal, mission, or approval-bound operation.
+
+A mission with `status: completed` MUST contain a complete, internally consistent `completion` structure. A nonterminal mission MAY contain a partial completion evaluation, but it MUST NOT claim unsupported success or omit a known mission-scoped blocker or pending mission-objective approval.
 
 ## Required semantic rules
 
@@ -51,5 +65,8 @@ An approval required only for a later external action, such as tagging, publishi
 - `COMPLETE-REUSE-001`: Reuse may close only after every required assessment is completed and consistent with adaptation reuse status.
 - `COMPLETE-GOAL-001`: Execution and goal completion are committed together.
 - `COMPLETE-MISSION-001`: A final goal triggers explicit mission-completion evaluation rather than implicit retention or implicit closure.
+- `COMPLETE-MISSION-EVIDENCE-001`: Every mission success criterion maps to durable evidence before mission completion.
+- `COMPLETE-MISSION-BLOCKER-001`: Every unresolved mission-scoped blocker is durably referenced and prevents mission completion.
+- `COMPLETE-MISSION-APPROVAL-001`: Approval evaluation distinguishes mission-objective requirements from external follow-on work.
 - `COMPLETE-STATE-001`: State is written last and contains no active execution or lifecycle stage after successful completion.
 - `COMPLETE-ROLLBACK-001`: Any failed completion attempt leaves the governed repository set unchanged.
