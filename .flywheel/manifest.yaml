@@ -24,6 +24,7 @@ required_files:
   - .flywheel/operating-model/guidance/invariants.md
   - .flywheel/operating-model/guidance/principles.md
   - .flywheel/operating-model/guidance/lifecycle.md
+  - .flywheel/operating-model/guidance/completion.md
   - .flywheel/operating-model/guidance/sop.md
   - .flywheel/operating-model/guidance/mission-model.md
   - .flywheel/operating-model/guidance/execution-model.md
