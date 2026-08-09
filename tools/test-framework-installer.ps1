@@ -78,9 +78,9 @@ try {
     Assert-Test -Condition ($installation -match $archivePattern) -Message 'Installation metadata archive checksum is incorrect.'
     Assert-Test -Condition ($installation -match '(?m)^source_identity:\s*"local-archive"\s*$') -Message 'Installation metadata source identity is incorrect.'
     Assert-Test -Condition ($installation -match '(?m)^owned_files:\s*$') -Message 'Installation metadata owned_files mapping is missing.'
-    Assert-Test -Condition ($installation.Contains('".flywheel/manifest.yaml"')) -Message 'Installation metadata must track immutable framework files.'
-    Assert-Test -Condition (-not $installation.Contains('".flywheel/state.yaml"')) -Message 'Mutable state.yaml must not be recorded as an owned immutable file.'
-    Assert-Test -Condition (-not $installation.Contains('".flywheel/operations/')) -Message 'Mutable operations content must not be recorded as owned immutable files.'
+    Assert-Test -Condition ($installation.Contains('".flywheel/manifest.yaml"'.Replace('\', ''))) -Message 'Installation metadata must track immutable framework files.'
+    Assert-Test -Condition (-not $installation.Contains('".flywheel/state.yaml"'.Replace('\', ''))) -Message 'Mutable state.yaml must not be recorded as an owned immutable file.'
+    Assert-Test -Condition (-not $installation.Contains('".flywheel/operations/'.Replace('\', ''))) -Message 'Mutable operations content must not be recorded as owned immutable files.'
 
     $topLevel = @(Get-ChildItem -LiteralPath $targetRepository -Force | Where-Object { $_.Name -notin @('.git', '.flywheel') })
     Assert-Test -Condition ($topLevel.Count -eq 0) -Message 'Installer introduced content outside .flywheel.'
