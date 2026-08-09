@@ -74,7 +74,8 @@ try {
     $installation = Get-Content -LiteralPath $installationPath -Raw
     Assert-Test -Condition ($installation -match '(?m)^schema_version:\s*1\s*$') -Message 'Installation metadata schema version is missing.'
     Assert-Test -Condition ($installation -match '(?m)^framework_version:\s*"2026\.08\.08"\s*$') -Message 'Installation metadata framework version is incorrect.'
-    Assert-Test -Condition ($installation -match "(?m)^archive_sha256:\s*\"$packageSha256\"\s*$") -Message 'Installation metadata archive checksum is incorrect.'
+    $archivePattern = '(?m)^archive_sha256:\s*"{0}"\s*$' -f [regex]::Escape($packageSha256)
+    Assert-Test -Condition ($installation -match $archivePattern) -Message 'Installation metadata archive checksum is incorrect.'
     Assert-Test -Condition ($installation -match '(?m)^source_identity:\s*"local-archive"\s*$') -Message 'Installation metadata source identity is incorrect.'
     Assert-Test -Condition ($installation -match '(?m)^owned_files:\s*$') -Message 'Installation metadata owned_files mapping is missing.'
     Assert-Test -Condition ($installation.Contains('".flywheel/manifest.yaml"')) -Message 'Installation metadata must track immutable framework files.'
