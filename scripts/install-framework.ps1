@@ -43,6 +43,9 @@ $script:FrameworkRepository = 'Infoconex/ai-flywheel-framework'
 $script:PackageName = "ai-flywheel-framework-$($script:FrameworkVersion).zip"
 $script:ReleaseTag = "v$($script:FrameworkVersion)"
 $script:RunId = [guid]::NewGuid().ToString('N').Substring(0, 8)
+$script:RequestedPackagePath = $PackagePath
+$script:IsNonInteractive = [bool]$NonInteractive
+$script:IsApplyApproved = [bool]$Apply
 
 function Write-Section {
     [CmdletBinding()]
@@ -77,8 +80,8 @@ function Get-FrameworkPackage {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$WorkingDirectory)
 
-    if ($PackagePath) {
-        $resolved = (Resolve-Path -LiteralPath $PackagePath -ErrorAction Stop).Path
+    if ($script:RequestedPackagePath) {
+        $resolved = (Resolve-Path -LiteralPath $script:RequestedPackagePath -ErrorAction Stop).Path
         if ([System.IO.Path]::GetExtension($resolved) -ne '.zip') { throw 'PackagePath must reference a ZIP archive.' }
         Write-Host '[WARN] Using a local release-candidate package; published checksum verification is not available.' -ForegroundColor Yellow
         return [pscustomobject]@{ Path = $resolved; SourceIdentity = 'local-archive'; ExpectedSha256 = $null }
@@ -147,9 +150,9 @@ function Expand-SafeFrameworkPackage {
 
             $parent = Split-Path -Parent $target
             if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
-            $input = $entry.Open()
+            $entryStream = $entry.Open()
             $output = [System.IO.File]::Open($target, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
-            try { $input.CopyTo($output) } finally { $output.Dispose(); $input.Dispose() }
+            try { $entryStream.CopyTo($output) } finally { $output.Dispose(); $entryStream.Dispose() }
         }
     }
     finally { $archive.Dispose() }
@@ -170,7 +173,7 @@ function Assert-PackageVersion {
     if ($manifest -notmatch $pattern) { throw "Release package version does not match installer version $($script:FrameworkVersion)." }
 }
 
-function Get-FrameworkFileHashes {
+function Get-FrameworkFileHashMap {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Root)
 
@@ -196,7 +199,7 @@ function Assert-HashesMatch {
     }
 }
 
-function New-InstallationMetadata {
+function ConvertTo-InstallationMetadata {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][string]$ArchiveSha256,
@@ -225,7 +228,7 @@ function Test-InstallApproved {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$RepositoryRoot)
 
-    if ($NonInteractive) { return [bool]$Apply }
+    if ($script:IsNonInteractive) { return $script:IsApplyApproved }
     $answer = Read-Host "Install AI Flywheel Framework $($script:FrameworkVersion) into ${RepositoryRoot}? [Y/n]"
     return [string]::IsNullOrWhiteSpace($answer) -or $answer.Trim().StartsWith('y', [System.StringComparison]::OrdinalIgnoreCase)
 }
@@ -262,7 +265,7 @@ try {
 
     $packageFlywheel = Expand-SafeFrameworkPackage -ArchivePath $package.Path -Destination (Join-Path $workingRoot 'extract')
     Assert-PackageVersion -FlywheelPath $packageFlywheel
-    $expectedHashes = Get-FrameworkFileHashes -Root $packageFlywheel
+    $expectedHashes = Get-FrameworkFileHashMap -Root $packageFlywheel
     Write-Ok -Message "Package safety checks passed ($($expectedHashes.Count) framework files)"
 
     Write-Section -Title 'Installation Plan'
@@ -281,15 +284,15 @@ try {
     Write-Section -Title 'Installation'
     $stagedTarget = Join-Path $repositoryRoot ".flywheel.installing-$($script:RunId)"
     Copy-Item -LiteralPath $packageFlywheel -Destination $stagedTarget -Recurse -Force -ErrorAction Stop
-    Assert-HashesMatch -Expected $expectedHashes -Actual (Get-FrameworkFileHashes -Root $stagedTarget)
+    Assert-HashesMatch -Expected $expectedHashes -Actual (Get-FrameworkFileHashMap -Root $stagedTarget)
 
     Move-Item -LiteralPath $stagedTarget -Destination $targetFlywheel -ErrorAction Stop
     $stagedTarget = $null
     $publishedTarget = $true
 
-    $provenance = New-InstallationMetadata -ArchiveSha256 $packageSha256 -SourceIdentity $package.SourceIdentity -FrameworkHashes $expectedHashes
+    $provenance = ConvertTo-InstallationMetadata -ArchiveSha256 $packageSha256 -SourceIdentity $package.SourceIdentity -FrameworkHashes $expectedHashes
     Set-Content -LiteralPath (Join-Path $targetFlywheel 'installation.yaml') -Value $provenance -Encoding UTF8 -ErrorAction Stop
-    Assert-HashesMatch -Expected $expectedHashes -Actual (Get-FrameworkFileHashes -Root $targetFlywheel)
+    Assert-HashesMatch -Expected $expectedHashes -Actual (Get-FrameworkFileHashMap -Root $targetFlywheel)
 
     $installationComplete = $true
     Write-Ok -Message 'Framework installed faithfully'
