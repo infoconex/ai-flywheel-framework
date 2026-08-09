@@ -230,7 +230,7 @@ function Expand-SafeFrameworkPackage {
             }
 
             $parent = Split-Path -Parent $target
-            if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $target -Force | Out-Null }
+            if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
             $entryStream = $entry.Open()
             $output = [System.IO.File]::Open($target, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
             try { $entryStream.CopyTo($output) } finally { $output.Dispose(); $entryStream.Dispose() }
