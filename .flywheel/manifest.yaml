@@ -1,7 +1,7 @@
 schema_version: 1
 framework:
   name: AI Flywheel
-  version: 0.1.0-development
+  version: 2026.08.08
   mode: manual-bootstrap
   specification: https://github.com/Infoconex/ai-flywheel-spec
 path_base: repository-root

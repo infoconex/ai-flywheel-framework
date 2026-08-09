@@ -46,16 +46,63 @@ The framework is responsible for:
 
 ## Installation model
 
-A user copies the `.flywheel` directory and `AGENTS.md` from this repository into the root of a target repository. The AI operator begins with `.flywheel/manifest.yaml` and follows its declared entrypoint.
+The framework has its own implementation-neutral installer. Installing the framework does not require Python and does not install or invoke the Python CLI or any other runtime implementation.
 
-The first goals gather onboarding answers, inspect the repository, reconcile conflicts, and populate the configuration files. Later goals use that context to propose, build, validate, and prove the repository-specific Flywheel implementation.
+For release `2026.08.08`, the public Windows entry point is:
+
+```powershell
+irm https://raw.githubusercontent.com/Infoconex/ai-flywheel-framework/v2026.08.08/install.ps1 | iex
+```
+
+The public `install.ps1` is a lightweight `Invoke-Expression`-safe launcher. It downloads the reviewed canonical installer from `scripts/install-framework.ps1` and runs it in its own script scope.
+
+The installer:
+
+- resolves the target Git repository root;
+- downloads `ai-flywheel-framework-2026.08.08.zip` and its `.sha256` sidecar from release `v2026.08.08`;
+- verifies the published checksum;
+- rejects unsafe archive paths or content outside `.flywheel`;
+- verifies the package manifest identifies framework version `2026.08.08`;
+- stages and hash-verifies the framework before publication into the repository;
+- records installation provenance in `.flywheel/installation.yaml`;
+- verifies the installed package files byte-for-byte; and
+- refuses to overwrite an existing `.flywheel` installation.
+
+A successful initial installation changes only `.flywheel/`. It does not start onboarding or any lifecycle execution. `AGENTS.md` remains a repository discovery aid and is not required for the installed framework because the canonical startup boundary is `.flywheel/manifest.yaml`.
+
+For release-candidate testing from a framework checkout, build the package with:
+
+```powershell
+.\tools\package-framework.ps1
+```
+
+Then invoke the canonical installer with `-PackagePath` against a test Git repository. The local regression gate performs this flow automatically:
+
+```powershell
+.\tools\test-framework-installer.ps1
+```
+
+## Release model
+
+The framework, its installer, its package, and its release tag share one CalVer release identity. For this release:
+
+```text
+Framework manifest: 2026.08.08
+Release tag:        v2026.08.08
+Package:            ai-flywheel-framework-2026.08.08.zip
+Checksum:           ai-flywheel-framework-2026.08.08.zip.sha256
+Installer target:   2026.08.08
+```
+
+Framework validity is established before publication through the framework certification and release-validation process. The installer is responsible for proving that the exact published artifact was acquired and installed faithfully; it does not re-certify the framework's schemas or operating semantics.
 
 ## Relationship to the AI Flywheel ecosystem
 
 | Repository | Responsibility |
 |---|---|
 | [ai-flywheel-spec](https://github.com/Infoconex/ai-flywheel-spec) | Defines the normative specification |
-| **ai-flywheel-framework** | Provides the canonical installable `.flywheel` structure and bootstrap mission |
+| **ai-flywheel-framework** | Provides the canonical installable `.flywheel` structure, framework release, and implementation-neutral framework installer |
+| Language-specific CLI/implementation | Optionally ensures a compatible framework exists, installs its own runtime dependencies, and operates the Flywheel |
 | Repository-specific implementation | Runs and evolves Flywheel operations using the language and standards selected during onboarding |
 | Sample repositories | Demonstrate possible implementations without making them mandatory |
 
