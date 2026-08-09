@@ -168,16 +168,27 @@ try {
 
     $markerPath = Join-Path $installedFlywheel 'installer-regression-marker.txt'
     Set-Content -LiteralPath $markerPath -Value 'preserve-me' -Encoding ASCII
+    $secondInstallOutputPath = Join-Path $testRoot 'second-install-output.txt'
     $secondInstallFailed = $false
     try {
-        & $installerPath -Repository $targetRepository -PackagePath $packagePath -NonInteractive -Apply -Confirm:$false
+        & $installerPath -Repository $targetRepository -PackagePath $packagePath -NonInteractive -Apply -Confirm:$false *> $secondInstallOutputPath
     }
     catch {
         $secondInstallFailed = $true
     }
 
+    $secondInstallOutput = if (Test-Path -LiteralPath $secondInstallOutputPath) {
+        Get-Content -LiteralPath $secondInstallOutputPath -Raw -ErrorAction SilentlyContinue
+    }
+    if ($null -eq $secondInstallOutput) { $secondInstallOutput = '' }
+
     Assert-Test -Condition $secondInstallFailed -Message 'Installer did not refuse an existing .flywheel installation.'
+    Assert-Test -Condition ($secondInstallOutput -match '\[FAIL\] A \.flywheel directory already exists\.') -Message 'Expected reinstall refusal message was not emitted.'
+    Assert-Test -Condition ($secondInstallOutput -notmatch '## Diagnostic Details') -Message 'Expected reinstall refusal emitted unexpected diagnostic details.'
     Assert-Test -Condition (Test-Path -LiteralPath $markerPath -PathType Leaf) -Message 'Existing Flywheel content was modified during refused reinstall.'
+    if (-not [string]::IsNullOrWhiteSpace($secondInstallOutput)) {
+        Write-Output $secondInstallOutput.Trim()
+    }
 
     $installerText = Get-Content -LiteralPath $installerPath -Raw
     Assert-Test -Condition ($installerText -notmatch '(?im)Get-Command\s+(python|py)\b') -Message 'Framework installer must not discover Python.'
