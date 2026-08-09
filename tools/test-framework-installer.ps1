@@ -39,6 +39,50 @@ function Assert-Test {
     if (-not $Condition) { throw $Message }
 }
 
+function Invoke-NativeCommandCapture {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string]$FilePath,
+        [Parameter()][string[]]$Arguments = @()
+    )
+
+    $stdoutPath = Join-Path $testRoot ('stdout-' + [guid]::NewGuid().ToString('N') + '.txt')
+    $stderrPath = Join-Path $testRoot ('stderr-' + [guid]::NewGuid().ToString('N') + '.txt')
+    try {
+        & $FilePath @Arguments 1> $stdoutPath 2> $stderrPath
+        $exitCode = $LASTEXITCODE
+        $stdout = if (Test-Path -LiteralPath $stdoutPath) { (Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction SilentlyContinue).Trim() } else { '' }
+        $stderr = if (Test-Path -LiteralPath $stderrPath) { (Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue).Trim() } else { '' }
+        return [pscustomobject]@{
+            FilePath = $FilePath
+            Arguments = @($Arguments)
+            ExitCode = $exitCode
+            StdOut = $stdout
+            StdErr = $stderr
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Format-NativeCommandFailure {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Message,
+        [Parameter(Mandatory)][pscustomobject]$Result
+    )
+
+    $command = @($Result.FilePath) + @($Result.Arguments)
+    return @(
+        $Message
+        "Command: $($command -join ' ')"
+        "Exit code: $($Result.ExitCode)"
+        "stdout: $($Result.StdOut)"
+        "stderr: $($Result.StdErr)"
+    ) -join [Environment]::NewLine
+}
+
 try {
     foreach ($name in $gitEnvironmentNames) {
         $value = [Environment]::GetEnvironmentVariable($name, 'Process')
@@ -66,26 +110,25 @@ try {
     Assert-Test -Condition ($packageSha256 -eq $secondPackageSha256) -Message 'Repeated framework packaging produced different ZIP hashes.'
 
     $git = Get-Command git -ErrorAction Stop
-    Push-Location -LiteralPath $targetRepository
-    try {
-        & $git.Source init --quiet
-        if ($LASTEXITCODE -ne 0) { throw 'Unable to initialize temporary Git repository.' }
-    }
-    finally {
-        Pop-Location
-    }
+    $gitVersion = Invoke-NativeCommandCapture -FilePath $git.Source -Arguments @('--version')
+    Assert-Test -Condition ($gitVersion.ExitCode -eq 0) -Message (Format-NativeCommandFailure -Message 'Git executable could not report its version.' -Result $gitVersion)
+
+    $gitInit = Invoke-NativeCommandCapture -FilePath $git.Source -Arguments @('-C', $targetRepository, 'init', '--quiet')
+    Assert-Test -Condition ($gitInit.ExitCode -eq 0) -Message (Format-NativeCommandFailure -Message 'Unable to initialize temporary Git repository.' -Result $gitInit)
 
     $gitDirectory = Join-Path $targetRepository '.git'
-    Assert-Test -Condition (Test-Path -LiteralPath $gitDirectory -PathType Container) -Message 'Temporary Git repository did not create a .git directory.'
+    Assert-Test -Condition (Test-Path -LiteralPath $gitDirectory -PathType Container) -Message "Temporary Git repository did not create a .git directory. Git: $($git.Source); version: $($gitVersion.StdOut)"
 
-    $insideWorkTree = (& $git.Source -C $targetRepository rev-parse --is-inside-work-tree 2>$null | Select-Object -First 1)
-    Assert-Test -Condition ($LASTEXITCODE -eq 0) -Message 'Git could not verify the temporary repository as a work tree.'
-    Assert-Test -Condition ($insideWorkTree.Trim() -eq 'true') -Message 'Temporary Git repository is not recognized as a work tree.'
+    $insideWorkTreeResult = Invoke-NativeCommandCapture -FilePath $git.Source -Arguments @('-C', $targetRepository, 'rev-parse', '--is-inside-work-tree')
+    Assert-Test -Condition ($insideWorkTreeResult.ExitCode -eq 0) -Message (Format-NativeCommandFailure -Message 'Git could not verify the temporary repository as a work tree.' -Result $insideWorkTreeResult)
+    Assert-Test -Condition ($insideWorkTreeResult.StdOut.Trim() -eq 'true') -Message (Format-NativeCommandFailure -Message 'Temporary Git repository is not recognized as a work tree.' -Result $insideWorkTreeResult)
 
-    $reportedTopLevel = (& $git.Source -C $targetRepository rev-parse --show-toplevel 2>$null | Select-Object -First 1)
-    Assert-Test -Condition ($LASTEXITCODE -eq 0) -Message 'Git could not resolve the temporary repository root.'
+    $topLevelResult = Invoke-NativeCommandCapture -FilePath $git.Source -Arguments @('-C', $targetRepository, 'rev-parse', '--show-toplevel')
+    Assert-Test -Condition ($topLevelResult.ExitCode -eq 0) -Message (Format-NativeCommandFailure -Message 'Git could not resolve the temporary repository root.' -Result $topLevelResult)
+    Assert-Test -Condition (-not [string]::IsNullOrWhiteSpace($topLevelResult.StdOut)) -Message (Format-NativeCommandFailure -Message 'Git returned an empty repository root.' -Result $topLevelResult)
+
     $pathTrimCharacters = [char[]]'\/'
-    $resolvedTopLevel = (Resolve-Path -LiteralPath $reportedTopLevel).Path.TrimEnd($pathTrimCharacters)
+    $resolvedTopLevel = (Resolve-Path -LiteralPath $topLevelResult.StdOut.Trim()).Path.TrimEnd($pathTrimCharacters)
     $resolvedTargetRepository = (Resolve-Path -LiteralPath $targetRepository).Path.TrimEnd($pathTrimCharacters)
     Assert-Test -Condition ($resolvedTopLevel -eq $resolvedTargetRepository) -Message "Git resolved unexpected repository root '$resolvedTopLevel'; expected '$resolvedTargetRepository'."
 
@@ -146,6 +189,19 @@ try {
     Assert-Test -Condition ($launcherText.Contains('/scripts/install-framework.ps1')) -Message 'Public launcher must delegate to the canonical framework installer.'
 
     Write-Output 'Framework installer regression tests passed.'
+}
+catch {
+    Write-Host ''
+    Write-Host '[FAIL] Framework installer regression failed.' -ForegroundColor Red
+    Write-Host "Message: $($_.Exception.Message)" -ForegroundColor Red
+    if ($_.InvocationInfo -and $_.InvocationInfo.PositionMessage) {
+        Write-Host "Location: $($_.InvocationInfo.PositionMessage.Trim())"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($_.ScriptStackTrace)) {
+        Write-Host 'Stack trace:'
+        Write-Host $_.ScriptStackTrace
+    }
+    throw
 }
 finally {
     foreach ($name in $gitEnvironmentNames) {
