@@ -62,7 +62,7 @@ function Write-Ok {
     Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
-function New-ExpectedFailure {
+function Get-ExpectedFailureException {
     [CmdletBinding()]
     param([Parameter(Mandatory)][ValidateNotNullOrEmpty()][string]$Message)
 
@@ -332,7 +332,7 @@ try {
     Write-Ok -Message 'Git repository detected'
     Write-Host "Repository root: $repositoryRoot"
     if (Test-Path -LiteralPath $targetFlywheel) {
-        throw (New-ExpectedFailure -Message 'A .flywheel directory already exists. Initial installation will not overwrite an existing Flywheel.')
+        throw (Get-ExpectedFailureException -Message 'A .flywheel directory already exists. Initial installation will not overwrite an existing Flywheel.')
     }
 
     New-Item -ItemType Directory -Path $workingRoot -Force | Out-Null
