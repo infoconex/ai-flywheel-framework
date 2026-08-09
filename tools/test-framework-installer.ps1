@@ -74,8 +74,9 @@ try {
 
     $reportedTopLevel = (& $git.Source -C $targetRepository rev-parse --show-toplevel 2>$null | Select-Object -First 1)
     Assert-Test -Condition ($LASTEXITCODE -eq 0) -Message 'Git could not resolve the temporary repository root.'
-    $resolvedTopLevel = (Resolve-Path -LiteralPath $reportedTopLevel).Path.TrimEnd('\', '/')
-    $resolvedTargetRepository = (Resolve-Path -LiteralPath $targetRepository).Path.TrimEnd('\', '/')
+    $pathTrimCharacters = [char[]]'\/'
+    $resolvedTopLevel = (Resolve-Path -LiteralPath $reportedTopLevel).Path.TrimEnd($pathTrimCharacters)
+    $resolvedTargetRepository = (Resolve-Path -LiteralPath $targetRepository).Path.TrimEnd($pathTrimCharacters)
     Assert-Test -Condition ($resolvedTopLevel -eq $resolvedTargetRepository) -Message "Git resolved unexpected repository root '$resolvedTopLevel'; expected '$resolvedTargetRepository'."
 
     & $installerPath -Repository $targetRepository -PackagePath $packagePath -NonInteractive -Apply -Confirm:$false
