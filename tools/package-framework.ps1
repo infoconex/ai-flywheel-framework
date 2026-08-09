@@ -54,21 +54,31 @@ if ($PSCmdlet.ShouldProcess($packagePath, "Build AI Flywheel Framework $framewor
     Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-    $fileStream = [System.IO.File]::Open($packagePath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::None)
-    $archive = New-Object System.IO.Compression.ZipArchive($fileStream, [System.IO.Compression.ZipArchiveMode]::Create, $false)
+    $fileStream = [System.IO.File]::Open(
+        $packagePath,
+        [System.IO.FileMode]::CreateNew,
+        [System.IO.FileAccess]::ReadWrite,
+        [System.IO.FileShare]::None
+    )
+    $archive = [System.IO.Compression.ZipArchive]::new(
+        $fileStream,
+        [System.IO.Compression.ZipArchiveMode]::Create,
+        $false
+    )
     $fixedTimestamp = [DateTimeOffset]::new(1980, 1, 1, 0, 0, 0, [TimeSpan]::Zero)
+    $repositoryPrefixLength = $repositoryRoot.TrimEnd([char[]]@('\', '/')).Length + 1
 
     try {
         $directories = @(Get-ChildItem -LiteralPath $flywheelRoot -Directory -Recurse | Sort-Object FullName)
         foreach ($directory in $directories) {
-            $relative = $directory.FullName.Substring($repositoryRoot.TrimEnd('\', '/').Length + 1).Replace('\', '/') + '/'
+            $relative = $directory.FullName.Substring($repositoryPrefixLength).Replace('\', '/') + '/'
             $entry = $archive.CreateEntry($relative, [System.IO.Compression.CompressionLevel]::Optimal)
             $entry.LastWriteTime = $fixedTimestamp
         }
 
         $files = @(Get-ChildItem -LiteralPath $flywheelRoot -File -Recurse | Sort-Object FullName)
         foreach ($file in $files) {
-            $relative = $file.FullName.Substring($repositoryRoot.TrimEnd('\', '/').Length + 1).Replace('\', '/')
+            $relative = $file.FullName.Substring($repositoryPrefixLength).Replace('\', '/')
             if ($relative -eq '.flywheel/installation.yaml') {
                 throw 'Installer-owned .flywheel/installation.yaml must not be included in a framework release package.'
             }
@@ -77,7 +87,9 @@ if ($PSCmdlet.ShouldProcess($packagePath, "Build AI Flywheel Framework $framewor
             $entry.LastWriteTime = $fixedTimestamp
             $input = [System.IO.File]::OpenRead($file.FullName)
             $output = $entry.Open()
-            try { $input.CopyTo($output) }
+            try {
+                $input.CopyTo($output)
+            }
             finally {
                 $output.Dispose()
                 $input.Dispose()
