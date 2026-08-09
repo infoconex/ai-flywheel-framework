@@ -85,14 +85,14 @@ if ($PSCmdlet.ShouldProcess($packagePath, "Build AI Flywheel Framework $framewor
 
             $entry = $archive.CreateEntry($relative, [System.IO.Compression.CompressionLevel]::Optimal)
             $entry.LastWriteTime = $fixedTimestamp
-            $input = [System.IO.File]::OpenRead($file.FullName)
-            $output = $entry.Open()
+            $sourceStream = [System.IO.File]::OpenRead($file.FullName)
+            $entryStream = $entry.Open()
             try {
-                $input.CopyTo($output)
+                $sourceStream.CopyTo($entryStream)
             }
             finally {
-                $output.Dispose()
-                $input.Dispose()
+                $entryStream.Dispose()
+                $sourceStream.Dispose()
             }
         }
     }
