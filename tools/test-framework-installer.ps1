@@ -5,10 +5,10 @@
 Runs local regression tests for the standalone framework installer.
 
 .DESCRIPTION
-Packages the repository's real `.flywheel`, installs it into a temporary Git
-repository with the canonical framework installer, verifies provenance and mutation
-scope, confirms reinstall refusal preserves existing state, and checks that the
-public root launcher is safe for the `irm ... | iex` delivery pattern.
+Packages the repository's real `.flywheel` twice to prove deterministic local
+packaging, installs it into a temporary Git repository with the canonical framework
+installer, verifies CLI-compatible provenance and mutation scope, confirms reinstall
+refusal preserves existing state, and checks the public launcher boundary.
 #>
 
 [CmdletBinding()]
@@ -22,8 +22,10 @@ $launcherPath = Join-Path $repositoryRoot 'install.ps1'
 $installerPath = Join-Path $repositoryRoot 'scripts\install-framework.ps1'
 $packagerPath = Join-Path $repositoryRoot 'tools\package-framework.ps1'
 $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('AIFW-FRAMEWORK-TEST-' + [guid]::NewGuid().ToString('N').Substring(0, 8))
-$packageOutput = Join-Path $testRoot 'dist'
+$packageOutput1 = Join-Path $testRoot 'dist-1'
+$packageOutput2 = Join-Path $testRoot 'dist-2'
 $targetRepository = Join-Path $testRoot 'target'
+$packageName = 'ai-flywheel-framework-2026.08.08.zip'
 
 function Assert-Test {
     [CmdletBinding()]
@@ -36,13 +38,22 @@ function Assert-Test {
 }
 
 try {
-    New-Item -ItemType Directory -Path $packageOutput -Force | Out-Null
+    New-Item -ItemType Directory -Path $packageOutput1 -Force | Out-Null
+    New-Item -ItemType Directory -Path $packageOutput2 -Force | Out-Null
     New-Item -ItemType Directory -Path $targetRepository -Force | Out-Null
 
-    & $packagerPath -OutputDirectory $packageOutput -Confirm:$false
-    $packagePath = Join-Path $packageOutput 'ai-flywheel-framework-2026.08.08.zip'
+    & $packagerPath -OutputDirectory $packageOutput1 -Confirm:$false
+    & $packagerPath -OutputDirectory $packageOutput2 -Confirm:$false
+
+    $packagePath = Join-Path $packageOutput1 $packageName
+    $secondPackagePath = Join-Path $packageOutput2 $packageName
     Assert-Test -Condition (Test-Path -LiteralPath $packagePath -PathType Leaf) -Message 'Framework package was not created.'
     Assert-Test -Condition (Test-Path -LiteralPath "$packagePath.sha256" -PathType Leaf) -Message 'Framework checksum sidecar was not created.'
+    Assert-Test -Condition (Test-Path -LiteralPath $secondPackagePath -PathType Leaf) -Message 'Second framework package was not created.'
+
+    $packageSha256 = (Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $secondPackageSha256 = (Get-FileHash -LiteralPath $secondPackagePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    Assert-Test -Condition ($packageSha256 -eq $secondPackageSha256) -Message 'Repeated framework packaging produced different ZIP hashes.'
 
     $git = Get-Command git -ErrorAction Stop
     & $git.Source -C $targetRepository init --quiet
@@ -51,12 +62,24 @@ try {
     & $installerPath -Repository $targetRepository -PackagePath $packagePath -NonInteractive -Apply -Confirm:$false
 
     $installedFlywheel = Join-Path $targetRepository '.flywheel'
+    $manifestPath = Join-Path $installedFlywheel 'manifest.yaml'
+    $installationPath = Join-Path $installedFlywheel 'installation.yaml'
     Assert-Test -Condition (Test-Path -LiteralPath $installedFlywheel -PathType Container) -Message '.flywheel was not installed.'
-    Assert-Test -Condition (Test-Path -LiteralPath (Join-Path $installedFlywheel 'manifest.yaml') -PathType Leaf) -Message 'Installed manifest is missing.'
-    Assert-Test -Condition (Test-Path -LiteralPath (Join-Path $installedFlywheel 'installation.yaml') -PathType Leaf) -Message 'Installation provenance is missing.'
+    Assert-Test -Condition (Test-Path -LiteralPath $manifestPath -PathType Leaf) -Message 'Installed manifest is missing.'
+    Assert-Test -Condition (Test-Path -LiteralPath $installationPath -PathType Leaf) -Message 'Installation provenance is missing.'
 
-    $manifest = Get-Content -LiteralPath (Join-Path $installedFlywheel 'manifest.yaml') -Raw
+    $manifest = Get-Content -LiteralPath $manifestPath -Raw
     Assert-Test -Condition ($manifest -match '(?m)^\s*version:\s*2026\.08\.08\s*$') -Message 'Installed framework version is incorrect.'
+
+    $installation = Get-Content -LiteralPath $installationPath -Raw
+    Assert-Test -Condition ($installation -match '(?m)^schema_version:\s*1\s*$') -Message 'Installation metadata schema version is missing.'
+    Assert-Test -Condition ($installation -match '(?m)^framework_version:\s*"2026\.08\.08"\s*$') -Message 'Installation metadata framework version is incorrect.'
+    Assert-Test -Condition ($installation -match "(?m)^archive_sha256:\s*\"$packageSha256\"\s*$") -Message 'Installation metadata archive checksum is incorrect.'
+    Assert-Test -Condition ($installation -match '(?m)^source_identity:\s*"local-archive"\s*$') -Message 'Installation metadata source identity is incorrect.'
+    Assert-Test -Condition ($installation -match '(?m)^owned_files:\s*$') -Message 'Installation metadata owned_files mapping is missing.'
+    Assert-Test -Condition ($installation.Contains('".flywheel/manifest.yaml"')) -Message 'Installation metadata must track immutable framework files.'
+    Assert-Test -Condition (-not $installation.Contains('".flywheel/state.yaml"')) -Message 'Mutable state.yaml must not be recorded as an owned immutable file.'
+    Assert-Test -Condition (-not $installation.Contains('".flywheel/operations/')) -Message 'Mutable operations content must not be recorded as owned immutable files.'
 
     $topLevel = @(Get-ChildItem -LiteralPath $targetRepository -Force | Where-Object { $_.Name -notin @('.git', '.flywheel') })
     Assert-Test -Condition ($topLevel.Count -eq 0) -Message 'Installer introduced content outside .flywheel.'
