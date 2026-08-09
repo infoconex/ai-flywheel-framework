@@ -81,7 +81,7 @@ function Get-FrameworkPackage {
         $resolved = (Resolve-Path -LiteralPath $PackagePath -ErrorAction Stop).Path
         if ([System.IO.Path]::GetExtension($resolved) -ne '.zip') { throw 'PackagePath must reference a ZIP archive.' }
         Write-Host '[WARN] Using a local release-candidate package; published checksum verification is not available.' -ForegroundColor Yellow
-        return [pscustomobject]@{ Path = $resolved; Source = 'local-package'; ExpectedSha256 = $null }
+        return [pscustomobject]@{ Path = $resolved; SourceIdentity = 'local-archive'; ExpectedSha256 = $null }
     }
 
     $baseUri = "https://github.com/$($script:FrameworkRepository)/releases/download/$($script:ReleaseTag)"
@@ -104,7 +104,7 @@ function Get-FrameworkPackage {
 
     return [pscustomobject]@{
         Path = $downloadedPackage
-        Source = "github-release:$($script:ReleaseTag)"
+        SourceIdentity = "github-release:$($script:ReleaseTag)"
         ExpectedSha256 = $match.Value.ToLowerInvariant()
     }
 }
@@ -196,6 +196,31 @@ function Assert-HashesMatch {
     }
 }
 
+function New-InstallationMetadata {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$ArchiveSha256,
+        [Parameter(Mandatory)][string]$SourceIdentity,
+        [Parameter(Mandatory)][hashtable]$FrameworkHashes
+    )
+
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.Add('schema_version: 1')
+    $lines.Add("framework_version: \"$($script:FrameworkVersion)\"")
+    $lines.Add("archive_sha256: \"$ArchiveSha256\"")
+    $lines.Add("source_identity: \"$SourceIdentity\"")
+    $lines.Add("installed_at: \"$([DateTimeOffset]::UtcNow.ToString('o'))\"")
+    $lines.Add('owned_files:')
+
+    foreach ($relative in ($FrameworkHashes.Keys | Sort-Object)) {
+        if ($relative -eq 'state.yaml' -or $relative.StartsWith('operations/', [System.StringComparison]::Ordinal)) { continue }
+        $path = ".flywheel/$relative"
+        $lines.Add("  \"$path\": \"$($FrameworkHashes[$relative])\"")
+    }
+
+    return ($lines -join [Environment]::NewLine)
+}
+
 function Test-InstallApproved {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$RepositoryRoot)
@@ -262,15 +287,7 @@ try {
     $stagedTarget = $null
     $publishedTarget = $true
 
-    $provenance = @(
-        'schema_version: 1',
-        "framework_version: \"$($script:FrameworkVersion)\"",
-        "source: \"$($package.Source)\"",
-        "package: \"$($script:PackageName)\"",
-        "package_sha256: \"$packageSha256\"",
-        "installed_at: \"$([DateTimeOffset]::UtcNow.ToString('o'))\"",
-        'installer: framework-install.ps1'
-    ) -join [Environment]::NewLine
+    $provenance = New-InstallationMetadata -ArchiveSha256 $packageSha256 -SourceIdentity $package.SourceIdentity -FrameworkHashes $expectedHashes
     Set-Content -LiteralPath (Join-Path $targetFlywheel 'installation.yaml') -Value $provenance -Encoding UTF8 -ErrorAction Stop
     Assert-HashesMatch -Expected $expectedHashes -Actual (Get-FrameworkFileHashes -Root $targetFlywheel)
 
