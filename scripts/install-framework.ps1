@@ -71,8 +71,12 @@ function Write-FailureDiagnostic {
     Write-Host "Message: $($ErrorRecord.Exception.Message)"
 
     if ($ErrorRecord.InvocationInfo) {
-        if (-not [string]::IsNullOrWhiteSpace($ErrorRecord.InvocationInfo.MyCommand.Name)) {
-            Write-Host "Command: $($ErrorRecord.InvocationInfo.MyCommand.Name)"
+        $commandName = $null
+        if ($ErrorRecord.InvocationInfo.MyCommand) {
+            $commandName = $ErrorRecord.InvocationInfo.MyCommand.ToString()
+        }
+        if (-not [string]::IsNullOrWhiteSpace($commandName)) {
+            Write-Host "Command: $commandName"
         }
         if (-not [string]::IsNullOrWhiteSpace($ErrorRecord.InvocationInfo.PositionMessage)) {
             Write-Host "Location: $($ErrorRecord.InvocationInfo.PositionMessage.Trim())"
@@ -104,11 +108,35 @@ function Get-GitRepositoryRoot {
     $git = Get-Command git -ErrorAction SilentlyContinue
     if (-not $git) { throw 'Git is required to install the AI Flywheel framework.' }
 
-    $root = (& $git.Source -C $resolved rev-parse --show-toplevel 2>$null | Select-Object -First 1)
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($root)) {
-        throw "The target path is not inside a Git repository: $resolved"
+    $stdoutPath = Join-Path ([System.IO.Path]::GetTempPath()) ("AIFW-GIT-STDOUT-$($script:RunId).txt")
+    $stderrPath = Join-Path ([System.IO.Path]::GetTempPath()) ("AIFW-GIT-STDERR-$($script:RunId).txt")
+    try {
+        & $git.Source -C $resolved rev-parse --show-toplevel 1> $stdoutPath 2> $stderrPath
+        $exitCode = $LASTEXITCODE
+
+        $stdoutContent = if (Test-Path -LiteralPath $stdoutPath) {
+            Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction SilentlyContinue
+        }
+        $stderrContent = if (Test-Path -LiteralPath $stderrPath) {
+            Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue
+        }
+        $root = if ($null -eq $stdoutContent) { '' } else { $stdoutContent.Trim() }
+        $gitError = if ($null -eq $stderrContent) { '' } else { $stderrContent.Trim() }
+
+        if ($exitCode -ne 0 -or [string]::IsNullOrWhiteSpace($root)) {
+            $message = @(
+                "The target path is not inside a Git repository: $resolved"
+                "Git executable: $($git.Source)"
+                "Git exit code: $exitCode"
+                "Git stderr: $gitError"
+            ) -join [Environment]::NewLine
+            throw $message
+        }
+        return [System.IO.Path]::GetFullPath($root)
     }
-    return [System.IO.Path]::GetFullPath($root.Trim())
+    finally {
+        Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Get-FrameworkPackage {
