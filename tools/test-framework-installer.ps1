@@ -51,8 +51,8 @@ function Invoke-NativeCommandCapture {
     try {
         & $FilePath @Arguments 1> $stdoutPath 2> $stderrPath
         $exitCode = $LASTEXITCODE
-        $stdout = if (Test-Path -LiteralPath $stdoutPath) { (Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction SilentlyContinue).Trim() } else { '' }
-        $stderr = if (Test-Path -LiteralPath $stderrPath) { (Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue).Trim() } else { '' }
+        $stdout = if (Test-Path -LiteralPath $stdoutPath) { ([string](Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction SilentlyContinue)).Trim() } else { '' }
+        $stderr = if (Test-Path -LiteralPath $stderrPath) { ([string](Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue)).Trim() } else { '' }
         return [pscustomobject]@{
             FilePath = $FilePath
             Arguments = @($Arguments)
