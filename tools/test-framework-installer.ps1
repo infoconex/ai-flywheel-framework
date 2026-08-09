@@ -26,6 +26,8 @@ $packageOutput1 = Join-Path $testRoot 'dist-1'
 $packageOutput2 = Join-Path $testRoot 'dist-2'
 $targetRepository = Join-Path $testRoot 'target'
 $packageName = 'ai-flywheel-framework-2026.08.08.zip'
+$gitEnvironmentNames = @('GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_OBJECT_DIRECTORY', 'GIT_INDEX_FILE')
+$savedGitEnvironment = @{}
 
 function Assert-Test {
     [CmdletBinding()]
@@ -38,6 +40,14 @@ function Assert-Test {
 }
 
 try {
+    foreach ($name in $gitEnvironmentNames) {
+        $value = [Environment]::GetEnvironmentVariable($name, 'Process')
+        if ($null -ne $value) {
+            $savedGitEnvironment[$name] = $value
+            [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+        }
+    }
+
     New-Item -ItemType Directory -Path $packageOutput1 -Force | Out-Null
     New-Item -ItemType Directory -Path $packageOutput2 -Force | Out-Null
     New-Item -ItemType Directory -Path $targetRepository -Force | Out-Null
@@ -138,6 +148,13 @@ try {
     Write-Output 'Framework installer regression tests passed.'
 }
 finally {
+    foreach ($name in $gitEnvironmentNames) {
+        [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+    }
+    foreach ($name in $savedGitEnvironment.Keys) {
+        [Environment]::SetEnvironmentVariable($name, $savedGitEnvironment[$name], 'Process')
+    }
+
     if (Test-Path -LiteralPath $testRoot) {
         Remove-Item -LiteralPath $testRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
