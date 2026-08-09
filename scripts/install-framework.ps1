@@ -61,6 +61,41 @@ function Write-Ok {
     Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
+function Write-FailureDiagnostics {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][System.Management.Automation.ErrorRecord]$ErrorRecord)
+
+    Write-Host ''
+    Write-Host '## Diagnostic Details' -ForegroundColor DarkYellow
+    Write-Host "Exception type: $($ErrorRecord.Exception.GetType().FullName)"
+    Write-Host "Message: $($ErrorRecord.Exception.Message)"
+
+    if ($ErrorRecord.InvocationInfo) {
+        if (-not [string]::IsNullOrWhiteSpace($ErrorRecord.InvocationInfo.MyCommand.Name)) {
+            Write-Host "Command: $($ErrorRecord.InvocationInfo.MyCommand.Name)"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($ErrorRecord.InvocationInfo.PositionMessage)) {
+            Write-Host "Location: $($ErrorRecord.InvocationInfo.PositionMessage.Trim())"
+        }
+        if (-not [string]::IsNullOrWhiteSpace($ErrorRecord.InvocationInfo.Line)) {
+            Write-Host "Statement: $($ErrorRecord.InvocationInfo.Line.Trim())"
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($ErrorRecord.ScriptStackTrace)) {
+        Write-Host 'Stack trace:'
+        Write-Host $ErrorRecord.ScriptStackTrace
+    }
+
+    $inner = $ErrorRecord.Exception.InnerException
+    $depth = 0
+    while ($null -ne $inner -and $depth -lt 5) {
+        Write-Host "Inner exception $($depth + 1): $($inner.GetType().FullName): $($inner.Message)"
+        $inner = $inner.InnerException
+        $depth++
+    }
+}
+
 function Get-GitRepositoryRoot {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Path)
@@ -307,11 +342,13 @@ try {
     Write-Host 'Next: Begin AI Flywheel onboarding manually or install a compatible runtime implementation.'
 }
 catch {
+    $failure = $_
     if ($publishedTarget -and -not $installationComplete -and $targetFlywheel -and (Test-Path -LiteralPath $targetFlywheel)) {
         Remove-Item -LiteralPath $targetFlywheel -Recurse -Force -ErrorAction SilentlyContinue
     }
     Write-Host ''
-    Write-Host "[FAIL] $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "[FAIL] $($failure.Exception.Message)" -ForegroundColor Red
+    Write-FailureDiagnostics -ErrorRecord $failure
     throw
 }
 finally {
