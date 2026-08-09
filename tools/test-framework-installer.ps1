@@ -56,8 +56,27 @@ try {
     Assert-Test -Condition ($packageSha256 -eq $secondPackageSha256) -Message 'Repeated framework packaging produced different ZIP hashes.'
 
     $git = Get-Command git -ErrorAction Stop
-    & $git.Source -C $targetRepository init --quiet
-    if ($LASTEXITCODE -ne 0) { throw 'Unable to initialize temporary Git repository.' }
+    Push-Location -LiteralPath $targetRepository
+    try {
+        & $git.Source init --quiet
+        if ($LASTEXITCODE -ne 0) { throw 'Unable to initialize temporary Git repository.' }
+    }
+    finally {
+        Pop-Location
+    }
+
+    $gitDirectory = Join-Path $targetRepository '.git'
+    Assert-Test -Condition (Test-Path -LiteralPath $gitDirectory -PathType Container) -Message 'Temporary Git repository did not create a .git directory.'
+
+    $insideWorkTree = (& $git.Source -C $targetRepository rev-parse --is-inside-work-tree 2>$null | Select-Object -First 1)
+    Assert-Test -Condition ($LASTEXITCODE -eq 0) -Message 'Git could not verify the temporary repository as a work tree.'
+    Assert-Test -Condition ($insideWorkTree.Trim() -eq 'true') -Message 'Temporary Git repository is not recognized as a work tree.'
+
+    $reportedTopLevel = (& $git.Source -C $targetRepository rev-parse --show-toplevel 2>$null | Select-Object -First 1)
+    Assert-Test -Condition ($LASTEXITCODE -eq 0) -Message 'Git could not resolve the temporary repository root.'
+    $resolvedTopLevel = (Resolve-Path -LiteralPath $reportedTopLevel).Path.TrimEnd('\', '/')
+    $resolvedTargetRepository = (Resolve-Path -LiteralPath $targetRepository).Path.TrimEnd('\', '/')
+    Assert-Test -Condition ($resolvedTopLevel -eq $resolvedTargetRepository) -Message "Git resolved unexpected repository root '$resolvedTopLevel'; expected '$resolvedTargetRepository'."
 
     & $installerPath -Repository $targetRepository -PackagePath $packagePath -NonInteractive -Apply -Confirm:$false
 
