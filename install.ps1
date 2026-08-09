@@ -19,7 +19,7 @@ The launcher and canonical installer both target framework release 2026.08.08.
     $ProgressPreference = 'SilentlyContinue'
 
     $frameworkVersion = '2026.08.08'
-    $installerCommit = 'b48cb15f94798aeea07d67a656c96d5ae41dbbaa'
+    $installerCommit = 'fe11b801b5dfeef812377a978558fd563b67fa9e'
     $installerUri = "https://raw.githubusercontent.com/Infoconex/ai-flywheel-framework/$installerCommit/scripts/install-framework.ps1"
     $installerPath = Join-Path ([System.IO.Path]::GetTempPath()) ("ai-flywheel-framework-$frameworkVersion-$([guid]::NewGuid().ToString('N').Substring(0, 8)).ps1")
 
