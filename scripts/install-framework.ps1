@@ -46,6 +46,7 @@ $script:RunId = [guid]::NewGuid().ToString('N').Substring(0, 8)
 $script:RequestedPackagePath = $PackagePath
 $script:IsNonInteractive = [bool]$NonInteractive
 $script:IsApplyApproved = [bool]$Apply
+$script:ExpectedFailureMarker = 'AI_FLYWHEEL_EXPECTED_FAILURE'
 
 function Write-Section {
     [CmdletBinding()]
@@ -59,6 +60,23 @@ function Write-Ok {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Message)
     Write-Host "[OK] $Message" -ForegroundColor Green
+}
+
+function New-ExpectedFailure {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][ValidateNotNullOrEmpty()][string]$Message)
+
+    $exception = [System.InvalidOperationException]::new($Message)
+    $exception.Data[$script:ExpectedFailureMarker] = $true
+    return $exception
+}
+
+function Test-ExpectedFailure {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][System.Management.Automation.ErrorRecord]$ErrorRecord)
+
+    return $ErrorRecord.Exception.Data.Contains($script:ExpectedFailureMarker) -and
+        $ErrorRecord.Exception.Data[$script:ExpectedFailureMarker] -eq $true
 }
 
 function Write-FailureDiagnostic {
@@ -212,7 +230,7 @@ function Expand-SafeFrameworkPackage {
             }
 
             $parent = Split-Path -Parent $target
-            if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+            if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $target -Force | Out-Null }
             $entryStream = $entry.Open()
             $output = [System.IO.File]::Open($target, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
             try { $entryStream.CopyTo($output) } finally { $output.Dispose(); $entryStream.Dispose() }
@@ -314,7 +332,7 @@ try {
     Write-Ok -Message 'Git repository detected'
     Write-Host "Repository root: $repositoryRoot"
     if (Test-Path -LiteralPath $targetFlywheel) {
-        throw 'A .flywheel directory already exists. Initial installation will not overwrite an existing Flywheel.'
+        throw (New-ExpectedFailure -Message 'A .flywheel directory already exists. Initial installation will not overwrite an existing Flywheel.')
     }
 
     New-Item -ItemType Directory -Path $workingRoot -Force | Out-Null
@@ -376,7 +394,9 @@ catch {
     }
     Write-Host ''
     Write-Host "[FAIL] $($failure.Exception.Message)" -ForegroundColor Red
-    Write-FailureDiagnostic -ErrorRecord $failure
+    if (-not (Test-ExpectedFailure -ErrorRecord $failure)) {
+        Write-FailureDiagnostic -ErrorRecord $failure
+    }
     throw
 }
 finally {
