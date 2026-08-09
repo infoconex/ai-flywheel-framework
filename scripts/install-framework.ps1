@@ -206,16 +206,16 @@ function New-InstallationMetadata {
 
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add('schema_version: 1')
-    $lines.Add("framework_version: \"$($script:FrameworkVersion)\"")
-    $lines.Add("archive_sha256: \"$ArchiveSha256\"")
-    $lines.Add("source_identity: \"$SourceIdentity\"")
-    $lines.Add("installed_at: \"$([DateTimeOffset]::UtcNow.ToString('o'))\"")
+    $lines.Add(('framework_version: "{0}"' -f $script:FrameworkVersion))
+    $lines.Add(('archive_sha256: "{0}"' -f $ArchiveSha256))
+    $lines.Add(('source_identity: "{0}"' -f $SourceIdentity))
+    $lines.Add(('installed_at: "{0}"' -f [DateTimeOffset]::UtcNow.ToString('o')))
     $lines.Add('owned_files:')
 
     foreach ($relative in ($FrameworkHashes.Keys | Sort-Object)) {
         if ($relative -eq 'state.yaml' -or $relative.StartsWith('operations/', [System.StringComparison]::Ordinal)) { continue }
         $path = ".flywheel/$relative"
-        $lines.Add("  \"$path\": \"$($FrameworkHashes[$relative])\"")
+        $lines.Add(('  "{0}": "{1}"' -f $path, $FrameworkHashes[$relative]))
     }
 
     return ($lines -join [Environment]::NewLine)
