@@ -2,13 +2,13 @@
 
 <#
 .SYNOPSIS
-Runs a local end-to-end regression test for the standalone framework installer.
+Runs local regression tests for the standalone framework installer.
 
 .DESCRIPTION
-Packages the repository's real `.flywheel`, initializes a temporary Git repository,
-installs the package with the framework installer, verifies the expected installed
-files and provenance, verifies no application files were introduced, and confirms
-a second install is refused instead of overwriting an existing Flywheel.
+Packages the repository's real `.flywheel`, installs it into a temporary Git
+repository with the canonical framework installer, verifies provenance and mutation
+scope, confirms reinstall refusal preserves existing state, and checks that the
+public root launcher is safe for the `irm ... | iex` delivery pattern.
 #>
 
 [CmdletBinding()]
@@ -18,7 +18,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
-$installerPath = Join-Path $repositoryRoot 'install.ps1'
+$launcherPath = Join-Path $repositoryRoot 'install.ps1'
+$installerPath = Join-Path $repositoryRoot 'scripts\install-framework.ps1'
 $packagerPath = Join-Path $repositoryRoot 'tools\package-framework.ps1'
 $testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('AIFW-FRAMEWORK-TEST-' + [guid]::NewGuid().ToString('N').Substring(0, 8))
 $packageOutput = Join-Path $testRoot 'dist'
@@ -77,6 +78,18 @@ try {
     Assert-Test -Condition ($installerText -notmatch '(?im)Get-Command\s+(python|py)\b') -Message 'Framework installer must not discover Python.'
     Assert-Test -Condition ($installerText -notmatch '(?i)ai-flywheel-cli-python') -Message 'Framework installer must not depend on the Python CLI repository.'
     Assert-Test -Condition ($installerText -notmatch '(?i)start-execution|advance-lifecycle|complete-execution') -Message 'Framework installer must not perform lifecycle operations.'
+
+    $tokens = $null
+    $parseErrors = $null
+    $launcherAst = [System.Management.Automation.Language.Parser]::ParseFile($launcherPath, [ref]$tokens, [ref]$parseErrors)
+    Assert-Test -Condition ($parseErrors.Count -eq 0) -Message 'Public launcher contains a parse error.'
+    Assert-Test -Condition ($null -eq $launcherAst.ParamBlock) -Message 'Public launcher must not have a top-level parameter block.'
+
+    $launcherText = Get-Content -LiteralPath $launcherPath -Raw
+    Assert-Test -Condition ($launcherText.Contains('& {')) -Message 'Public launcher must isolate Invoke-Expression execution in a child scope.'
+    Assert-Test -Condition ($launcherText -match "frameworkVersion\s*=\s*'2026\.08\.08'") -Message 'Public launcher must target framework version 2026.08.08.'
+    Assert-Test -Condition ($launcherText -match "installerCommit\s*=\s*'[0-9a-f]{40}'") -Message 'Public launcher must pin an immutable canonical installer commit.'
+    Assert-Test -Condition ($launcherText.Contains('/scripts/install-framework.ps1')) -Message 'Public launcher must delegate to the canonical framework installer.'
 
     Write-Output 'Framework installer regression tests passed.'
 }
