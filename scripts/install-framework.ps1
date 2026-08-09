@@ -61,7 +61,7 @@ function Write-Ok {
     Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
-function Write-FailureDiagnostics {
+function Write-FailureDiagnostic {
     [CmdletBinding()]
     param([Parameter(Mandatory)][System.Management.Automation.ErrorRecord]$ErrorRecord)
 
@@ -348,7 +348,7 @@ catch {
     }
     Write-Host ''
     Write-Host "[FAIL] $($failure.Exception.Message)" -ForegroundColor Red
-    Write-FailureDiagnostics -ErrorRecord $failure
+    Write-FailureDiagnostic -ErrorRecord $failure
     throw
 }
 finally {
